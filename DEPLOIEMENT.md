@@ -170,6 +170,64 @@ seulement la mise à jour. Le journal le dit.
 
 Les migrations de base de données s'appliquent toutes seules au démarrage.
 
+## 7. Nettoyer les images envoyées avant le 23 octobre 2026 (une seule fois)
+
+Jusqu'au 23 octobre 2026, le site enregistrait les images telles qu'elles
+arrivaient. Or une photo prise au téléphone garde en elle l'endroit exact où
+elle a été prise (sa position GPS), la date et l'heure, et le modèle du
+téléphone : n'importe quel visiteur pouvait les lire en enregistrant l'image.
+Depuis, chaque image est nettoyée au moment de l'envoi. Celles qui étaient déjà
+en ligne doivent l'être une fois, avec `scripts/nettoyer-images.sh`.
+
+Quand la mise à jour est arrivée sur le serveur (cinq minutes après avoir été
+poussée sur `main`) :
+
+```bash
+# 1. Une sauvegarde d'abord : le nettoyage ne se défait pas.
+ssh lfi '/srv/lfi-site/scripts/sauvegarde.sh'
+
+# 2. Un essai : la liste de ce qui serait nettoyé. Rien n'est modifié.
+ssh lfi '/srv/lfi-site/scripts/nettoyer-images.sh'
+
+# 3. Le nettoyage, si la liste de l'essai convient.
+ssh lfi '/srv/lfi-site/scripts/nettoyer-images.sh --appliquer'
+```
+
+Le site reste en ligne pendant l'opération : chaque image est remplacée d'un
+coup, un visiteur reçoit l'ancienne ou la nouvelle, jamais une image cassée.
+Les noms de fichiers ne changent pas, les publications n'ont donc rien à
+reprendre. Chaque image nettoyée est notée dans le journal d'audit
+(`image.nettoyage`). Relancer le script ne change rien aux images déjà propres.
+
+Ce que dit le compte rendu :
+
+- **`POSITION GPS`** au bout d'une ligne : cette image indiquait l'endroit où
+  elle a été prise, et cet endroit était public. La plupart du temps c'est le
+  lieu d'une action, déjà annoncé. Mais si une photo a été prise chez
+  quelqu'un, il faut le lui dire.
+- **Illisibles, laissées telles quelles** : le script ne comprend pas le
+  fichier en entier et n'y touche pas plutôt que de le nettoyer à moitié.
+  Elles gardent donc leurs métadonnées : réenregistrer l'image depuis
+  l'original, l'envoyer de nouveau, la mettre à la place de l'ancienne, puis
+  supprimer l'ancienne dans Administration → Images.
+- **Absentes du disque** : une image inscrite en base dont le fichier a
+  disparu. Rien à nettoyer ; elle s'affiche déjà cassée sur le site.
+
+Ce que le script ne peut pas faire :
+
+- **Les sauvegardes** contiennent les images d'origine, avec leurs
+  métadonnées. Celles du serveur disparaissent d'elles-mêmes au bout de
+  trente jours, celle de l'étape 1 comprise. Les copies faites ailleurs
+  (sur un poste du groupe) les gardent tant qu'on ne les supprime pas.
+- **Les copies déjà faites** : quelqu'un qui a enregistré une image, ou un
+  moteur de recherche qui l'a gardée en mémoire, conserve la version
+  d'origine.
+
+Pourquoi un `.sh` : le conteneur du site ne contient que le site compilé, pas
+le code source. Le script lance un conteneur jetable tiré de la même image,
+avec les mêmes données et le même utilisateur, et lui prête le code source en
+lecture seule le temps du nettoyage.
+
 ## Ce que ce dispositif protège - et ce qu'il ne protège pas
 
 **Protégé :** injection de script (CSP stricte, HTML non interprété), injection
@@ -177,7 +235,8 @@ SQL (requêtes préparées partout), CSRF (contrôle d'origine de SvelteKit),
 force brute sur les mots de passe (verrouillage + double authentification),
 spam de commentaires (preuve de travail, quotas, pré-modération), lecture de
 fichiers arbitraires (les images sont servies depuis la base), fuite de données
-personnelles (aucune IP en clair, secrets 2FA chiffrés).
+personnelles (aucune IP en clair, secrets 2FA chiffrés, images enregistrées
+sans leur position GPS ni leurs autres métadonnées).
 
 **Protégé en partie : les vagues de requêtes.** Le 16 octobre 2026, une vague
 venue de 80 adresses a figé le site trois heures et demie. Depuis, le site

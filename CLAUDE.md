@@ -14,13 +14,16 @@ npm run check    # vérification TypeScript + Svelte - À LANCER APRÈS CHAQUE M
 npm run build    # compilation de production
 
 node --test src/lib/jeux/mythology-rts/tests/*.test.js  # tests du jeu de stratégie
+node --test src/lib/server/tests/*.test.js              # tests du nettoyage des images
 
 npm run outils:pages   # regénère la tête et le pied des pages d'outils (voir « La boîte à outils »)
 ```
 
 Le site Svelte est contrôlé par `npm run check` et `npm run build`. Les jeux
 autonomes ne passent pas dans le contrôle TypeScript/Svelte ; le jeu de
-stratégie possède une suite dédiée avec `node --test`. Une vérification
+stratégie possède une suite dédiée avec `node --test`, comme le nettoyage des
+images (`metadonnees-images.ts`), dont les tests décodent aussi les images avec
+libjpeg et libwebp quand `djpeg` et `dwebp` sont installés. Une vérification
 manuelle dans le navigateur reste nécessaire pour les parcours éditoriaux.
 
 ## Architecture
@@ -38,6 +41,7 @@ native.
 | `src/lib/server/content.ts` | Requêtes sur les publications et commentaires |
 | `src/lib/server/present.ts` | **Seul** point de passage base → navigateur |
 | `src/lib/server/media.ts` | Envoi et diffusion des images |
+| `src/lib/server/metadonnees-images.ts` | Retire des images envoyées la position GPS, la date, l'appareil (règle n° 10) |
 | `src/lib/server/captcha.ts` | Anti-spam par preuve de travail |
 | `src/lib/server/limiteur.ts` | Écarte les adresses qui envoient trop de requêtes (voir « Les vagues de requêtes ») |
 | `src/lib/server/frequentation.ts` | Compte les visites et le trafic, sans cookie ni adresse IP (voir « La fréquentation ») |
@@ -116,6 +120,23 @@ faille connue.
 9. **Toute action destructrice passe par `audit()`.** Savoir qui a supprimé
    quoi est ce qui permet de comprendre après coup si un compte a été
    compromis.
+10. **Les images sont enregistrées sans leurs métadonnées.** Une photo de
+    téléphone contient l'endroit exact où elle a été prise, la date et le
+    modèle de l'appareil : la photo d'une réunion prise chez quelqu'un donne
+    son adresse à tout visiteur. `storeUpload` passe donc chaque fichier par
+    `retirerMetadonnees` (`metadonnees-images.ts`) avant de l'écrire. Le
+    module garde une liste fermée de ce qui sert à afficher l'image et jette
+    tout le reste - EXIF, XMP, IPTC, commentaires, textes, ce qui suit la fin
+    de l'image -, sauf l'orientation, réécrite dans un EXIF qui ne contient
+    qu'elle (sans elle, une photo prise en portrait s'afficherait couchée).
+    Un fichier qu'il ne comprend pas en entier est refusé, jamais écrit à
+    moitié nettoyé. Deux conséquences : **aucune image envoyée ne doit
+    atteindre le disque sans passer par `storeUpload`** (l'image de la démo,
+    que `demo.ts` écrit lui-même, vient du dépôt), et ajouter un format à
+    `SIGNATURES` de `media.ts` demande d'écrire son nettoyeur - sans lui,
+    l'envoi est refusé. Les images envoyées avant le 23 octobre 2026 se
+    nettoient une fois avec `scripts/nettoyer-images.sh` (voir
+    `DEPLOIEMENT.md`).
 
 ## Modifier le schéma de la base
 
