@@ -14,7 +14,7 @@ npm run check    # vérification TypeScript + Svelte - À LANCER APRÈS CHAQUE M
 npm run build    # compilation de production
 
 node --test src/lib/jeux/mythology-rts/tests/*.test.js  # tests du jeu de stratégie
-node --test src/lib/server/tests/*.test.js              # tests du nettoyage des images
+node --test src/lib/server/tests/*.test.js              # tests du nettoyage des images et des PDF
 
 npm run outils:pages   # regénère la tête et le pied des pages d'outils (voir « La boîte à outils »)
 ```
@@ -22,8 +22,10 @@ npm run outils:pages   # regénère la tête et le pied des pages d'outils (voir
 Le site Svelte est contrôlé par `npm run check` et `npm run build`. Les jeux
 autonomes ne passent pas dans le contrôle TypeScript/Svelte ; le jeu de
 stratégie possède une suite dédiée avec `node --test`, comme le nettoyage des
-images (`metadonnees-images.ts`), dont les tests décodent aussi les images avec
-libjpeg et libwebp quand `djpeg` et `dwebp` sont installés. Une vérification
+images (`metadonnees-images.ts`) et des PDF (`metadonnees-pdf.ts`). Leurs tests
+décodent aussi les images avec libjpeg et libwebp quand `djpeg` et `dwebp` sont
+installés, contrôlent les PDF nettoyés avec `qpdf` et comparent leurs pages,
+dessinées par Ghostscript (`gs`), à celles de l'original. Une vérification
 manuelle dans le navigateur reste nécessaire pour les parcours éditoriaux.
 
 ## Architecture
@@ -42,6 +44,7 @@ native.
 | `src/lib/server/present.ts` | **Seul** point de passage base → navigateur |
 | `src/lib/server/media.ts` | Envoi et diffusion des images |
 | `src/lib/server/metadonnees-images.ts` | Retire des images envoyées la position GPS, la date, l'appareil (règle n° 10) |
+| `src/lib/server/metadonnees-pdf.ts` | Retire des PDF proposés le nom de l'auteur, le logiciel, les dates (règle n° 11) |
 | `src/lib/server/captcha.ts` | Anti-spam par preuve de travail |
 | `src/lib/server/limiteur.ts` | Écarte les adresses qui envoient trop de requêtes (voir « Les vagues de requêtes ») |
 | `src/lib/server/frequentation.ts` | Compte les visites et le trafic, sans cookie ni adresse IP (voir « La fréquentation ») |
@@ -137,6 +140,24 @@ faille connue.
     l'envoi est refusé. Les images envoyées avant le 23 octobre 2026 se
     nettoient une fois avec `scripts/nettoyer-images.sh` (voir
     `DEPLOIEMENT.md`).
+11. **Les PDF de la bibliothèque sont enregistrés sans le nom de leur
+    auteur.** Un PDF exporté de Word ou de LibreOffice porte, dans sa fiche
+    (le dictionnaire Info) et dans son XMP, le nom du compte de l'ordinateur -
+    le plus souvent le vrai nom de la personne -, le logiciel et les dates ;
+    Chrome et l'impression de macOS y recopient les photos avec leur position
+    GPS. Une fois le PDF approuvé, c'est public. `stockerPdf` passe donc chaque
+    fichier par `retirerMetadonneesPdf` (`metadonnees-pdf.ts`), qui
+    **reconstruit** le PDF : il part du catalogue et recopie ce que le document
+    désigne (pages, polices, images), sans la fiche, le XMP, les pièces jointes,
+    les signatures, l'auteur des commentaires ni les anciennes versions qu'un
+    PDF retouché garde en lui. Écraser les champs sur place ne suffirait pas :
+    dans un PDF compressé, la fiche n'est pas lisible en clair, et une
+    ancienne version garde l'ancienne fiche plus haut dans le fichier. Un PDF
+    que le module ne comprend pas en entier, ou qui est chiffré, est refusé
+    avec un message qui dit comment en faire une copie lisible. **Aucun PDF
+    reçu ne doit atteindre le disque sans passer par `stockerPdf`.** Les PDF
+    déposés avant le 24 octobre 2026 se nettoient une fois avec
+    `scripts/nettoyer-pdf.sh` (voir `DEPLOIEMENT.md`).
 
 ## Modifier le schéma de la base
 
@@ -349,8 +370,9 @@ avoir rien lu.
 
 Une source proposée depuis un apéro contient soit un lien, soit un PDF. Les PDF
 sont limités à 50 Mo, identifiés par leur signature `%PDF-`, stockés sous un nom
-aléatoire dans `data/bibliotheque/` et toujours soumis à modération. La personne
-qui propose un PDF doit préciser la licence ou l'autorisation de republication.
+aléatoire dans `data/bibliotheque/` sans le nom de leur auteur ni leurs autres
+métadonnées (règle n° 11), et toujours soumis à modération. La personne qui
+propose un PDF doit préciser la licence ou l'autorisation de republication.
 
 La page `/bibliotheque` porte **les ressources** - les sources approuvées des
 apéros - et rien d'autre. Les **outils interactifs** (`/boite-a-outils`) et les
