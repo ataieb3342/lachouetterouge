@@ -5,44 +5,22 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import type { Snippet } from 'svelte';
 	import type { LayoutData } from './$types';
+	import { LIEN_GROUPE, LIEN_REJOINDRE, LIENS_PRINCIPAUX, MENU_RESSOURCES, PIED_DE_PAGE } from '$lib/structure';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
-	// Les publications se rangent en deux portes, d'après la question que se
-	// pose le visiteur : « où est-ce que je peux venir ? » (l'agenda) et
-	// « qu'est-ce que vous faites et pensez ? » (les articles). Pas de menu déroulant
-	// pour elles : sept entrées mêlant les deux familles, on s'y perdait.
-	// `sections` liste les adresses où le lien s'allume : la fiche d'un
-	// événement est sous /actualites, celle d'un apéro sous /aperos.
-	const liensPrincipaux = [
-		{ href: '/agenda', label: 'Agenda', sections: ['/agenda', '/actualites', '/aperos'] },
-		{ href: '/articles', label: 'Articles', sections: ['/articles'] }
-	];
-
-	// Tout ce qu'on consulte ou dont on se sert, sans date ni signature du
-	// groupe : la bibliothèque, les outils, les jeux, les dessins, les médias.
-	// Les dessins ont d'abord été un troisième lien principal, à côté de
-	// l'agenda et des articles : ce n'est pas une troisième question que se
-	// pose le visiteur, et l'en-tête débordait sur les écrans moyens.
-	const groupesNavigation = [
-		{
-			href: '/bibliotheque',
-			label: 'Ressources',
-			liens: [
-				{ href: '/bibliotheque', label: 'Bibliothèque' },
-				{ href: '/boite-a-outils', label: 'Boîte à outils' },
-				{ href: '/jeux', label: 'Jeux' },
-				{ href: '/dessins', label: 'Dessins' },
-				{ href: '/medias', label: 'Médias' }
-			]
-		}
-	];
+	// Ce que contiennent l'en-tête, le menu Ressources et le pied de page est
+	// décidé dans `structure.ts`, qui est verrouillé : ce fichier-ci ne fait
+	// que l'afficher. Pour ajouter une page à la navigation, c'est là-bas - et
+	// jamais dans les liens principaux.
+	const liensPrincipaux = LIENS_PRINCIPAUX;
+	const groupesNavigation = [MENU_RESSOURCES];
 
 	function actif(href: string): boolean {
 		return href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href);
 	}
 
-	function sectionActive(sections: string[]): boolean {
+	function sectionActive(sections: readonly string[]): boolean {
 		return sections.some(actif);
 	}
 
@@ -80,39 +58,7 @@
 		});
 	}
 
-	// Le pied de page reprend les familles de l'en-tête, une colonne chacune.
-	// C'est aussi là que vont les pages absentes de l'en-tête de bureau.
-	const groupesPied = [
-		{
-			titre: 'Le groupe',
-			liens: [
-				{ href: '/le-groupe', label: 'Qui sommes-nous ?' },
-				{ href: '/nous-rejoindre', label: 'Nous rejoindre' },
-				{ href: '/agenda', label: 'Agenda' },
-				{ href: '/aperos', label: 'Apéros' }
-			]
-		},
-		{
-			titre: 'Ressources',
-			liens: [
-				{ href: '/articles', label: 'Articles' },
-				{ href: '/bibliotheque', label: 'Bibliothèque' },
-				{ href: '/boite-a-outils', label: 'Boîte à outils' },
-				{ href: '/jeux', label: 'Jeux' },
-				{ href: '/dessins', label: 'Dessins et caricatures' },
-				{ href: '/medias', label: 'Médias' }
-			]
-		},
-		{
-			titre: 'Le site',
-			liens: [
-				{ href: '/rss.xml', label: 'Flux RSS' },
-				{ href: '/mentions-legales', label: 'Mentions légales' },
-				{ href: '/confidentialite', label: 'Confidentialité' },
-				{ href: '/admin', label: 'Administration' }
-			]
-		}
-	];
+	const groupesPied = PIED_DE_PAGE;
 
 	const affichages = [
 		{ valeur: 'auto', label: 'Automatique' },
@@ -212,15 +158,15 @@
 				{/each}
 				<li>
 					<a
-						href="/le-groupe"
-						aria-current={actif('/le-groupe') ? 'page' : undefined}
+						href={LIEN_GROUPE.href}
+						aria-current={actif(LIEN_GROUPE.href) ? 'page' : undefined}
 						class="block rounded-full px-3 py-1.5 text-sm font-semibold transition-colors
-							{actif('/le-groupe') ? 'bg-brand-soft text-brand' : 'text-ink-soft hover:bg-surface-alt hover:text-ink'}"
-						>Qui sommes-nous ?</a
+							{actif(LIEN_GROUPE.href) ? 'bg-brand-soft text-brand' : 'text-ink-soft hover:bg-surface-alt hover:text-ink'}"
+						>{LIEN_GROUPE.label}</a
 					>
 				</li>
 				<li class="ml-1">
-					<a href="/nous-rejoindre" class="bouton px-4 py-1.5 text-sm">Nous rejoindre</a>
+					<a href={LIEN_REJOINDRE.href} class="bouton px-4 py-1.5 text-sm">{LIEN_REJOINDRE.label}</a>
 				</li>
 			</ul>
 		</nav>
@@ -249,8 +195,10 @@
 							</ul>
 						</li>
 					{/each}
-					<li class="border-t border-line pt-2"><a class="block rounded px-3 py-2 font-bold text-ink" href="/le-groupe">Qui sommes-nous ?</a></li>
-					<li><a class="bouton mt-1 w-full justify-center" href="/nous-rejoindre">Nous rejoindre</a></li>
+					<li class="border-t border-line pt-2">
+						<a class="block rounded px-3 py-2 font-bold text-ink" href={LIEN_GROUPE.href}>{LIEN_GROUPE.label}</a>
+					</li>
+					<li><a class="bouton mt-1 w-full justify-center" href={LIEN_REJOINDRE.href}>{LIEN_REJOINDRE.label}</a></li>
 				</ul>
 			</nav>
 		</details>

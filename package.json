@@ -10,7 +10,10 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"outils:pages": "node --experimental-strip-types scripts/pages-outils.js"
+		"outils:pages": "node --experimental-strip-types scripts/pages-outils.js",
+		"test": "node --experimental-strip-types --test tests/*.test.ts garde-fous/*.test.ts src/lib/server/tests/*.test.js",
+		"garde-fous:migrations": "node --experimental-strip-types garde-fous/empreintes-migrations.ts",
+		"verifier": "npm run check && npm test && npm run build"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "^5.5.7",

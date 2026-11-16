@@ -128,20 +128,32 @@ export function presentMediaRecommande(row: MediaRecommande): MediaRecommandeVue
  * de sa vignette.
  */
 export function presentDessin(row: import('./dessins.ts').Dessin) {
- const media = getMedia(row.media_id);
- return {
-  id: row.id, title: row.title, author: row.author, caption: row.caption,
-  alt: row.alt, rights: row.rights, published: !!row.published,
-  image: media ? `/media/${media.filename}` : null,
-  thumbnail: media ? `/media/${media.filename}/vignette` : null
- };
+	const media = getMedia(row.media_id);
+	return {
+		id: row.id,
+		title: row.title,
+		author: row.author,
+		caption: row.caption,
+		alt: row.alt,
+		rights: row.rights,
+		published: !!row.published,
+		image: media ? `/media/${media.filename}` : null,
+		thumbnail: media ? `/media/${media.filename}/vignette` : null
+	};
 }
 
 /** Une proposition en attente. Son image passe par la route réservée à l'équipe. */
 export function presentPropositionDessin(row: import('./propositions-dessins.ts').PropositionDessin) {
- return { id: row.id, title: row.title, author: row.author, caption: row.caption,
-  alt: row.alt, rights: row.rights, createdAt: row.created_at,
-  image: `/admin/dessins/propositions/${row.id}/image` };
+	return {
+		id: row.id,
+		title: row.title,
+		author: row.author,
+		caption: row.caption,
+		alt: row.alt,
+		rights: row.rights,
+		createdAt: row.created_at,
+		image: `/admin/dessins/propositions/${row.id}/image`
+	};
 }
 
 /** Un compte rendu de réunion, pour la page de lecture et l'éditeur. Réservé à l'administration. */

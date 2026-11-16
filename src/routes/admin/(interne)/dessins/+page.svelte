@@ -12,7 +12,7 @@
 	</p>
 	<a class="mt-3 inline-block font-semibold text-brand hover:underline" href="/dessins">Voir la galerie →</a>
 </header>
-{#if form?.erreur}<p role="alert" class="mt-5 rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">
+{#if form?.erreur}<p role="alert" class="alerte mt-5">
 		{form.erreur}
 	</p>{/if}
 <section class="mt-6" aria-labelledby="propositions-titre">

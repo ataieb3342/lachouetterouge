@@ -49,7 +49,7 @@ export function db(): DatabaseSync {
  * dernière migration appliquée est stocké dans `pragma user_version`, donc
  * elles ne s'exécutent qu'une fois.
  */
-const MIGRATIONS: string[] = [
+export const MIGRATIONS: string[] = [
 	// 001 - schéma initial
 	`
 	create table admins (
