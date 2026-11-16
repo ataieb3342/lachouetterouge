@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { db, now } from './db.ts';
 import { randomToken } from './crypto.ts';
+import { retirerMetadonnees } from './metadonnees-images.ts';
 
 /**
  * Images envoyées depuis l'administration.
@@ -13,6 +14,9 @@ import { randomToken } from './crypto.ts';
  *
  * Le SVG est refusé volontairement : c'est un format XML qui peut contenir du
  * JavaScript, et l'afficher reviendrait à ouvrir une faille XSS.
+ *
+ * Toute image est enregistrée sans ses métadonnées (position GPS, date,
+ * appareil) : voir `metadonnees-images.ts`.
  */
 
 export const UPLOADS_DIR = resolve(process.env.UPLOADS_PATH || 'data/uploads');
@@ -64,11 +68,15 @@ export async function storeUpload(file: File, alt: string, adminId: number): Pro
 	if (file.size > MAX_UPLOAD_BYTES) {
 		throw new Error(`Image trop lourde (maximum ${MAX_UPLOAD_BYTES / 1024 / 1024} Mo).`);
 	}
-	const bytes = Buffer.from(await file.arrayBuffer());
-	const kind = sniffImage(bytes);
+	const recus = Buffer.from(await file.arrayBuffer());
+	const kind = sniffImage(recus);
 	if (!kind) {
 		throw new Error('Format non reconnu. Formats acceptés : JPEG, PNG, WebP, GIF, AVIF.');
 	}
+	// Une photo de téléphone porte l'endroit où elle a été prise : seule
+	// l'image est écrite sur le disque. Un fichier qu'on ne sait pas lire en
+	// entier est refusé ici, avant toute écriture.
+	const bytes = retirerMetadonnees(recus, kind.mime).octets;
 
 	// Nom de fichier entièrement aléatoire : le nom d'origine, qui peut contenir
 	// des séquences de traversée de répertoire, n'est jamais réutilisé.
