@@ -414,8 +414,8 @@ faire tourner un simulateur n'est pas la même chose que consulter un lien. Une
 version antérieure empilait les trois sur la même page, qui devenait
 interminable.
 
-Les pages voisines - outils, jeux et médias recommandés (`/medias`) - sont
-atteintes par **trois cartes en bas de la bibliothèque**, sous « Aussi dans la bibliothèque ». En bas et non en tête :
+Les pages voisines - outils, jeux, dessins (`/dessins`) et médias recommandés (`/medias`) - sont
+atteintes par **quatre cartes en bas de la bibliothèque**, sous « Aussi dans la bibliothèque ». En bas et non en tête :
 on y arrive après avoir parcouru les ressources. C'est pour cela que la
 pagination est courte - voir ci-dessous.
 
@@ -751,10 +751,17 @@ texte tapé restent en place.
 
 L'en-tête porte les deux portes du site, **Agenda** et **Articles**, en liens
 simples (`liensPrincipaux` dans `src/routes/+layout.svelte`), puis le menu
-**Ressources** (bibliothèque, outils, jeux, médias), « Qui sommes-nous ? » et le
-bouton « Nous rejoindre ». Le logo ramène à l'accueil. Le menu mobile reprend
-la même chose. « Agenda » s'allume aussi sur les fiches d'événements
-(`/actualites/…`) et sur les apéros (`sections`).
+**Ressources** (bibliothèque, outils, jeux, dessins, médias), « Qui sommes-nous ? »
+et le bouton « Nous rejoindre ». Le logo ramène à l'accueil. Le menu mobile
+reprend la même chose. « Agenda » s'allume aussi sur les fiches d'événements
+(`/actualites/…`) et sur les apéros (`sections`) ; « Ressources » s'allume sur
+chacune de ses pages (`groupeActif`).
+
+**Les dessins sont dans Ressources, pas à côté d'Agenda et d'Articles.** Ils y
+ont été un troisième lien principal quelques jours (novembre 2026) : ce n'est
+pas une troisième question que se pose le visiteur, et l'en-tête débordait. On
+y arrive par le menu Ressources, par la carte en bas de la bibliothèque et par
+le pied de page, comme pour les jeux.
 
 Pas de menu déroulant pour les publications : l'ancien menu « Actualités »
 alignait sept entrées des deux familles, et on s'y perdait. Ajouter un lien

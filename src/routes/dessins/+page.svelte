@@ -7,7 +7,8 @@
 </script>
 <Metadonnees titre="Dessins et caricatures - {data.settings.siteName}" description="Dessins et caricatures proposés sur le site. Vous pouvez envoyer un dessin sans créer de compte." donnees={filAriane(page.url.origin, [{ nom: 'Accueil', chemin: '/' }, { nom: 'Dessins et caricatures', chemin: '/dessins' }])} />
 <header class="border-b border-line pb-4">
- <h1 class="titre-affiche text-3xl text-ink sm:text-4xl">Dessins et caricatures</h1>
+ <p class="text-xs font-bold tracking-[0.2em] text-pourpre uppercase">Ressources</p>
+ <h1 class="titre-affiche mt-2 text-3xl text-ink sm:text-4xl">Dessins et caricatures</h1>
  <p class="mt-3 max-w-2xl text-lg text-ink-soft">Vous pouvez proposer un dessin sans créer de compte. Il sera vérifié avant d’être publié.</p>
  <a class="bouton mt-5" href="/dessins/proposer">Proposer un dessin</a>
 </header>

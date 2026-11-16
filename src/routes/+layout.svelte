@@ -16,10 +16,14 @@
 	// événement est sous /actualites, celle d'un apéro sous /aperos.
 	const liensPrincipaux = [
 		{ href: '/agenda', label: 'Agenda', sections: ['/agenda', '/actualites', '/aperos'] },
-		{ href: '/articles', label: 'Articles', sections: ['/articles'] },
-		{ href: '/dessins', label: 'Dessins', sections: ['/dessins'] }
+		{ href: '/articles', label: 'Articles', sections: ['/articles'] }
 	];
 
+	// Tout ce qu'on consulte ou dont on se sert, sans date ni signature du
+	// groupe : la bibliothèque, les outils, les jeux, les dessins, les médias.
+	// Les dessins ont d'abord été un troisième lien principal, à côté de
+	// l'agenda et des articles : ce n'est pas une troisième question que se
+	// pose le visiteur, et l'en-tête débordait sur les écrans moyens.
 	const groupesNavigation = [
 		{
 			href: '/bibliotheque',
@@ -28,6 +32,7 @@
 				{ href: '/bibliotheque', label: 'Bibliothèque' },
 				{ href: '/boite-a-outils', label: 'Boîte à outils' },
 				{ href: '/jeux', label: 'Jeux' },
+				{ href: '/dessins', label: 'Dessins' },
 				{ href: '/medias', label: 'Médias' }
 			]
 		}
@@ -39,6 +44,12 @@
 
 	function sectionActive(sections: string[]): boolean {
 		return sections.some(actif);
+	}
+
+	// « Ressources » s'allume sur chacune de ses pages, pas seulement sur la
+	// bibliothèque : sur /dessins ou /jeux, plus rien ne disait où l'on était.
+	function groupeActif(groupe: (typeof groupesNavigation)[number]): boolean {
+		return groupe.liens.some((lien) => actif(lien.href));
 	}
 
 	const annee = new Date().getFullYear();
@@ -85,10 +96,10 @@
 			titre: 'Ressources',
 			liens: [
 				{ href: '/articles', label: 'Articles' },
-				{ href: '/dessins', label: 'Dessins et caricatures' },
 				{ href: '/bibliotheque', label: 'Bibliothèque' },
 				{ href: '/boite-a-outils', label: 'Boîte à outils' },
 				{ href: '/jeux', label: 'Jeux' },
+				{ href: '/dessins', label: 'Dessins et caricatures' },
 				{ href: '/medias', label: 'Médias' }
 			]
 		},
@@ -167,12 +178,12 @@
 				{/each}
 				{#each groupesNavigation as groupe, index (groupe.href)}
 					<li>
-						<div class="flex items-center rounded-full {actif(groupe.href) ? 'bg-brand-soft text-brand' : ''}">
+						<div class="flex items-center rounded-full {groupeActif(groupe) ? 'bg-brand-soft text-brand' : ''}">
 							<a
 								href={groupe.href}
 								aria-current={actif(groupe.href) ? 'page' : undefined}
 								class="rounded-l-full py-1.5 pr-1 pl-3 text-sm font-semibold
-									{actif(groupe.href) ? '' : 'text-ink-soft hover:text-ink'}">{groupe.label}</a
+									{groupeActif(groupe) ? '' : 'text-ink-soft hover:text-ink'}">{groupe.label}</a
 							>
 							<details
 								class="navigation-deroulante relative"
@@ -181,7 +192,7 @@
 							>
 								<summary
 									class="grid cursor-pointer list-none place-items-center rounded-r-full py-2 pr-3 pl-1
-										{actif(groupe.href) ? '' : 'text-ink-soft hover:text-ink'}"
+										{groupeActif(groupe) ? '' : 'text-ink-soft hover:text-ink'}"
 									aria-label="Ouvrir le menu {groupe.label}"
 								>
 									<svg class="h-3.5 w-3.5 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
