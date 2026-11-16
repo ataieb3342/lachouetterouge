@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import MeetingReportEditor from '$lib/components/MeetingReportEditor.svelte';
+	import EditeurCompteRendu from '$lib/components/EditeurCompteRendu.svelte';
 	import type { PageData, ActionData } from './$types';
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let sending = $state(false);
@@ -42,13 +42,13 @@
 	<h1 class="titre-affiche text-3xl text-ink">Comptes rendus de réunions</h1>
 	<p class="mt-3 text-ink-soft">Un espace interne, accessible uniquement aux administrateurs connectés.</p>
 </header>
-{#if form?.error}<p class="alerte mt-5" role="alert">{form.error}</p>{/if}
+{#if form?.erreur}<p class="alerte mt-5" role="alert">{form.erreur}</p>{/if}
 <details class="carte mt-6">
 	<summary class="cursor-pointer text-lg font-bold text-ink">Ajouter un compte rendu</summary>
 	<form
 		class="mt-5 space-y-5"
 		method="POST"
-		action="?/create"
+		action="?/creer"
 		enctype="multipart/form-data"
 		use:enhance={() => {
 			sending = true;
@@ -93,7 +93,7 @@
 		</div>
 		{#if importError}<p class="alerte" role="alert">{importError}</p>{/if}
 		<p class="aide" role="status">{importing ? 'Lecture du fichier…' : importStatus}</p>
-		<fieldset disabled={importing || sending} class="min-w-0"><MeetingReportEditor template bind:body /></fieldset>
+		<fieldset disabled={importing || sending} class="min-w-0"><EditeurCompteRendu template bind:body /></fieldset>
 		<button class="bouton" type="submit" disabled={sending || importing || !!importError}
 			>{sending ? 'Enregistrement en cours…' : 'Enregistrer le compte rendu'}</button
 		>
@@ -105,27 +105,27 @@
 			class="champ"
 			id="q"
 			name="q"
-			value={data.search}
+			value={data.recherche}
 			maxlength="100"
 		/>
 	</div>
-	<button class="bouton-secondaire" type="submit">Rechercher</button>{#if data.search}<a
+	<button class="bouton-secondaire" type="submit">Rechercher</button>{#if data.recherche}<a
 			class="bouton-secondaire"
 			href="/admin/comptes-rendus">Tout afficher</a
 		>{/if}
 </form>
-{#if data.reports.length}
+{#if data.comptesRendus.length}
 	<ul class="mt-6 divide-y divide-line">
-		{#each data.reports as report (report.id)}<li class="py-4">
-				<a class="font-bold text-brand hover:underline" href="/admin/comptes-rendus/{report.id}">{report.title}</a>
-				<p class="mt-1 text-sm text-ink-soft">Réunion du {report.meetingDate.split('-').reverse().join('/')}</p>
+		{#each data.comptesRendus as compteRendu (compteRendu.id)}<li class="py-4">
+				<a class="font-bold text-brand hover:underline" href="/admin/comptes-rendus/{compteRendu.id}">{compteRendu.title}</a>
+				<p class="mt-1 text-sm text-ink-soft">Réunion du {compteRendu.meetingDate.split('-').reverse().join('/')}</p>
 			</li>{/each}
 	</ul>
-	{#if data.reports.length === 200}<p class="mt-3 text-sm text-ink-soft">
+	{#if data.comptesRendus.length === 200}<p class="mt-3 text-sm text-ink-soft">
 			Les 200 premiers résultats sont affichés. Précisez votre recherche pour retrouver un compte rendu plus ancien.
 		</p>{/if}
 {:else}<p class="mt-6 text-ink-soft">
-		{data.search
+		{data.recherche
 			? 'Aucun compte rendu ne correspond à cette recherche.'
 			: 'Aucun compte rendu enregistré pour le moment.'}
 	</p>{/if}

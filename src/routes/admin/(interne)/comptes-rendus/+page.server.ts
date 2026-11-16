@@ -1,33 +1,46 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import {
-	listMeetingReports,
-	readMeetingFields,
-	importMeetingFile,
-	createMeetingReport
-} from '$lib/server/meeting-reports';
-import { presentMeetingSummary } from '$lib/server/present';
+	creerCompteRendu,
+	importerFichier,
+	lireChampsCompteRendu,
+	listerComptesRendus
+} from '$lib/server/comptes-rendus';
+import { presentResumeCompteRendu } from '$lib/server/present';
 import { audit } from '$lib/server/auth';
+
+/**
+ * La liste des comptes rendus de réunion et le formulaire d'ajout.
+ *
+ * La session et la double authentification sont revérifiées ici et dans
+ * chaque action : ces documents sont internes, on ne s'en remet pas au seul
+ * `+layout.server.ts`, qui ne protège pas les actions de formulaire.
+ */
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.admin?.totpEnabled) error(403, 'Accès réservé aux administrateurs.');
-	const search = (url.searchParams.get('q') ?? '').trim().slice(0, 100);
-	return { search, reports: listMeetingReports(search).map(presentMeetingSummary) };
+	const recherche = (url.searchParams.get('q') ?? '').trim().slice(0, 100);
+	return { recherche, comptesRendus: listerComptesRendus(recherche).map(presentResumeCompteRendu) };
 };
+
 export const actions: Actions = {
-	create: async ({ locals, request }) => {
-		if (!locals.admin?.totpEnabled) return fail(403, { error: 'Accès réservé aux administrateurs.' });
+	creer: async ({ locals, request }) => {
+		if (!locals.admin?.totpEnabled) return fail(403, { erreur: 'Accès réservé aux administrateurs.' });
+
 		let id: number;
 		try {
 			const form = await request.formData();
-			const fields = readMeetingFields(form);
-			const file = form.get('file');
-			const imported = file instanceof File && file.size ? await importMeetingFile(file) : null;
-			if (imported && fields.body) imported.body = fields.body;
-			id = await createMeetingReport(fields, imported, locals.admin.id);
-		} catch (err) {
-			return fail(400, { error: (err as Error).message });
+			const champs = lireChampsCompteRendu(form);
+			const fichier = form.get('file');
+			const importe = fichier instanceof File && fichier.size ? await importerFichier(fichier) : null;
+			// Le texte de l'éditeur l'emporte sur la conversion automatique : la
+			// personne a pu le corriger après l'import. Le fichier d'origine, lui,
+			// est gardé tel quel.
+			if (importe && champs.body) importe.body = champs.body;
+			id = await creerCompteRendu(champs, importe, locals.admin.id);
+		} catch (erreur) {
+			return fail(400, { erreur: (erreur as Error).message });
 		}
-		audit(locals.admin, 'meeting-report.create', String(id), '', locals.ipHash);
+		audit(locals.admin, 'compte-rendu.creation', String(id), '', locals.ipHash);
 		redirect(303, `/admin/comptes-rendus/${id}`);
 	}
 };

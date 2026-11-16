@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { renderMeetingBody } from '../meeting-markdown';
+	import { rendreCompteRendu } from '../markdown-compte-rendu';
 	let {
 		body = $bindable(''),
 		id = 'body',
@@ -9,7 +9,7 @@
 	}: { body?: string; id?: string; required?: boolean; template?: boolean } = $props();
 	let mode = $state<'markdown' | 'preview'>('markdown');
 	let area = $state<HTMLTextAreaElement>();
-	const html = $derived(renderMeetingBody(body));
+	const html = $derived(rendreCompteRendu(body));
 	const model = '## Participants\n\n\n\n## Points discutés\n\n\n\n## Décisions\n\n\n\n## Actions à mener\n\n- [ ] \n';
 	async function wrap(before: string, after = before, placeholder = 'texte') {
 		if (!area) return;

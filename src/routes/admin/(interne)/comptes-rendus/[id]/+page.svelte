@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import MeetingReportEditor from '$lib/components/MeetingReportEditor.svelte';
+	import EditeurCompteRendu from '$lib/components/EditeurCompteRendu.svelte';
 	import type { PageData, ActionData } from './$types';
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let savingTask = $state(false);
@@ -20,18 +20,18 @@
 	}
 </script>
 
-<svelte:head><title>{data.report.title} · Comptes rendus internes</title></svelte:head>
+<svelte:head><title>{data.compteRendu.title} · Comptes rendus internes</title></svelte:head>
 <a class="text-sm font-semibold text-brand hover:underline" href="/admin/comptes-rendus">← Comptes rendus de réunions</a
 >
 <header class="mt-6 border-b border-line pb-4">
-	<h1 class="titre-affiche text-3xl text-ink">{data.report.title}</h1>
+	<h1 class="titre-affiche text-3xl text-ink">{data.compteRendu.title}</h1>
 	<p class="mt-3 text-ink-soft">
-		Réunion du {data.report.meetingDate.split('-').reverse().join('/')} · Document interne
+		Réunion du {data.compteRendu.meetingDate.split('-').reverse().join('/')} · Document interne
 	</p>
 </header>
-{#if form?.error}<p role="alert" class="alerte mt-5">{form.error}</p>{/if}
-{#if data.report.originalUrl}<a class="bouton-secondaire mt-5" href={data.report.originalUrl}
-		>Télécharger l’original ({data.report.originalName})</a
+{#if form?.erreur}<p role="alert" class="alerte mt-5">{form.erreur}</p>{/if}
+{#if data.compteRendu.originalUrl}<a class="bouton-secondaire mt-5" href={data.compteRendu.originalUrl}
+		>Télécharger l’original ({data.compteRendu.originalName})</a
 	>
 	<p class="aide">
 		Le fichier original correspond à l’import initial ; les corrections ci-dessous concernent le texte consultable sur
@@ -40,7 +40,7 @@
 <form
 	class="mt-6"
 	method="POST"
-	action="?/task"
+	action="?/cocher"
 	onchange={changeTask}
 	use:enhance={() => {
 		savingTask = true;
@@ -59,21 +59,21 @@
 		};
 	}}
 >
-	<input type="hidden" name="version" value={data.report.updatedAt} />
+	<input type="hidden" name="version" value={data.compteRendu.updatedAt} />
 	<input type="hidden" name="taskLine" value={taskLine} /><input type="hidden" name="checked" value={taskChecked} />
 	<fieldset disabled={savingTask} class="min-w-0"><div class="contenu meeting-body">{@html data.html}</div></fieldset>
 	<p class="aide" role="status">
 		{savingTask
 			? 'Enregistrement…'
-			: form?.taskSaved
+			: form?.tacheEnregistree
 				? 'Case enregistrée.'
 				: 'Les cases à cocher sont enregistrées automatiquement.'}
 	</p>
 </form>
 <details class="carte mt-8">
 	<summary class="cursor-pointer font-bold text-ink">Modifier le compte rendu</summary>
-	<form class="mt-5 space-y-5" method="POST" action="?/save" use:enhance>
-		<input type="hidden" name="version" value={data.report.updatedAt} />
+	<form class="mt-5 space-y-5" method="POST" action="?/enregistrer" use:enhance>
+		<input type="hidden" name="version" value={data.compteRendu.updatedAt} />
 		<div>
 			<label class="etiquette" for="edit-title">Titre</label><input
 				class="champ"
@@ -81,7 +81,7 @@
 				name="title"
 				required
 				maxlength="200"
-				value={data.report.title}
+				value={data.compteRendu.title}
 			/>
 		</div>
 		<div>
@@ -91,17 +91,17 @@
 				name="meetingDate"
 				type="date"
 				required
-				value={data.report.meetingDate}
+				value={data.compteRendu.meetingDate}
 			/>
 		</div>
-		{#key data.report.updatedAt}<MeetingReportEditor id="edit-body" body={data.report.body} required />{/key}
+		{#key data.compteRendu.updatedAt}<EditeurCompteRendu id="edit-body" body={data.compteRendu.body} required />{/key}
 		<button class="bouton" type="submit">Enregistrer les modifications</button>
 	</form>
 </details>
 <details class="mt-6 border-t border-line pt-5">
 	<summary class="cursor-pointer text-sm text-ink-soft">Supprimer ce compte rendu…</summary>
 	<p class="mt-3 text-sm text-ink-soft">Le compte rendu et le fichier original seront supprimés.</p>
-	<form method="POST" action="?/delete" class="mt-3">
+	<form method="POST" action="?/supprimer" class="mt-3">
 		<button class="bouton-secondaire" type="submit">Confirmer la suppression</button>
 	</form>
 </details>

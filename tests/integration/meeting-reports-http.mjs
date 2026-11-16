@@ -21,7 +21,7 @@ Object.assign(process.env, {
 });
 const { db } = await import('../../src/lib/server/db.ts');
 const { createSession, SESSION_COOKIE } = await import('../../src/lib/server/auth.ts');
-const { renderMeetingBody, toggleMeetingTask } = await import('../../src/lib/server/meeting-reports.ts');
+const { rendreCompteRendu: renderMeetingBody, cocherTache: toggleMeetingTask } = await import('../../src/lib/server/comptes-rendus.ts');
 const taskSample = '- [ ] **Task**\n  - [X] Nested\n\n```\n- [ ] Code\n```\n\n[ ] Plain text';
 assert.equal((renderMeetingBody(taskSample).match(/type="checkbox"/g) || []).length, 2);
 assert.ok(toggleMeetingTask(taskSample, 1, false).includes('  - [ ] Nested'));
@@ -76,7 +76,7 @@ try {
 	}
 	const invalid = fields();
 	invalid.set('file', new File(['not a docx'], 'wrong.docx'));
-	assert.equal((await request(path + '?/create', invalid)).status, 400);
+	assert.equal((await request(path + '?/creer', invalid)).status, 400);
 	const md =
 		'# Internal decisions\n\nPRIVATE_REPORT_BODY_SENTINEL\n\n- [ ] Task one\n- [X] Task two\n\n<script>alert(1)</script>\n![Secret image](https://example.invalid/tracker.png)';
 	const input = fields();
@@ -87,7 +87,7 @@ try {
 	assert.ok(preview.headers.get('cache-control').includes('no-store'));
 	assert.equal(base.prepare('select count(*) as n from meeting_reports').get().n, 0, 'Preview does not save a report');
 	assert.equal((await request(path + '/import', input, false)).status, 303);
-	const saved = await request(path + '?/create', input);
+	const saved = await request(path + '?/creer', input);
 	assert.equal(saved.status, 303);
 	const row = base.prepare('select * from meeting_reports').get();
 	assert.equal(row.body, md);
@@ -102,12 +102,12 @@ try {
 	toggle.set('taskLine', '4');
 	toggle.set('checked', 'true');
 	toggle.set('version', row.updated_at);
-	assert.equal((await request(url + '?/task', toggle)).status, 200);
+	assert.equal((await request(url + '?/cocher', toggle)).status, 200);
 	assert.ok(base.prepare('select body from meeting_reports where id=?').get(row.id).body.includes('- [x] Task one'));
-	assert.equal((await request(url + '?/task', toggle)).status, 400, 'Stale task updates are rejected');
+	assert.equal((await request(url + '?/cocher', toggle)).status, 400, 'Stale task updates are rejected');
 	toggle.set('checked', 'false');
 	toggle.set('version', base.prepare('select updated_at from meeting_reports where id=?').get(row.id).updated_at);
-	assert.equal((await request(url + '?/task', toggle)).status, 200);
+	assert.equal((await request(url + '?/cocher', toggle)).status, 200);
 	row.updated_at = base.prepare('select updated_at from meeting_reports where id=?').get(row.id).updated_at;
 	assert.equal(base.prepare('select body from meeting_reports where id=?').get(row.id).body, md);
 	const original = await fetch(origin + url + '/original', { headers: { Cookie: `${SESSION_COOKIE}=${token}` } });
@@ -130,12 +130,12 @@ try {
 		'/media/.meeting-reports/' + row.filename
 	])
 		assert.equal((await request(target, null, false)).status, 404);
-	for (const target of [path + '/import', path + '?/create', url + '?/save', url + '?/task', url + '?/delete']) {
+	for (const target of [path + '/import', path + '?/creer', url + '?/enregistrer', url + '?/cocher', url + '?/supprimer']) {
 		assert.equal((await request(target, fields('Unauthorized', 'Blocked'), false)).status, 303);
 		assert.equal(base.prepare('select count(*) as n from meeting_reports').get().n, 1);
 		assert.equal(base.prepare('select body from meeting_reports where id=?').get(row.id).body, md);
 	}
-	const crossSite = await fetch(origin + url + '?/task', {
+	const crossSite = await fetch(origin + url + '?/cocher', {
 		method: 'POST',
 		body: toggle,
 		redirect: 'manual',
@@ -146,9 +146,9 @@ try {
 	assert.ok((await request(path + '?q=decisions')).html.includes('Private meeting'));
 	const edited = fields('Updated internal meeting', '## Corrected decisions');
 	edited.set('version', row.updated_at);
-	assert.equal((await request(url + '?/save', edited)).status, 303);
+	assert.equal((await request(url + '?/enregistrer', edited)).status, 303);
 	assert.equal(base.prepare('select body from meeting_reports where id=?').get(row.id).body, '## Corrected decisions');
-	assert.equal((await request(url + '?/save', edited)).status, 400, 'Stale versions are rejected');
+	assert.equal((await request(url + '?/enregistrer', edited)).status, 400, 'Stale versions are rejected');
 	assert.equal(
 		await (await fetch(origin + url + '/original', { headers: { Cookie: `${SESSION_COOKIE}=${token}` } })).text(),
 		md
@@ -166,7 +166,7 @@ try {
 		});
 		assert.ok([303, 403].includes(denied.status));
 	}
-	for (const target of [path + '/import', path + '?/create', url + '?/save', url + '?/task', url + '?/delete']) {
+	for (const target of [path + '/import', path + '?/creer', url + '?/enregistrer', url + '?/cocher', url + '?/supprimer']) {
 		const attempt = await fetch(origin + target, {
 			method: 'POST',
 			body: fields('Unauthorized', 'Blocked edit'),
@@ -193,7 +193,7 @@ try {
 	const wordPreview = await request(path + '/import', word);
 	assert.equal(wordPreview.status, 200);
 	assert.ok(JSON.parse(wordPreview.html).body.includes('Word meeting decisions'));
-	assert.equal((await request(path + '?/create', word)).status, 303);
+	assert.equal((await request(path + '?/creer', word)).status, 303);
 	assert.ok(
 		base
 			.prepare('select body from meeting_reports where title=?')
@@ -202,7 +202,7 @@ try {
 	);
 	const correctedImport = fields('Corrected import', '## Corrected before saving');
 	correctedImport.set('file', new File([md], 'source.md'));
-	assert.equal((await request(path + '?/create', correctedImport)).status, 303);
+	assert.equal((await request(path + '?/creer', correctedImport)).status, 303);
 	const correctedRow = base.prepare('select * from meeting_reports where title=?').get('Corrected import');
 	assert.equal(correctedRow.body, '## Corrected before saving');
 	assert.equal(
@@ -216,12 +216,12 @@ try {
 	const bomb = minimalZip({ '[Content_Types].xml': 'x', 'word/document.xml': 'x'.repeat(11 * 1024 * 1024) });
 	const oversized = fields();
 	oversized.set('file', new File([bomb], 'oversized.docx'));
-	assert.equal((await request(path + '?/create', oversized)).status, 400);
+	assert.equal((await request(path + '?/creer', oversized)).status, 400);
 	const removal = new FormData();
-	assert.equal((await request(url + '?/delete', removal)).status, 303);
+	assert.equal((await request(url + '?/supprimer', removal)).status, 303);
 	assert.equal((await request(url)).status, 404);
 	assert.equal((await request(url + '/original')).status, 404);
-	assert.equal(base.prepare("select count(*) as n from audit_log where action like 'meeting-report.%'").get().n, 7);
+	assert.equal(base.prepare("select count(*) as n from audit_log where action like 'compte-rendu.%'").get().n, 7);
 	console.log(
 		'PASS private meeting reports: Markdown and Word imports, archive limits, private download, safe rendering, search, editing, conflict detection, deletion, two-factor authentication and no public disclosure.'
 	);

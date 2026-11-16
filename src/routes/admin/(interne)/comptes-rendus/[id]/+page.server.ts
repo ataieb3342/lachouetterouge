@@ -1,67 +1,75 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import {
-	getMeetingReport,
-	readMeetingFields,
-	updateMeetingReport,
-	deleteMeetingReport,
-	renderMeetingBody,
-	toggleMeetingTask
-} from '$lib/server/meeting-reports';
-import { presentMeetingReport } from '$lib/server/present';
+	cocherTache,
+	lireChampsCompteRendu,
+	modifierCompteRendu,
+	rendreCompteRendu,
+	supprimerCompteRendu,
+	trouverCompteRendu
+} from '$lib/server/comptes-rendus';
+import { presentCompteRendu } from '$lib/server/present';
 import { audit } from '$lib/server/auth';
+
+const REFUS = { erreur: 'Accès réservé aux administrateurs.' };
+
 export const load: PageServerLoad = async ({ locals, params }) => {
-	if (!locals.admin?.totpEnabled) error(403, 'Accès réservé aux administrateurs.');
-	const row = getMeetingReport(Number(params.id));
-	if (!row) error(404, 'Compte rendu introuvable.');
-	return { report: presentMeetingReport(row), html: renderMeetingBody(row.body) };
+	if (!locals.admin?.totpEnabled) error(403, REFUS.erreur);
+	const compteRendu = trouverCompteRendu(Number(params.id));
+	if (!compteRendu) error(404, 'Compte rendu introuvable.');
+	return { compteRendu: presentCompteRendu(compteRendu), html: rendreCompteRendu(compteRendu.body) };
 };
+
 export const actions: Actions = {
-	task: async ({ locals, params, request }) => {
-		if (!locals.admin?.totpEnabled) return fail(403, { error: 'Accès réservé aux administrateurs.' });
+	// Coche ou décoche une tâche depuis la page de lecture, sans ouvrir l'éditeur.
+	cocher: async ({ locals, params, request }) => {
+		if (!locals.admin?.totpEnabled) return fail(403, REFUS);
 		const id = Number(params.id);
-		const row = getMeetingReport(id);
-		if (!row) error(404, 'Compte rendu introuvable.');
+		const compteRendu = trouverCompteRendu(id);
+		if (!compteRendu) error(404, 'Compte rendu introuvable.');
+
 		try {
 			const form = await request.formData();
-			const checked = String(form.get('checked'));
-			if (!['true', 'false'].includes(checked)) throw new Error('État de case invalide.');
-			const line = String(form.get('taskLine') ?? '');
-			if (!/^\d+$/.test(line)) throw new Error('Case invalide.');
-			updateMeetingReport(
+			const cochee = String(form.get('checked'));
+			if (!['true', 'false'].includes(cochee)) throw new Error('État de case invalide.');
+			const ligne = String(form.get('taskLine') ?? '');
+			if (!/^\d+$/.test(ligne)) throw new Error('Case invalide.');
+
+			const texte = cocherTache(compteRendu.body, Number(ligne), cochee === 'true');
+			modifierCompteRendu(
 				id,
-				{
-					title: row.title,
-					date: row.meeting_date,
-					body: toggleMeetingTask(row.body, Number(line), checked === 'true')
-				},
+				{ title: compteRendu.title, date: compteRendu.meeting_date, body: texte },
 				String(form.get('version') ?? '')
 			);
-		} catch (err) {
-			return fail(400, { error: (err as Error).message });
+		} catch (erreur) {
+			return fail(400, { erreur: (erreur as Error).message });
 		}
-		audit(locals.admin, 'meeting-report.task', String(id), '', locals.ipHash);
-		return { taskSaved: true };
+		audit(locals.admin, 'compte-rendu.tache', String(id), '', locals.ipHash);
+		return { tacheEnregistree: true };
 	},
-	save: async ({ locals, params, request }) => {
-		if (!locals.admin?.totpEnabled) return fail(403, { error: 'Accès réservé aux administrateurs.' });
+
+	enregistrer: async ({ locals, params, request }) => {
+		if (!locals.admin?.totpEnabled) return fail(403, REFUS);
 		const id = Number(params.id);
-		if (!getMeetingReport(id)) error(404, 'Compte rendu introuvable.');
+		if (!trouverCompteRendu(id)) error(404, 'Compte rendu introuvable.');
+
 		try {
 			const form = await request.formData();
-			updateMeetingReport(id, readMeetingFields(form), String(form.get('version') ?? ''));
-		} catch (err) {
-			return fail(400, { error: (err as Error).message });
+			modifierCompteRendu(id, lireChampsCompteRendu(form), String(form.get('version') ?? ''));
+		} catch (erreur) {
+			return fail(400, { erreur: (erreur as Error).message });
 		}
-		audit(locals.admin, 'meeting-report.update', String(id), '', locals.ipHash);
+		audit(locals.admin, 'compte-rendu.modification', String(id), '', locals.ipHash);
 		redirect(303, `/admin/comptes-rendus/${id}`);
 	},
-	delete: async ({ locals, params }) => {
-		if (!locals.admin?.totpEnabled) return fail(403, { error: 'Accès réservé aux administrateurs.' });
+
+	supprimer: async ({ locals, params }) => {
+		if (!locals.admin?.totpEnabled) return fail(403, REFUS);
 		const id = Number(params.id);
-		if (!getMeetingReport(id)) error(404, 'Compte rendu introuvable.');
-		await deleteMeetingReport(id);
-		audit(locals.admin, 'meeting-report.delete', String(id), '', locals.ipHash);
+		if (!trouverCompteRendu(id)) error(404, 'Compte rendu introuvable.');
+
+		await supprimerCompteRendu(id);
+		audit(locals.admin, 'compte-rendu.suppression', String(id), '', locals.ipHash);
 		redirect(303, '/admin/comptes-rendus');
 	}
 };

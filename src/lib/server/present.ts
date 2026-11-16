@@ -144,12 +144,20 @@ export function presentPropositionDessin(row: import('./propositions-dessins.ts'
   image: `/admin/dessins/propositions/${row.id}/image` };
 }
 
-export function presentMeetingReport(row: import('./meeting-reports.ts').MeetingReport) {
- return { id: row.id, title: row.title, meetingDate: row.meeting_date, body: row.body,
-  updatedAt: row.updated_at, originalName: row.original_name,
-  originalUrl: row.filename ? `/admin/comptes-rendus/${row.id}/original` : null };
+/** Un compte rendu de réunion, pour la page de lecture et l'éditeur. Réservé à l'administration. */
+export function presentCompteRendu(row: import('./comptes-rendus.ts').CompteRendu) {
+	return {
+		id: row.id,
+		title: row.title,
+		meetingDate: row.meeting_date,
+		body: row.body,
+		updatedAt: row.updated_at,
+		originalName: row.original_name,
+		originalUrl: row.filename ? `/admin/comptes-rendus/${row.id}/original` : null
+	};
 }
 
-export function presentMeetingSummary(row: Pick<import('./meeting-reports.ts').MeetingReport, 'id'|'title'|'meeting_date'|'updated_at'>) {
- return {id:row.id,title:row.title,meetingDate:row.meeting_date,updatedAt:row.updated_at};
+/** Une ligne de la liste des comptes rendus. */
+export function presentResumeCompteRendu(row: import('./comptes-rendus.ts').ResumeCompteRendu) {
+	return { id: row.id, title: row.title, meetingDate: row.meeting_date, updatedAt: row.updated_at };
 }
