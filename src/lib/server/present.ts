@@ -123,29 +123,53 @@ export function presentMediaRecommande(row: MediaRecommande): MediaRecommandeVue
 	};
 }
 
-/** Public drawing fields only; uploaded files retain their original content. */
-export function presentDrawing(row: import('./drawings.ts').Drawing) {
- const media = getMedia(row.media_id);
- return {
-  id: row.id, title: row.title, author: row.author, caption: row.caption,
-  alt: row.alt, rights: row.rights, published: !!row.published,
-  image: media ? `/media/${media.filename}` : null,
-  thumbnail: media ? `/media/${media.filename}/vignette` : null
- };
+/**
+ * Un dessin de la galerie : les champs publics, l'adresse de l'image et celle
+ * de sa vignette.
+ */
+export function presentDessin(row: import('./dessins.ts').Dessin) {
+	const media = getMedia(row.media_id);
+	return {
+		id: row.id,
+		title: row.title,
+		author: row.author,
+		caption: row.caption,
+		alt: row.alt,
+		rights: row.rights,
+		published: !!row.published,
+		image: media ? `/media/${media.filename}` : null,
+		thumbnail: media ? `/media/${media.filename}/vignette` : null
+	};
 }
 
-export function presentDrawingSubmission(row: import('./drawing-submissions.ts').DrawingSubmission) {
- return { id: row.id, title: row.title, author: row.author, caption: row.caption,
-  alt: row.alt, rights: row.rights, createdAt: row.created_at,
-  image: `/admin/dessins/propositions/${row.id}/image` };
+/** Une proposition en attente. Son image passe par la route réservée à l'équipe. */
+export function presentPropositionDessin(row: import('./propositions-dessins.ts').PropositionDessin) {
+	return {
+		id: row.id,
+		title: row.title,
+		author: row.author,
+		caption: row.caption,
+		alt: row.alt,
+		rights: row.rights,
+		createdAt: row.created_at,
+		image: `/admin/dessins/propositions/${row.id}/image`
+	};
 }
 
-export function presentMeetingReport(row: import('./meeting-reports.ts').MeetingReport) {
- return { id: row.id, title: row.title, meetingDate: row.meeting_date, body: row.body,
-  updatedAt: row.updated_at, originalName: row.original_name,
-  originalUrl: row.filename ? `/admin/comptes-rendus/${row.id}/original` : null };
+/** Un compte rendu de réunion, pour la page de lecture et l'éditeur. Réservé à l'administration. */
+export function presentCompteRendu(row: import('./comptes-rendus.ts').CompteRendu) {
+	return {
+		id: row.id,
+		title: row.title,
+		meetingDate: row.meeting_date,
+		body: row.body,
+		updatedAt: row.updated_at,
+		originalName: row.original_name,
+		originalUrl: row.filename ? `/admin/comptes-rendus/${row.id}/original` : null
+	};
 }
 
-export function presentMeetingSummary(row: Pick<import('./meeting-reports.ts').MeetingReport, 'id'|'title'|'meeting_date'|'updated_at'>) {
- return {id:row.id,title:row.title,meetingDate:row.meeting_date,updatedAt:row.updated_at};
+/** Une ligne de la liste des comptes rendus. */
+export function presentResumeCompteRendu(row: import('./comptes-rendus.ts').ResumeCompteRendu) {
+	return { id: row.id, title: row.title, meetingDate: row.meeting_date, updatedAt: row.updated_at };
 }

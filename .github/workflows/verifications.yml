@@ -1,0 +1,151 @@
+# Les vérifications lancées après chaque envoi sur `main`, et sur chaque
+# demande de fusion.
+#
+# Personne n'est empêché de pousser sur `main` : c'est un choix du groupe, pour
+# que contribuer reste simple. En échange, ce fichier fait tourner sur les
+# machines de GitHub ce que `npm run verifier` fait sur un ordinateur, et
+# **prévient le propriétaire du dépôt dès qu'une étape échoue** : une fiche
+# (« issue ») est ouverte à son nom, et GitHub lui envoie un courriel. Quand un
+# envoi suivant répare, la fiche se referme toute seule.
+#
+# À savoir : `main` part en production en cinq minutes, que les vérifications
+# réussissent ou non. Ce fichier prévient, il ne retient rien.
+#
+# Aucun secret n'est utilisé. Le jeton de GitHub n'a que le droit de lire le
+# dépôt, sauf pour les deux tâches de la fin, qui écrivent la fiche d'alerte.
+name: Vérifications
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verifications-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifications:
+    name: verifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # `npm ci` installe exactement ce que dit package-lock.json, sans exécuter
+      # les scripts d'installation des paquets.
+      - name: Installer les dépendances
+        run: npm ci --ignore-scripts
+
+      - name: Vérifier le code (TypeScript et Svelte)
+        run: npm run check
+
+      - name: Tests et garde-fous
+        run: npm test
+
+      - name: Compiler le site
+        run: npm run build
+
+      # Ces parcours démarrent le site compilé sur une base temporaire et
+      # l'utilisent comme un navigateur le ferait.
+      - name: Parcours complets (dessins, propositions, comptes rendus)
+        run: |
+          node tests/integration/drawings-http.mjs
+          node tests/integration/drawing-submissions-http.mjs
+          node tests/integration/meeting-reports-http.mjs
+
+      - name: Tests du jeu de stratégie
+        run: node --test src/lib/jeux/mythology-rts/tests/*.test.js
+
+  # ------------------------------------------------------------------ l'alerte
+  #
+  # Seulement après un envoi sur `main` : sur une demande de fusion, l'échec se
+  # voit déjà sur la page de la demande.
+  prevenir:
+    name: Prévenir le propriétaire du dépôt
+    needs: verifications
+    if: ${{ failure() && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      # À qui la fiche est attribuée : c'est ce qui déclenche le courriel.
+      PROPRIETAIRE: ataieb3342
+      # Ce qui vient de la personne qui a poussé passe par des variables,
+      # jamais directement dans le script : un message de commit ne doit pas
+      # pouvoir y glisser une commande.
+      AUTEUR: ${{ github.actor }}
+      MESSAGE: ${{ github.event.head_commit.message }}
+      COMMIT: ${{ github.sha }}
+      EXECUTION: ${{ github.run_id }}
+      ADRESSE: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - name: Ouvrir ou compléter la fiche d'alerte
+        run: |
+          gh label create verifications-en-echec --force --color B8334A \
+            --description "Les vérifications ont échoué sur main" > /dev/null
+
+          # La première ligne du message, sans accent grave : elle est affichée
+          # comme du code, pour qu'un « @quelqu'un » n'y prévienne personne.
+          TITRE=$(printf '%s' "$MESSAGE" | head -n 1 | tr -d '`' | cut -c1-120)
+          ETAPES=$(gh run view "$EXECUTION" --json jobs \
+            --jq '.jobs[].steps[] | select(.conclusion == "failure") | "- " + .name')
+
+          {
+            echo "@$PROPRIETAIRE : les vérifications ont échoué sur \`main\`."
+            echo
+            echo "- **Qui** : $AUTEUR"
+            echo "- **Quoi** : \`$TITRE\`"
+            echo "- **Commit** : $ADRESSE/commit/$COMMIT"
+            echo "- **Le détail** : $ADRESSE/actions/runs/$EXECUTION"
+            echo
+            echo "**Ce qui a échoué :**"
+            echo "${ETAPES:-- (étape non identifiée : voir le détail)}"
+            echo
+            echo "Ce changement est déjà parti en production, ou y part dans les cinq minutes."
+            echo "Le message d'un garde-fou dit quoi faire ; voir \`garde-fous/LISEZMOI.md\`."
+          } > alerte.md
+
+          # Une seule fiche ouverte à la fois : un deuxième échec la complète.
+          NUMERO=$(gh issue list --label verifications-en-echec --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$NUMERO" ]; then
+            gh issue comment "$NUMERO" --body-file alerte.md
+          else
+            gh issue create --title "Les vérifications échouent sur main" \
+              --label verifications-en-echec --assignee "$PROPRIETAIRE" --body-file alerte.md
+          fi
+
+  retablir:
+    name: Refermer la fiche d'alerte
+    needs: verifications
+    if: ${{ success() && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      COMMIT: ${{ github.sha }}
+      ADRESSE: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - name: Refermer la fiche si les vérifications passent de nouveau
+        run: |
+          for NUMERO in $(gh issue list --label verifications-en-echec --state open \
+            --json number --jq '.[].number'); do
+            gh issue close "$NUMERO" \
+              --comment "Les vérifications passent de nouveau depuis $ADRESSE/commit/$COMMIT."
+          done

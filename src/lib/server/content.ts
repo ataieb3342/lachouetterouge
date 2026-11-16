@@ -1,4 +1,3 @@
-import { canPublishArticle, ReviewError } from './reviews.ts';
 import { db, now } from './db.ts';
 import { supprimerPdf } from './bibliotheque.ts';
 
@@ -252,7 +251,9 @@ export type PublicationInput = {
 };
 
 export function createPublication(input: PublicationInput, authorId: number): number {
-	if (input.kind === 'article' && input.status === 'published') throw new ReviewError('Enregistrez cet article en brouillon pour le faire valider.');
+	// Un article naît toujours en brouillon : il n'est mis en ligne qu'au bout
+	// du parcours de relecture (`relecture.ts`), jamais par ce formulaire.
+	if (input.kind === 'article') input = { ...input, status: 'draft' };
 	const timestamp = now();
 	const result = db()
 		.prepare(
@@ -301,11 +302,12 @@ export function createPublication(input: PublicationInput, authorId: number): nu
 export function updatePublication(id: number, input: PublicationInput, opts: { reslug: boolean }) {
 	const existing = getById(id);
 	if (!existing) throw new Error('Publication introuvable');
- if (input.kind === 'article' && input.status === 'published') {
- if (existing.kind !== 'article') input = { ...input, status: 'draft' };
- else if (existing.status !== 'published' && (!canPublishArticle(id) || existing.byline_admin_id !== (input.authorAdminId ?? null))) throw new ReviewError('Cet article doit être validé par son auteur et un autre administrateur.');
- }
-
+	// Enregistrer un article ne change jamais son état : seul le parcours de
+	// relecture le met en ligne ou l'en retire (`relecture.ts`). Une fiche qui
+	// devient un article repart en brouillon, pour être relue comme les autres.
+	if (input.kind === 'article') {
+		input = { ...input, status: existing.kind === 'article' ? existing.status : 'draft' };
+	}
 
 	// On ne change l'URL que si on le demande explicitement : les liens déjà
 	// partagés sur les réseaux sociaux continuent de fonctionner.

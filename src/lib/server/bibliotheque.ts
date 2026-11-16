@@ -2,8 +2,13 @@ import { mkdirSync, unlinkSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { randomToken } from './crypto.ts';
+import { retirerMetadonneesPdf } from './metadonnees-pdf.ts';
 
-/** PDF proposés par le public. Le dossier fait partie de data/ et des sauvegardes. */
+/**
+ * PDF proposés par le public. Le dossier fait partie de data/ et des sauvegardes.
+ * Chaque PDF y est écrit sans le nom de son auteur ni ses autres métadonnées :
+ * voir `metadonnees-pdf.ts`.
+ */
 export const BIBLIOTHEQUE_DIR = resolve(process.env.BIBLIOTHEQUE_PATH || 'data/bibliotheque');
 export const MAX_PDF_BYTES = 50 * 1024 * 1024;
 
@@ -20,9 +25,14 @@ export async function stockerPdf(file: File): Promise<{
 	if (file.size <= 0) throw new Error('Le fichier PDF est vide.');
 	if (file.size > MAX_PDF_BYTES) throw new Error('PDF trop lourd (maximum 50 Mo).');
 
-	const contenu = Buffer.from(await file.arrayBuffer());
-	if (contenu.length > MAX_PDF_BYTES) throw new Error('PDF trop lourd (maximum 50 Mo).');
-	if (!estPdf(contenu)) throw new Error('Le fichier envoyé n’est pas un PDF reconnu.');
+	const recu = Buffer.from(await file.arrayBuffer());
+	if (recu.length > MAX_PDF_BYTES) throw new Error('PDF trop lourd (maximum 50 Mo).');
+	if (!estPdf(recu)) throw new Error('Le fichier envoyé n’est pas un PDF reconnu.');
+	// Un PDF exporté de Word ou de LibreOffice porte le nom de la personne qui
+	// l'a écrit : seul le document lui-même est écrit sur le disque. Un fichier
+	// qu'on ne sait pas lire en entier est refusé ici, avant toute écriture,
+	// avec un message qui dit comment en faire une copie lisible.
+	const contenu = retirerMetadonneesPdf(recu).octets;
 
 	const filename = `${randomToken(16)}.pdf`;
 	mkdirSync(BIBLIOTHEQUE_DIR, { recursive: true });

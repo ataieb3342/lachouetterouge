@@ -1,0 +1,7 @@
+# Qui relit quoi.
+#
+# Sur chaque demande de fusion, GitHub demande automatiquement la relecture du
+# propriétaire du dépôt. Ce n'est pas un verrou : chacun peut aussi pousser
+# directement sur `main`, et c'est alors `.github/workflows/verifications.yml`
+# qui prévient le propriétaire si quelque chose casse.
+*	@ataieb3342

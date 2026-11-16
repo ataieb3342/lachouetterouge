@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { countDrawingSubmissions } from '$lib/server/drawing-submissions';
-import { countArticlesAwaitingReview } from '$lib/server/reviews';
+import { compterPropositions } from '$lib/server/propositions-dessins';
+import { compterARelire } from '$lib/server/relecture';
 import { countPendingComments, countPendingSources } from '$lib/server/content';
 
 /** Pages accessibles avant d'avoir activé la double authentification. */
@@ -26,9 +26,9 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 			role: locals.admin.role,
 			totpEnabled: locals.admin.totpEnabled
 		},
-		verificationsEnAttente: countArticlesAwaitingReview(locals.admin.id),
+		articlesARelire: compterARelire(locals.admin.id),
 		commentairesEnAttente: countPendingComments(),
 		sourcesEnAttente: countPendingSources(),
-		dessinsEnAttente: countDrawingSubmissions()
+		dessinsEnAttente: compterPropositions()
 	};
 };

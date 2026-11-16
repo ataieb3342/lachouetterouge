@@ -32,11 +32,14 @@
 	}}
 >
 	<FormulairePublication
-		articleWorkflow={true}
-		canSubmitArticle={true}
-		currentAdminId={data.currentAdminId}
+		actionPrincipale={{
+			libelle: 'Enregistrer et envoyer en relecture',
+			action: '?/creerEtEnvoyer',
+			aide: 'Une autre personne de l’équipe relira le texte avant sa mise en ligne.'
+		}}
+		adminCourantId={data.adminCourantId}
 		admins={data.admins}
-		valeurs={form ?? { authorAdminId: String(data.currentAdminId) }}
+		valeurs={form ?? { authorAdminId: String(data.adminCourantId) }}
 		erreur={form?.erreur ?? ''}
 		apercu={form?.apercu ?? ''}
 		libelleValider="Créer la publication"

@@ -1,6 +1,6 @@
-import { articleReviewWorkspace } from '$lib/server/reviews';
-import type { PageServerLoad } from './$types';
-export const load: PageServerLoad = ({locals,url}) => {
- const workspace=articleReviewWorkspace(locals.admin!.id);
- return {...workspace,submitted:url.searchParams.get('soumis')==='1',tab:url.searchParams.get('onglet')==='a-verifier'?'a-verifier':'mes-articles'};
-};
+import { redirect } from '@sveltejs/kit';
+
+// Cette page et sa voisine ont été réunies en une seule : Administration →
+// Relecture. L'ancienne adresse reste, pour les favoris et les liens envoyés
+// par message.
+export const load = () => redirect(308, '/admin/relecture');
