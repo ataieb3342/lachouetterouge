@@ -3,7 +3,7 @@ import { listPublished } from '$lib/server/content';
 import { RUBRIQUE_PAR_KIND } from '$lib/rubriques';
 import { JEUX, urlJeu } from '$lib/jeux';
 import { OUTILS, urlOutil } from '$lib/boite-a-outils';
-import { listDrawings } from '$lib/server/drawings';
+import { listerDessins } from '$lib/server/dessins';
 import type { Kind } from '$lib/rubriques';
 
 /**
@@ -64,7 +64,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		...PAGES_FIXES.map((chemin) =>
 			ligne(chemin, chemin === '/' ? dernierTout : dernierParKind.get(LISTES[chemin]))
 		),
-		...listDrawings().map((drawing) => ligne(`/dessins/${drawing.id}`, drawing.updated_at.slice(0, 10))),
+		...listerDessins().map((dessin) => ligne(`/dessins/${dessin.id}`, dessin.updated_at.slice(0, 10))),
 		...publications.map((p) =>
 			ligne(
 				`/${RUBRIQUE_PAR_KIND[p.kind]}/${p.slug}`,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DrawingForm from '$lib/components/DrawingForm.svelte';
+	import FormulaireDessin from '$lib/components/FormulaireDessin.svelte';
 	import type { PageData, ActionData } from './$types';
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
@@ -12,71 +12,71 @@
 	</p>
 	<a class="mt-3 inline-block font-semibold text-brand hover:underline" href="/dessins">Voir la galerie →</a>
 </header>
-{#if form?.error}<p role="alert" class="mt-5 rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">
-		{form.error}
+{#if form?.erreur}<p role="alert" class="mt-5 rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">
+		{form.erreur}
 	</p>{/if}
-<section class="mt-6" aria-labelledby="pending-drawings-title">
-	<h2 id="pending-drawings-title" class="text-xl font-bold text-ink">
-		Propositions à vérifier ({data.submissions.length})
+<section class="mt-6" aria-labelledby="propositions-titre">
+	<h2 id="propositions-titre" class="text-xl font-bold text-ink">
+		Propositions à vérifier ({data.propositions.length})
 	</h2>
-	{#if !data.submissions.length}<p class="mt-3 text-ink-soft">Aucune proposition en attente.</p>{/if}
-	{#each data.submissions as submission (submission.id)}
+	{#if !data.propositions.length}<p class="mt-3 text-ink-soft">Aucune proposition en attente.</p>{/if}
+	{#each data.propositions as proposition (proposition.id)}
 		<details class="carte mt-5">
-			<summary class="cursor-pointer font-semibold text-ink">{submission.title} · {submission.author}</summary>
-			<a href={submission.image} target="_blank" rel="noopener noreferrer"
-				><img class="mt-5 max-h-96 w-full object-contain" src={submission.image} alt={submission.alt} /></a
+			<summary class="cursor-pointer font-semibold text-ink">{proposition.title} · {proposition.author}</summary>
+			<a href={proposition.image} target="_blank" rel="noopener noreferrer"
+				><img class="mt-5 max-h-96 w-full object-contain" src={proposition.image} alt={proposition.alt} /></a
 			>
-			<form method="POST" action="?/approve" class="mt-5 space-y-4">
-				<input type="hidden" name="submissionId" value={submission.id} />
+			<form method="POST" action="?/accepter" class="mt-5 space-y-4">
+				<input type="hidden" name="submissionId" value={proposition.id} />
 				<div>
-					<label class="etiquette" for="submission-{submission.id}-title">Titre</label><input
+					<label class="etiquette" for="proposition-{proposition.id}-title">Titre</label><input
 						class="champ"
-						id="submission-{submission.id}-title"
+						id="proposition-{proposition.id}-title"
 						name="title"
-						value={submission.title}
+						value={proposition.title}
 						required
 						maxlength="180"
 					/>
 				</div>
 				<div>
-					<label class="etiquette" for="submission-{submission.id}-author">Auteur ou pseudonyme</label><input
+					<label class="etiquette" for="proposition-{proposition.id}-author">Auteur ou pseudonyme</label><input
 						class="champ"
-						id="submission-{submission.id}-author"
+						id="proposition-{proposition.id}-author"
 						name="author"
-						value={submission.author}
+						value={proposition.author}
 						required
 						maxlength="120"
 					/>
 				</div>
 				<div>
-					<label class="etiquette" for="submission-{submission.id}-alt">Description accessible</label><textarea
+					<label class="etiquette" for="proposition-{proposition.id}-alt">Description accessible</label><textarea
 						class="champ"
-						id="submission-{submission.id}-alt"
+						id="proposition-{proposition.id}-alt"
 						name="alt"
 						required
 						maxlength="300"
-						rows="3">{submission.alt}</textarea
+						rows="3">{proposition.alt}</textarea
 					>
 				</div>
 				<div>
-					<label class="etiquette" for="submission-{submission.id}-caption">Légende</label><textarea
+					<label class="etiquette" for="proposition-{proposition.id}-caption">Légende</label><textarea
 						class="champ"
-						id="submission-{submission.id}-caption"
+						id="proposition-{proposition.id}-caption"
 						name="caption"
 						maxlength="2000"
-						rows="3">{submission.caption}</textarea
+						rows="3">{proposition.caption}</textarea
 					>
 				</div>
 				<div>
-					<label class="etiquette" for="submission-{submission.id}-rights"
+					<label class="etiquette" for="proposition-{proposition.id}-rights"
 						>Conditions de partage indiquées par l’auteur</label
 					><textarea
 						class="champ"
-						id="submission-{submission.id}-rights"
+						id="proposition-{proposition.id}-rights"
 						name="rights"
 						required
 						maxlength="500"
-						rows="2">{submission.rights}</textarea
+						rows="2">{proposition.rights}</textarea
 					>
 				</div>
 				<p class="text-sm text-ink-soft">
@@ -87,8 +87,8 @@
 			</form>
 			<details class="mt-5 border-t border-line pt-5">
 				<summary class="cursor-pointer text-sm text-ink-soft">Refuser cette proposition…</summary>
-				<form method="POST" action="?/reject" class="mt-3">
-					<input type="hidden" name="submissionId" value={submission.id} />
+				<form method="POST" action="?/refuser" class="mt-3">
+					<input type="hidden" name="submissionId" value={proposition.id} />
 					<p class="mb-3 text-sm text-ink-soft">La proposition et son fichier privé seront supprimés.</p>
 					<button class="bouton-secondaire" type="submit">Confirmer le refus</button>
 				</form>
@@ -96,26 +96,26 @@
 		</details>
 	{/each}
 </section>
-<details class="carte mt-6" open={!data.drawings.length}>
+<details class="carte mt-6" open={!data.dessins.length}>
 	<summary class="cursor-pointer text-lg font-bold text-ink">Ajouter un dessin</summary>
-	<div class="mt-5"><DrawingForm /></div>
+	<div class="mt-5"><FormulaireDessin /></div>
 </details>
 <section class="mt-8" aria-label="Dessins enregistrés">
-	{#each data.drawings as drawing (drawing.id)}
+	{#each data.dessins as dessin (dessin.id)}
 		<details class="mt-5 rounded-xl border border-line bg-carte p-5">
 			<summary class="cursor-pointer font-semibold text-ink"
-				>{drawing.title} · {drawing.published ? 'Publié' : 'Brouillon'}</summary
+				>{dessin.title} · {dessin.published ? 'Publié' : 'Brouillon'}</summary
 			>
-			{#if drawing.image}<img class="mt-5 max-h-64 w-full object-contain" src={drawing.image} alt={drawing.alt} />{/if}
-			{#if drawing.published}<a
+			{#if dessin.image}<img class="mt-5 max-h-64 w-full object-contain" src={dessin.image} alt={dessin.alt} />{/if}
+			{#if dessin.published}<a
 					class="mt-3 inline-block text-sm font-semibold text-brand hover:underline"
-					href="/dessins/{drawing.id}">Voir la page publique →</a
+					href="/dessins/{dessin.id}">Voir la page publique →</a
 				>{/if}
-			<div class="mt-5"><DrawingForm {drawing} /></div>
+			<div class="mt-5"><FormulaireDessin {dessin} /></div>
 			<details class="mt-5 border-t border-line pt-5">
 				<summary class="cursor-pointer text-sm text-ink-soft">Supprimer ce dessin…</summary>
-				<form method="POST" action="?/delete" class="mt-3">
-					<input type="hidden" name="id" value={drawing.id} />
+				<form method="POST" action="?/supprimer" class="mt-3">
+					<input type="hidden" name="id" value={dessin.id} />
 					<p class="mb-3 text-sm text-ink-soft">
 						La fiche sera supprimée. L’image restera disponible dans la médiathèque.
 					</p>

@@ -154,7 +154,7 @@ try {
 	);
 
 	const approval = fields({ submissionId: String(pending.id), title: 'Reviewed proposal' }, false);
-	for (const action of ['save', 'delete', 'approve', 'reject']) {
+	for (const action of ['enregistrer', 'supprimer', 'accepter', 'refuser']) {
 		const blocked = await fetch(origin + `/admin/dessins?/${action}`, {
 			method: 'POST',
 			body: approval,
@@ -170,9 +170,9 @@ try {
 		assert.ok(base.prepare('select id from drawing_submissions where id=?').get(pending.id));
 	}
 
-	assert.equal((await request('/admin/dessins?/approve', approval, false)).status, 303);
+	assert.equal((await request('/admin/dessins?/accepter', approval, false)).status, 303);
 	assert.ok(base.prepare('select id from drawing_submissions where id=?').get(pending.id));
-	assert.equal((await request('/admin/dessins?/approve', approval)).status, 303);
+	assert.equal((await request('/admin/dessins?/accepter', approval)).status, 303);
 	assert.equal(base.prepare('select count(*) as n from drawing_submissions').get().n, 0);
 	const published = base.prepare('select * from drawings').get();
 	assert.equal(published.title, 'Reviewed proposal');
@@ -182,13 +182,13 @@ try {
 	const media = base.prepare('select * from media where id=?').get(published.media_id);
 	const original = await fetch(origin + `/media/${media.filename}`);
 	assert.deepEqual(Buffer.from(await original.arrayBuffer()), png);
-	assert.equal((await request('/admin/dessins?/approve', approval)).status, 404);
+	assert.equal((await request('/admin/dessins?/accepter', approval)).status, 404);
 	assert.equal(base.prepare('select count(*) as n from drawings').get().n, 1);
 	assert.equal((await request('/dessins/proposer', proposal({ title: 'Rejected proposal' }), false)).status, 200);
 	const rejected = base.prepare('select * from drawing_submissions').get();
 	const rejection = new FormData();
 	rejection.set('submissionId', String(rejected.id));
-	assert.equal((await request('/admin/dessins?/reject', rejection)).status, 303);
+	assert.equal((await request('/admin/dessins?/refuser', rejection)).status, 303);
 	assert.equal(base.prepare('select count(*) as n from drawing_submissions').get().n, 0);
 	assert.ok(!existsSync(join(process.env.UPLOADS_PATH, '.drawing-submissions', rejected.filename)));
 	assert.ok(!(await request('/dessins', null, false)).html.includes('Rejected proposal'));
@@ -200,7 +200,7 @@ try {
 		'Replayed proof cannot obtain the verified submission quota'
 	);
 	assert.equal(
-		base.prepare("select count(*) as n from audit_log where action in ('drawing.approve','drawing.reject')").get().n,
+		base.prepare("select count(*) as n from audit_log where action in ('dessin.acceptation','dessin.refus')").get().n,
 		2
 	);
 	console.log(

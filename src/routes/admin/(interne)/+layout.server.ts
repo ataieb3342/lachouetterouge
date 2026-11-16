@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { countDrawingSubmissions } from '$lib/server/drawing-submissions';
+import { compterPropositions } from '$lib/server/propositions-dessins';
 import { countArticlesAwaitingReview } from '$lib/server/reviews';
 import { countPendingComments, countPendingSources } from '$lib/server/content';
 
@@ -29,6 +29,6 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		verificationsEnAttente: countArticlesAwaitingReview(locals.admin.id),
 		commentairesEnAttente: countPendingComments(),
 		sourcesEnAttente: countPendingSources(),
-		dessinsEnAttente: countDrawingSubmissions()
+		dessinsEnAttente: compterPropositions()
 	};
 };

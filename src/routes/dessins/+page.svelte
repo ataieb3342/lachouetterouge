@@ -22,24 +22,24 @@
 	</p>
 	<a class="bouton mt-5" href="/dessins/proposer">Proposer un dessin</a>
 </header>
-{#if data.drawings.length}
+{#if data.dessins.length}
 	<ul class="mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-		{#each data.drawings as drawing (drawing.id)}
+		{#each data.dessins as dessin (dessin.id)}
 			<li>
-				<a href="/dessins/{drawing.id}" class="group block">
-					{#if drawing.image}<div
+				<a href="/dessins/{dessin.id}" class="group block">
+					{#if dessin.image}<div
 							class="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-line bg-carte p-3"
 						>
 							<img
-								src={drawing.thumbnail ?? drawing.image}
-								alt={drawing.alt}
+								src={dessin.thumbnail ?? dessin.image}
+								alt={dessin.alt}
 								class="h-full w-full object-contain"
 								loading="lazy"
 								decoding="async"
 							/>
 						</div>{/if}
-					<h2 class="mt-3 text-xl font-bold text-ink group-hover:text-brand">{drawing.title}</h2>
-					<p class="mt-1 text-sm text-ink-soft">Dessin de {drawing.author}</p>
+					<h2 class="mt-3 text-xl font-bold text-ink group-hover:text-brand">{dessin.title}</h2>
+					<p class="mt-1 text-sm text-ink-soft">Dessin de {dessin.author}</p>
 					<span class="mt-3 inline-block text-sm font-semibold text-brand">Voir et partager →</span>
 				</a>
 			</li>

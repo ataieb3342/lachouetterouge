@@ -79,18 +79,18 @@ try {
 	});
 	assert.equal((await request('/admin/dessins', null, false)).status, 303);
 	assert.equal((await request('/admin/dessins')).status, 200);
-	assert.equal((await request('/admin/dessins?/save', fields({ permission: '' }))).status, 400);
+	assert.equal((await request('/admin/dessins?/enregistrer', fields({ permission: '' }))).status, 400);
 	assert.equal(base.prepare('select count(*) as n from drawings').get().n, 0);
 	const fake = fields();
 	fake.set('image', new File(['<svg onload="alert(1)"></svg>'], 'fake.png', { type: 'image/png' }));
-	assert.equal((await request('/admin/dessins?/save', fake)).status, 400);
-	assert.equal((await request('/admin/dessins?/save', fields())).status, 303);
+	assert.equal((await request('/admin/dessins?/enregistrer', fake)).status, 400);
+	assert.equal((await request('/admin/dessins?/enregistrer', fields())).status, 303);
 	const drawing = base.prepare('select * from drawings').get();
 	assert.equal((await request(`/dessins/${drawing.id}`, null, false)).status, 404);
 	assert.ok(!(await request('/dessins', null, false)).html.includes('Integration drawing'));
 	assert.ok(!(await request('/sitemap.xml', null, false)).html.includes(`/dessins/${drawing.id}`));
 	assert.equal(
-		(await request('/admin/dessins?/save', fields({ id: String(drawing.id), published: 'on' }, false))).status,
+		(await request('/admin/dessins?/enregistrer', fields({ id: String(drawing.id), published: 'on' }, false))).status,
 		303
 	);
 	const publicPage = await request(`/dessins/${drawing.id}`, null, false);
@@ -122,18 +122,18 @@ try {
 	assert.equal((await request('/admin/medias?/supprimer', deletion)).status, 400);
 	assert.ok(base.prepare('select id from media where id=?').get(media.id));
 	assert.equal(
-		(await request('/admin/dessins?/save', fields({ id: String(drawing.id), title: 'Updated drawing' }, false))).status,
+		(await request('/admin/dessins?/enregistrer', fields({ id: String(drawing.id), title: 'Updated drawing' }, false))).status,
 		303
 	);
 	assert.equal((await request(`/dessins/${drawing.id}`, null, false)).status, 404);
 	const remove = new FormData();
 	remove.set('id', String(drawing.id));
-	assert.equal((await request('/admin/dessins?/delete', remove)).status, 303);
+	assert.equal((await request('/admin/dessins?/supprimer', remove)).status, 303);
 	assert.equal(base.prepare('select count(*) as n from drawings').get().n, 0);
 	assert.ok(base.prepare('select id from media where id=?').get(media.id));
-	assert.equal((await request('/admin/dessins?/save', fields({ published: 'on' }))).status, 303);
+	assert.equal((await request('/admin/dessins?/enregistrer', fields({ published: 'on' }))).status, 303);
 	const next = base.prepare('select id from drawings').get();
-	const third = await request('/admin/dessins?/save', fields({ title: 'Third drawing', published: 'on' }));
+	const third = await request('/admin/dessins?/enregistrer', fields({ title: 'Third drawing', published: 'on' }));
 	assert.equal(third.status, 303);
 	const visible = base.prepare('select id from drawings where published=1 order by created_at desc,id desc').all();
 	const newestPage = (await request(`/dessins/${visible[0].id}`, null, false)).html;
@@ -143,7 +143,7 @@ try {
 	assert.ok(next.id > drawing.id, 'A deleted shared URL must never identify a new drawing');
 	assert.equal((await request(`/dessins/${drawing.id}`, null, false)).status, 404);
 	assert.equal((await request('/dessins/not-an-id', null, false)).status, 404);
-	assert.equal(base.prepare("select count(*) as n from audit_log where action like 'drawing.%'").get().n, 6);
+	assert.equal(base.prepare("select count(*) as n from audit_log where action like 'dessin.%'").get().n, 6);
 	console.log(
 		'PASS drawings: authenticated upload, permission, content sniffing, drafts, publication, metadata, original bytes, image protection, unpublishing, deletion and audit.'
 	);

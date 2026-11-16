@@ -4,8 +4,8 @@
 	import PreuveDeTravail from '$lib/components/PreuveDeTravail.svelte';
 	import type { PageData, ActionData } from './$types';
 	let { data, form }: { data: PageData; form: ActionData } = $props();
-	let sending = $state(false);
-	const values = $derived(form?.values ?? {});
+	let envoiEnCours = $state(false);
+	const valeurs = $derived(form?.valeurs ?? {});
 </script>
 
 <Metadonnees
@@ -21,7 +21,7 @@
 		galerie.
 	</p>
 </header>
-{#if form?.success}
+{#if form?.envoye}
 	<section class="carte mt-6" role="status">
 		<h2 class="text-xl font-bold text-ink">Merci pour votre proposition !</h2>
 		<p class="mt-3 text-ink-soft">
@@ -36,22 +36,22 @@
 		method="POST"
 		enctype="multipart/form-data"
 		use:enhance={() => {
-			sending = true;
+			envoiEnCours = true;
 			return async ({ update }) => {
 				try {
 					await update({ reset: false });
 				} finally {
-					sending = false;
+					envoiEnCours = false;
 				}
 			};
 		}}
 	>
-		{#if form?.error}<p class="alerte" role="alert">{form.error}</p>{/if}
+		{#if form?.erreur}<p class="alerte" role="alert">{form.erreur}</p>{/if}
 		<div>
 			<label class="etiquette" for="title">Titre du dessin</label><input
 				id="title"
 				name="title"
-				value={values.title ?? ''}
+				value={valeurs.title ?? ''}
 				class="champ"
 				required
 				maxlength="180"
@@ -61,7 +61,7 @@
 			<label class="etiquette" for="author">Votre nom ou pseudonyme</label><input
 				id="author"
 				name="author"
-				value={values.author ?? ''}
+				value={valeurs.author ?? ''}
 				class="champ"
 				required
 				maxlength="120"
@@ -86,7 +86,7 @@
 				class="champ"
 				required
 				maxlength="300"
-				rows="3">{values.alt ?? ''}</textarea
+				rows="3">{valeurs.alt ?? ''}</textarea
 			>
 			<p class="aide">Cette description permet aux personnes qui ne voient pas l’image de la comprendre.</p>
 		</div>
@@ -96,7 +96,7 @@
 				name="caption"
 				class="champ"
 				maxlength="2000"
-				rows="3">{values.caption ?? ''}</textarea
+				rows="3">{valeurs.caption ?? ''}</textarea
 			>
 		</div>
 		<div>
@@ -108,7 +108,7 @@
 				maxlength="500"
 				rows="2"
 				placeholder="Par exemple : partage autorisé avec mon nom, sans modification et sans utilisation commerciale."
-				>{values.rights ?? ''}</textarea
+				>{valeurs.rights ?? ''}</textarea
 			>
 			<p class="aide">
 				Ces conditions seront affichées avec le dessin. Après validation, les visiteurs pourront télécharger l’image
@@ -122,14 +122,14 @@
 		<div class="hidden" aria-hidden="true">
 			<label for="site">Votre site</label><input id="site" name="site" autocomplete="off" tabindex="-1" />
 		</div>
-		<PreuveDeTravail defi={data.challenge} />
+		<PreuveDeTravail defi={data.defi} />
 		<p class="text-sm text-ink-soft">
 			Les propositions sont relues par l’équipe. Elles ne sont jamais publiées automatiquement. <a
 				class="text-brand underline"
 				href="/confidentialite">Confidentialité</a
 			>
 		</p>
-		<button class="bouton" type="submit" disabled={sending}>{sending ? 'Envoi en cours…' : 'Envoyer à l’équipe'}</button
+		<button class="bouton" type="submit" disabled={envoiEnCours}>{envoiEnCours ? 'Envoi en cours…' : 'Envoyer à l’équipe'}</button
 		>
 	</form>
 {/if}
