@@ -1,4 +1,22 @@
 <script lang="ts">
+	/**
+	 * L'éditeur des articles, avec ses deux modes : Markdown (le texte brut) et
+	 * Visuel (la mise en page telle qu'elle sera publiée).
+	 *
+	 * Les deux modes travaillent sur le même contenu, le Markdown de `body` :
+	 * le mode visuel le découpe en blocs (`article-editor.ts`), laisse modifier
+	 * un paragraphe sur place, déplacer une image ou une bulle, régler sa
+	 * largeur et son alignement, puis recolle le tout. Turndown ne reconvertit
+	 * que le paragraphe qu'on vient de modifier ; le reste du texte n'est pas
+	 * touché.
+	 *
+	 * Sans JavaScript, ce composant n'apparaît pas : il reste le champ de
+	 * texte ordinaire du formulaire. Les noms de ce fichier sont en anglais,
+	 * contrairement au reste du projet - il a été écrit ainsi et n'a pas été
+	 * retraduit, pour ne pas risquer de casser un éditeur long à vérifier.
+	 * **Le code qu'on y ajoute s'écrit en français.**
+	 */
+
 	import TurndownService from 'turndown';
 	import { renderMarkdown } from '../markdown.ts';
 	import { groupArticleFlow, articleFlowClass } from '../article-flow.ts';
@@ -327,7 +345,7 @@
 					></div>
 				</div>
 			{:else}
-				<!-- HTML generated only from validated image settings. -->
+				<!-- Ce HTML n'est produit qu'à partir de réglages validés (`article-layout.ts`). -->
 				<button
 					type="button"
 					class="article-editor-image"
@@ -366,7 +384,7 @@
 			ondragleave={() => (dropTarget = null)}
 			ondrop={(event) => drop(event, block)}
 		>
-			<!-- HTML uses the same safe renderer as the published article. -->
+			<!-- Même moteur de rendu, aussi fermé, que la page publique de l'article. -->
 			{@html block.html}
 		</div>
 	{/if}

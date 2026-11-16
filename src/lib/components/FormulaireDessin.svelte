@@ -1,4 +1,10 @@
 <script lang="ts">
+	/**
+	 * Le formulaire d'un dessin dans l'administration, pour l'ajouter ou le
+	 * modifier. Les champs portent les mêmes noms que ceux du formulaire public
+	 * (`/dessins/proposer`) : c'est `lireChampsDessin` qui les valide tous.
+	 */
+
 	import { enhance } from '$app/forms';
 	type ValeursDessin = {
 		id: number;

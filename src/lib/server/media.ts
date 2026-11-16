@@ -118,7 +118,7 @@ export function deleteMedia(id: number) {
 	try {
 		unlinkSync(join(UPLOADS_DIR, '.thumbnails', `${media.filename}.webp`));
 	} catch {
-		// No thumbnail has been generated yet.
+		// Aucune vignette n'avait encore été fabriquée (voir `vignettes.ts`).
 	}
 	try {
 		unlinkSync(join(UPLOADS_DIR, media.filename));

@@ -1,3 +1,14 @@
+/**
+ * Le passage entre le texte Markdown d'un article et les blocs de l'éditeur
+ * visuel (`ArticleEditor.svelte`).
+ *
+ * L'article reste enregistré en Markdown, dans le champ `body` : l'éditeur
+ * visuel n'a pas son propre format. À l'ouverture, le texte est découpé en
+ * blocs (paragraphes, titres, images, bulles) ; à l'enregistrement, les blocs
+ * sont recollés. Un bloc que l'éditeur ne sait pas modifier (un tableau, du
+ * code) est gardé tel quel, à sa place : rien n'est perdu en passant d'un
+ * mode à l'autre.
+ */
 import { markdownBlocks } from './markdown.ts';
 import { defaultScene, parseScene, scenePattern } from './speech-bubbles.ts';
 import { parseArticleElement, serializeArticleElement, safeImageUrl, type ArticleElement } from './article-layout.ts';
@@ -53,7 +64,8 @@ export function parseEditorDocument(source: string): EditorBlock[] {
 			];
 		}
 		const image = /^!\[([^\]]*)\]\(([^\s)]+)(?:\s+"[^"]*")?\)\s*$/.exec(block.source);
-		// Keep the original Amfis characters and their existing dialogue intact.
+		// Les personnages des Amfis et leurs répliques d'origine ne sont pas
+		// convertis : ils gardent leur rendu particulier (voir `markdown.ts`).
 		if (
 			image &&
 			!/^(R|Raïssa)\s*\|/i.test(image[1]) &&

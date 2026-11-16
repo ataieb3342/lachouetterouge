@@ -1,4 +1,15 @@
 <script lang="ts">
+	/**
+	 * L'éditeur des comptes rendus de réunion : un champ de texte Markdown,
+	 * quelques boutons de mise en forme, et un aperçu. L'aperçu utilise le même
+	 * rendu que la page de lecture (`markdown-compte-rendu.ts`). Sur un texte
+	 * vide, `template` propose un plan type (participants, points discutés,
+	 * décisions, actions à mener).
+	 *
+	 * Ne pas y importer le moteur des articles publics : un compte rendu est
+	 * interne, sans images ni bulles.
+	 */
+
 	import { tick } from 'svelte';
 	import { rendreCompteRendu } from '../markdown-compte-rendu';
 	let {

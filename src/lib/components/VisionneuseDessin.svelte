@@ -1,4 +1,12 @@
 <script lang="ts">
+	/**
+	 * L'affichage en grand d'un dessin : un clic l'ouvre en plein écran, où
+	 * l'on peut zoomer, passer au dessin précédent ou suivant, et fermer avec
+	 * Échap. C'est un `<dialog>` du navigateur, sans bibliothèque. Sans
+	 * JavaScript, l'image reste affichée dans la page, avec son lien de
+	 * téléchargement.
+	 */
+
 	import { onMount } from 'svelte';
 	let {
 		image,

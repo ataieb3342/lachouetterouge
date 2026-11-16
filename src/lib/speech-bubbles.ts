@@ -1,3 +1,13 @@
+/**
+ * Les « scènes à bulles » de la première version de l'éditeur : une image, et
+ * des bulles de dialogue posées dessus à des positions fixes.
+ *
+ * Ce format n'est plus proposé - les bulles sont désormais des éléments
+ * indépendants (`article-layout.ts`) -, mais les articles déjà écrits ainsi
+ * doivent continuer de s'afficher. Tout ce qui vient du texte de l'article est
+ * validé (`parseScene`) puis échappé (`sceneMarkup`) : c'est ce qui permet de
+ * produire ce HTML sans rouvrir la porte que `html: false` ferme.
+ */
 export type Bubble = { text: string; x: number; y: number; width: number; color: 'ochre' | 'blue' };
 export type BubbleScene = {
 	image: string;
@@ -14,7 +24,8 @@ export function parseScene(value: string): BubbleScene | null {
 	try {
 		const data = JSON.parse(value);
 		if (!data || typeof data.image !== 'string' || !Array.isArray(data.bubbles)) return null;
-		// Only local images or HTTPS; reject protocol-relative URLs and control characters.
+		// Une image du site ou en HTTPS, rien d'autre : pas d'adresse commençant
+		// par `//`, pas de caractère de contrôle.
 		if (!/^(\/(?!\/)|https:\/\/)/i.test(data.image) || /[\s\\\x00-\x1f]/.test(data.image)) return null;
 		return {
 			image: data.image,

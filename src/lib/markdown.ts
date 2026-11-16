@@ -278,7 +278,11 @@ export function renderMarkdown(source: string, documentSource?: string): string 
 	}).join('');
 }
 
-/** Source-preserving top-level blocks, including link-reference definitions. */
+/**
+ * Les blocs de premier niveau d'un texte, chacun avec sa source exacte : c'est
+ * ce que l'éditeur visuel affiche et recolle (`article-editor.ts`). Les
+ * définitions de liens placées entre deux blocs sont conservées.
+ */
 export function markdownBlocks(source: string): { source: string; html: string; type: string }[] {
 	const env = {};
 	const tokens = md.parse(source, env);

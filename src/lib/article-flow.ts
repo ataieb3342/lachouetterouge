@@ -1,9 +1,22 @@
 import type { ArticleElement } from './article-layout.ts';
+/**
+ * Garde une image ou une bulle à côté du texte qu'elle accompagne.
+ *
+ * Dans un article, une illustration flottante peut se retrouver séparée de
+ * son paragraphe quand l'écran rétrécit. L'option `keepWithNext` d'un élément
+ * (`article-layout.ts`) demande de le garder groupé avec ce qui suit. Ce
+ * regroupement sert à la fois à l'éditeur et au rendu public, pour que
+ * l'aperçu et la page en ligne soient identiques.
+ */
 
 type FlowBlock = { element?: ArticleElement; type?: string; editable?: boolean; source?: string };
 export type ArticleFlow<T> = { items: T[]; grouped: boolean };
 
-/** An explicit attachment ends at a text block, never across a heading or table. */
+/**
+ * Rassemble chaque élément marqué « garder avec la suite » et le bloc qui le
+ * suit. Le rattachement s'arrête au premier bloc de texte, et ne traverse
+ * jamais un titre, un tableau ou du code.
+ */
 export function groupArticleFlow<T extends FlowBlock>(blocks: T[]): ArticleFlow<T>[] {
 	const result: ArticleFlow<T>[] = [];
 	for (let index = 0; index < blocks.length; index++) {

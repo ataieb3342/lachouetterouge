@@ -1,3 +1,19 @@
+/**
+ * Les images et les bulles qu'on place dans un article : à gauche, à droite
+ * ou au centre, avec une largeur choisie.
+ *
+ * Dans le texte Markdown, chaque élément est un bloc de code nommé
+ * `element-article` qui contient sa description en JSON. **Rien de ce JSON
+ * n'est recopié tel quel dans la page** : `parseArticleElement` ne garde que
+ * des valeurs prises dans des listes fermées (type, alignement, couleur,
+ * forme), des nombres bornés, une adresse d'image vérifiée, et le texte est
+ * échappé au rendu. Un bloc invalide n'est pas interprété du tout. C'est ce
+ * qui permet de produire ce HTML sans rouvrir la porte que `html: false`
+ * ferme (règle de sécurité n° 1).
+ *
+ * Ajouter une option, c'est l'ajouter ici d'abord, avec sa liste de valeurs
+ * permises - jamais en laissant passer une valeur libre.
+ */
 export type ArticleElement = {
 	kind: 'image' | 'bubble';
 	align: 'left' | 'right' | 'center';
@@ -91,7 +107,10 @@ export function articleBubbleClass(element: ArticleElement): string {
 	return `article-bubble article-bubble-${element.color}${element.bubbleStyle ? ` article-bubble-shaped article-bubble-${element.bubbleStyle}` : ''}${element.bubbleSize === 'small' ? ' article-bubble-small' : ''}`;
 }
 
-/** Text stays separate and editable; each speech contour is a single closed path. */
+/**
+ * Le contour dessiné d'une bulle. Le texte reste à part, sélectionnable et
+ * lisible par un lecteur d'écran ; chaque contour est un seul tracé fermé.
+ */
 export function articleBubbleDecoration(element: ArticleElement): string {
 	if (!element.bubbleStyle) return '';
 	const speech =
