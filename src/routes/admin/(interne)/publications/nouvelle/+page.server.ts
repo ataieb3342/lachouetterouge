@@ -1,5 +1,5 @@
-import { db } from '$lib/server/db';
-import { getReview, reviewAction, ReviewError } from '$lib/server/reviews';
+import { transaction } from '$lib/server/db';
+import { envoyerEnRelecture, ErreurRelecture } from '$lib/server/relecture';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { createPublication } from '$lib/server/content';
@@ -8,7 +8,7 @@ import { apercuPublication, ErreurFormulaire, lirePublication, valeursSaisies } 
 import { audit, listAdminChoices } from '$lib/server/auth';
 
 export const load: PageServerLoad = async ({ locals }) => ({
-	currentAdminId: locals.admin!.id,
+	adminCourantId: locals.admin!.id,
 	admins: listAdminChoices().map(({ id, name, profile_public }) => ({
 		id,
 		name,
@@ -16,31 +16,25 @@ export const load: PageServerLoad = async ({ locals }) => ({
 	}))
 });
 
-/** Crée la publication ; renvoie son identifiant, ou l'échec à afficher. */
-async function creer({ request, locals }: RequestEvent) {
+/**
+ * Crée la publication ; renvoie son identifiant, ou l'échec à afficher. Avec
+ * `envoyer`, l'article part aussitôt en relecture - dans la même transaction,
+ * pour qu'un refus ne laisse pas un brouillon que personne n'a voulu créer.
+ */
+async function creer({ request, locals }: RequestEvent, envoyer = false) {
 	const admin = locals.admin!;
 	const form = await request.formData();
 	try {
 		const saisie = await lirePublication(form, admin.id, null);
-		const soumettre = form.get('articleAction') === 'submit';
-		if (soumettre && (saisie.kind !== 'article' || (saisie.authorAdminId ?? admin.id) !== admin.id)) {
-			throw new ReviewError('Seul l’auteur peut soumettre son article à validation.');
-		}
-		const base = db();
-		base.exec('begin immediate');
-		let id: number;
-		try {
-			id = createPublication(saisie, admin.id);
-			if (soumettre) reviewAction(id, admin.id, 'author', getReview(id).revision, '', 0, 0, false);
-			base.exec('commit');
-		} catch (err) {
-			base.exec('rollback');
-			throw err;
-		}
+		const id = transaction(() => {
+			const nouvelle = createPublication(saisie, admin.id);
+			if (envoyer) envoyerEnRelecture(nouvelle, admin.id);
+			return nouvelle;
+		});
 		audit(admin, 'publication.creation', saisie.title, saisie.status, locals.ipHash);
 		return id;
 	} catch (err) {
-		if (err instanceof ErreurFormulaire || err instanceof ReviewError) {
+		if (err instanceof ErreurFormulaire || err instanceof ErreurRelecture) {
 			return fail(400, { ...valeursSaisies(form), erreur: err.message });
 		}
 		throw err;
@@ -51,8 +45,15 @@ export const actions: Actions = {
 	creer: async (event) => {
 		const id = await creer(event);
 		if (typeof id !== 'number') return id;
-		if (getReview(id).author_approved_by) redirect(303, '/admin/verifications?onglet=mes-articles&soumis=1');
 		redirect(303, `/admin/publications/${id}?enregistre=1`);
+	},
+
+	// « Enregistrer et envoyer en relecture » : le premier pas du parcours des
+	// articles, fait dès la création.
+	creerEtEnvoyer: async (event) => {
+		const id = await creer(event, true);
+		if (typeof id !== 'number') return id;
+		redirect(303, '/admin/relecture?envoye=1');
 	},
 
 	// « Enregistrer et mettre à la une » : la publication est créée d'abord,

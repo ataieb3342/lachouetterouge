@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ArticleReviewPanel from '$lib/components/ArticleReviewPanel.svelte';
+	import PanneauRelecture from '$lib/components/PanneauRelecture.svelte';
 	import { enhance } from '$app/forms';
 	import FormulairePublication from '$lib/components/FormulairePublication.svelte';
 	import { formatDateTime, lienPublication } from '$lib/format';
@@ -9,7 +9,35 @@
 
 	// Après une erreur, on réaffiche ce qui venait d'être saisi ; sinon le
 	// contenu enregistré en base.
-	const valeurs = $derived(form && ('body' in form) ? { ...form } : { body: data.corps });
+	const valeurs = $derived(form && 'body' in form ? { ...form } : { body: data.corps });
+
+	const FORMULAIRE = 'formulaire-publication';
+
+	// Le bouton qui fait avancer l'article d'une étape. Il n'y en a jamais
+	// qu'un : c'est ce qui dit à chacun ce qu'on attend de lui. Il est montré
+	// deux fois - en tête de fiche et au pied du formulaire -, avec le même
+	// libellé.
+	const actionPrincipale = $derived(
+		data.droits.peutEnvoyer
+			? {
+					libelle: 'Enregistrer et envoyer en relecture',
+					action: '?/envoyer',
+					aide: 'Une autre personne de l’équipe relira le texte avant sa mise en ligne.'
+				}
+			: data.droits.peutValider
+				? {
+						libelle: 'Enregistrer et valider',
+						action: '?/valider',
+						aide: 'Enregistre vos corrections et autorise l’auteur à mettre l’article en ligne.'
+					}
+				: data.droits.peutPublier
+					? {
+							libelle: 'Enregistrer et mettre en ligne',
+							action: '?/publier',
+							aide: 'L’article sera visible de tous sur le site.'
+						}
+					: null
+	);
 </script>
 
 <svelte:head><title>{data.publication.title} - Administration</title></svelte:head>
@@ -17,8 +45,7 @@
 <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
 	<div>
 		<a class="text-sm font-semibold text-brand hover:underline" href="/admin/publications">← Publications</a>
-		<h1 class="mt-1 text-2xl font-extrabold text-ink">{!data.permissions.canEdit ? 'Consulter' : data.publication.kind === 'article' && data.publication.status === 'draft' && !data.review.author_approved_by ? 'Rédaction' : 'Modifier'}</h1>
-        {#if data.publication.kind === 'article'}<p class="mt-2 text-sm text-ink-soft">{data.publication.status === 'published' ? 'Rédaction → Vérification → Publication effectuée' : data.review.author_approved_by ? 'Rédaction terminée → Vérification → Publication' : 'Rédaction → Soumettre à validation → Vérification → Publication'}</p>{/if}
+		<h1 class="mt-1 text-2xl font-extrabold text-ink">{data.droits.peutModifier ? 'Modifier' : 'Consulter'}</h1>
 		<p class="mt-1 text-xs text-ink-faint">
 			Adresse : <code class="rounded bg-surface-alt px-1"
 				>{lienPublication(data.publication.kind, data.publication.slug)}</code
@@ -43,8 +70,7 @@
 		</p>
 	{:else if data.une === 'brouillon'}
 		<p class="alerte mb-6">
-			Enregistré, mais pas mis à la une : c'est un brouillon. Passez l'état à « Publié », puis
-			cliquez à nouveau sur « Enregistrer et mettre à la une ».
+			Enregistré, mais pas mis à la une : cette publication n'est pas encore en ligne.
 		</p>
 	{:else if data.une === 'pleine'}
 		<p class="alerte mb-6">
@@ -57,14 +83,20 @@
 {/if}
 
 
-{#if data.publication.kind === 'article'}
-<ArticleReviewPanel id={data.publication.id} review={data.review} permissions={data.permissions} admins={data.admins} actorId={data.adminCourant.id} ownerId={data.reviewAuthor} history={data.history} status={data.publication.status} error={form?.erreur ?? ''}/>
+{#if data.droits.etape}
+	<PanneauRelecture
+		droits={data.droits}
+		historique={data.historique}
+		formulaire={data.droits.peutModifier ? FORMULAIRE : null}
+		{actionPrincipale}
+		erreur={data.droits.peutModifier ? '' : (form?.erreur ?? '')}
+	/>
 {/if}
 
-{#if data.permissions.canEdit}
+{#if data.droits.peutModifier}
 
 <form
-    id="publication-edit"
+	id={FORMULAIRE}
 	method="POST"
 	action="?/enregistrer"
 	enctype="multipart/form-data"
@@ -82,14 +114,12 @@
 		};
 	}}
 >
-	<input type="hidden" name="reviewRevision" value={data.review.revision}/>
-    <div id="texte-article"></div>
+	<!-- La version du texte qu'on a sous les yeux : le serveur refuse
+	     d'enregistrer par-dessus une version que quelqu'un d'autre a modifiée. -->
+	<input type="hidden" name="revision" value={data.droits.revision} />
 	<FormulairePublication
 		publication={data.publication}
-        articleValidated={data.articleValidated}
-        canSubmitArticle={data.permissions.canSubmit}
-        canReviewArticle={data.permissions.canReview}
-        articleWorkflow={data.publication.kind==='article'}
+		{actionPrincipale}
 		admins={data.admins}
 		positionUne={data.positionUne}
 		{valeurs}
@@ -112,14 +142,16 @@
 
 
 {:else}
-<article class="carte" id="texte-article">
- <h2 class="text-2xl font-bold">{data.publication.title}</h2>
- {#if data.publication.summary}<p class="mt-3 text-ink-soft">{data.publication.summary}</p>{/if}
- <div class="contenu mt-6">{@html data.previewHtml}</div>
-</article>
+	<!-- En rédaction, le texte n'appartient qu'à son auteur : les autres le
+	     lisent. Le HTML vient du même moteur que les pages publiques. -->
+	<article class="carte">
+		<h2 class="text-2xl font-bold text-ink">{data.publication.title}</h2>
+		{#if data.publication.summary}<p class="mt-3 text-ink-soft">{data.publication.summary}</p>{/if}
+		<div class="contenu mt-6">{@html data.lecture}</div>
+	</article>
 {/if}
 
-{#if data.permissions.canEdit}
+{#if data.droits.peutModifier}
 
 <section class="mt-10 rounded-lg border border-brand p-5">
 	<h2 class="font-bold text-brand">Supprimer cette publication</h2>

@@ -9,7 +9,7 @@
 		{ href: '/admin', label: 'Tableau de bord', exact: true },
 		{ href: '/admin/publications', label: 'Publications' },
 		{ href: '/admin/comptes-rendus', label: 'Comptes rendus de réunions' },
-		{ href: '/admin/verifications', label: 'Vérifications', badge: data.verificationsEnAttente },
+		{ href: '/admin/relecture', label: 'Relecture', badge: data.articlesARelire },
 		{ href: '/admin/a-la-une', label: 'À la une' },
 		{ href: '/admin/commentaires', label: 'Commentaires', badge: data.commentairesEnAttente },
 		{ href: '/admin/sources', label: 'Sources des apéros', badge: data.sourcesEnAttente },

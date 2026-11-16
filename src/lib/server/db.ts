@@ -513,8 +513,15 @@ const MIGRATIONS: string[] = [
 	 where kind = 'actu' and (event_category = 'apero' or lower(title) like 'apéro thématique%');
 	update publications set event_category = 'reunion'
 	 where kind = 'actu' and event_category = 'autre';
+	`,
+	// 022 - la relecture des articles (voir `relecture.ts`)
+	//
+	// Une ligne de suivi par article, créée par un déclencheur, et un
+	// historique de ce que chacun a fait. `author_approved_by` veut dire
+	// « envoyé en relecture par », `reviewer_id` « validé par ». Le déclencheur
+	// `article_review_reset` de cette première version repassait l'article en
+	// brouillon à la moindre modification : il est remplacé plus bas (029).
 	`
-, `
  create table article_reviews (
  publication_id integer primary key references publications(id) on delete cascade,
  revision integer not null default 1,
@@ -551,8 +558,9 @@ const MIGRATIONS: string[] = [
  where publication_id=new.id;
  update publications set status='draft',pinned=0,pinned_order=null,pinned_at=null where id=new.id and new.kind='article';
  end;
- `
-, `
+ `,
+	// 023 - une correction du texte ne retire plus l'envoi en relecture
+	`
  drop trigger article_review_reset;
  create trigger article_review_reset after update of title,summary,body,cover_media_id,byline_admin_id,author_name,layout_style,kind on publications
  when old.title is not new.title or old.summary is not new.summary or old.body is not new.body
@@ -566,8 +574,9 @@ const MIGRATIONS: string[] = [
  where publication_id=new.id;
  update publications set status='draft',pinned=0,pinned_order=null,pinned_at=null where id=new.id and new.kind='article';
  end;
- `
-, `
+ `,
+	// 024 - identique à la 023, rejouée par erreur ; sans effet
+	`
  drop trigger article_review_reset;
  create trigger article_review_reset after update of title,summary,body,cover_media_id,byline_admin_id,author_name,layout_style,kind on publications
  when old.title is not new.title or old.summary is not new.summary or old.body is not new.body
@@ -581,15 +590,16 @@ const MIGRATIONS: string[] = [
  where publication_id=new.id;
  update publications set status='draft',pinned=0,pinned_order=null,pinned_at=null where id=new.id and new.kind='article';
  end;
- `
-
-, `
+ `,
+	// 025 - les demandes d'avis sur un brouillon (abandonnées depuis : voir 030)
+	`
  alter table article_reviews add column advice_requested_id integer references admins(id);
  alter table article_reviews add column advice_requested_by integer references admins(id);
  alter table article_reviews add column advice_note text not null default '';
  alter table article_reviews add column advice_requested_at text;
  `,
- `
+	// 026 - la galerie de dessins (voir `dessins.ts`)
+	`
  create table drawings (
   id integer primary key autoincrement,
   title text not null,
@@ -604,7 +614,8 @@ const MIGRATIONS: string[] = [
  );
  create index drawings_public on drawings(published, created_at desc);
  `,
- `
+	// 027 - les dessins proposés par les visiteurs, en attente (voir `propositions-dessins.ts`)
+	`
  create table drawing_submissions (
   id integer primary key autoincrement,
   title text not null, author text not null, caption text not null default '',
@@ -612,7 +623,8 @@ const MIGRATIONS: string[] = [
   mime text not null, bytes integer not null, created_at text not null
  );
  `,
- `
+	// 028 - les comptes rendus de réunion, internes (voir `comptes-rendus.ts`)
+	`
  create table meeting_reports (
   id integer primary key autoincrement, title text not null,
   meeting_date text not null, body text not null,
@@ -622,7 +634,10 @@ const MIGRATIONS: string[] = [
  );
  create index meeting_reports_date on meeting_reports(meeting_date desc);
  `,
- `
+	// 029 - une correction ne retire plus rien : ni l'envoi, ni la validation,
+	// ni la mise en ligne. Seul un changement d'auteur ou de type remet le
+	// suivi à zéro. Le numéro de version, lui, augmente à chaque modification.
+	`
  drop trigger article_review_reset;
  create trigger article_review_reset after update of title,summary,body,cover_media_id,byline_admin_id,author_name,layout_style,kind on publications
  when old.title is not new.title or old.summary is not new.summary or old.body is not new.body
@@ -636,7 +651,21 @@ const MIGRATIONS: string[] = [
  reviewed_at=case when old.byline_admin_id is not new.byline_admin_id or old.kind is not new.kind then null else reviewed_at end
  where publication_id=new.id;
  end;
- `
+ `,
+	// 030 - le parcours de relecture tient en quatre étapes
+	//
+	// Rédaction, relecture, validé, en ligne (voir `relecture.ts`). Les
+	// demandes d'un troisième avis, les demandes d'avis sur un brouillon et les
+	// priorités sont abandonnées : neuf actions possibles sur le même écran, et
+	// personne ne savait laquelle était la sienne. Les colonnes restent - les
+	// retirer demanderait de reconstruire la table pour rien -, mais elles sont
+	// vidées, pour qu'aucune demande en cours ne reste accrochée à un article.
+	`
+	update article_reviews set
+	 requested_by = null, requested_id = null, request_note = '',
+	 advice_requested_id = null, advice_requested_by = null, advice_note = '', advice_requested_at = null,
+	 priority = 0;
+	`
 ];
 
 function migrer(base: DatabaseSync) {
@@ -695,6 +724,28 @@ function migrer(base: DatabaseSync) {
 }
 
 /** Horodatage ISO en UTC : le seul format de date stocké en base. */
+/**
+ * Exécute `action` dans une transaction : tout est enregistré, ou rien.
+ *
+ * SQLite n'emboîte pas les transactions. Quand une transaction est déjà
+ * ouverte - une action de formulaire qui enregistre un texte *puis* le fait
+ * avancer d'une étape -, `action` s'y joint simplement : c'est la transaction
+ * extérieure qui décide de tout garder ou de tout annuler.
+ */
+export function transaction<T>(action: () => T): T {
+	const base = db();
+	if (base.isTransaction) return action();
+	base.exec('begin immediate');
+	try {
+		const resultat = action();
+		base.exec('commit');
+		return resultat;
+	} catch (erreur) {
+		base.exec('rollback');
+		throw erreur;
+	}
+}
+
 export function now(): string {
 	return new Date().toISOString();
 }
