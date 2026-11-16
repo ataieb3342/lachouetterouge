@@ -17,9 +17,12 @@ systématiquement la robustesse et la lisibilité sur la sophistication.
 npm run dev      # développement sur http://localhost:5173
 npm run check    # vérification TypeScript + Svelte - À LANCER APRÈS CHAQUE MODIFICATION
 npm run build    # compilation de production
+npm test         # tous les tests du site et les garde-fous (voir « Les garde-fous »)
+npm run verifier # check + test + build : À LANCER AVANT DE PROPOSER UN CHANGEMENT
 
 node --test src/lib/jeux/mythology-rts/tests/*.test.js  # tests du jeu de stratégie
-node --test src/lib/server/tests/*.test.js              # tests du nettoyage des images et des PDF
+node tests/integration/drawings-http.mjs                # parcours complets, après `npm run build`
+npm run garde-fous:migrations                           # après avoir ajouté une migration
 
 npm run outils:pages   # regénère la tête et le pied des pages d'outils (voir « La boîte à outils »)
 ```
@@ -36,8 +39,8 @@ manuelle dans le navigateur reste nécessaire pour les parcours éditoriaux.
 ## Architecture
 
 SvelteKit 2 (Svelte 5, runes) + SQLite + Tailwind 4. Un seul processus Node,
-aucun service externe nécessaire au fonctionnement du serveur, aucune dépendance
-native.
+aucun service externe nécessaire au fonctionnement du serveur. Une seule
+dépendance native, `sharp`, pour les vignettes des dessins.
 
 | Chemin | Rôle |
 | --- | --- |
@@ -50,6 +53,12 @@ native.
 | `src/lib/server/media.ts` | Envoi et diffusion des images |
 | `src/lib/server/metadonnees-images.ts` | Retire des images envoyées la position GPS, la date, l'appareil (règle n° 10) |
 | `src/lib/server/metadonnees-pdf.ts` | Retire des PDF proposés le nom de l'auteur, le logiciel, les dates (règle n° 11) |
+| `src/lib/server/relecture.ts` | Le parcours de relecture des articles, en quatre étapes (voir « La relecture des articles ») |
+| `src/lib/server/dessins.ts`, `propositions-dessins.ts`, `vignettes.ts` | La galerie de dessins, les dessins proposés par les visiteurs, leurs vignettes |
+| `src/lib/server/comptes-rendus.ts` | Les comptes rendus de réunion, internes |
+| `src/lib/structure.ts` | **Verrouillé** : ce que contiennent l'en-tête, le menu Ressources et le pied de page |
+| `garde-fous/` | Les tests qui échouent quand une règle du projet est cassée |
+| `CHARTE.md` | La charte graphique et la structure du site, en court |
 | `src/lib/server/captcha.ts` | Anti-spam par preuve de travail |
 | `src/lib/server/limiteur.ts` | Écarte les adresses qui envoient trop de requêtes (voir « Les vagues de requêtes ») |
 | `src/lib/server/frequentation.ts` | Compte les visites et le trafic, sans cookie ni adresse IP (voir « La fréquentation ») |
@@ -71,15 +80,24 @@ native.
 | `src/routes/admin/(interne)/` | Pages d'administration (session obligatoire) |
 
 Les dépendances runtime sont `markdown-it`, `qrcode`, `turndown`, `sharp`
-(vignettes des dessins), `mammoth` et `yauzl` (import Word privé).
-**Ne pas en ajouter sans nécessité** : chaque dépendance est une porte d'entrée
-possible et une mise à jour à suivre.
+(vignettes des dessins), `mammoth` et `yauzl` (import Word privé). Elles
+étaient deux ; quatre sont arrivées en novembre 2026 sans que personne l'ait
+décidé. **Ne pas en ajouter sans nécessité** : chaque dépendance est une porte
+d'entrée possible et une mise à jour à suivre. La liste est désormais fermée
+par `garde-fous/dependances.test.ts`, qui dit comment en faire approuver une.
 
 ## Conventions
 
-- **Tout est en français** : noms de routes, de variables, de champs de
-  formulaire, commentaires, messages d'erreur. Les personnes qui reprendront ce
-  code sont des militants, pas des développeurs professionnels.
+- **Tout est en français** : noms de routes, de fichiers, de fonctions, de
+  variables, d'actions de formulaire, commentaires, messages d'erreur. Les
+  personnes qui reprendront ce code sont des militants, pas des développeurs
+  professionnels. Deux restes en anglais, qu'on ne « corrige » pas : les tables
+  et colonnes de la base (une migration ne se réécrit pas) et l'intérieur de
+  l'éditeur visuel (`ArticleEditor.svelte`, `article-*.ts`), trop long à
+  vérifier pour être retraduit. Le code qu'on y ajoute s'écrit en français.
+- **Chaque fichier commence par dire ce qu'il fait et pourquoi**, et chaque
+  contrôle dit quelle erreur il évite. Indentation par tabulations, une
+  instruction par ligne.
 - Les modules de `src/lib/server/` s'importent entre eux **avec l'extension
   `.ts`** (`from './db.ts'`). C'est volontaire : ils tournent ainsi sous Node
   seul, sans Vite, ce qui permet d'écrire un script de maintenance qui réutilise
@@ -172,9 +190,19 @@ Ajouter une entrée **à la fin** du tableau `MIGRATIONS` dans `db.ts`. Ne jamai
 modifier une migration déjà partie en production : elles ne s'exécutent qu'une
 fois, le numéro appliqué étant conservé dans `pragma user_version`.
 
+Puis `npm run garde-fous:migrations`, qui enregistre l'empreinte de la nouvelle
+migration dans `garde-fous/migrations.json` : c'est ce fichier qui permet aux
+vérifications de refuser toute retouche d'une migration déjà enregistrée.
+
+Plusieurs écritures qui doivent réussir ou échouer ensemble passent par
+`transaction()` de `db.ts`, qui se joint à une transaction déjà ouverte au lieu
+d'en ouvrir une seconde (SQLite ne les emboîte pas).
+
 ## Direction artistique
 
-Moderne et sobre, pas « affiche de campagne ». Concrètement :
+Moderne et sobre, pas « affiche de campagne ». **`CHARTE.md` en est la version
+courte, à relire avant d'ajouter une page** ; ce qui suit en donne les raisons.
+Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
 
 - Les surfaces fortes (`.fond-degrade`) sont un violet profond éclairé par deux
   lueurs radiales, l'une rouge, l'autre violette - pas le dégradé diagonal du
@@ -792,8 +820,16 @@ texte tapé restent en place.
 
 ## L'en-tête
 
+**Ce que contiennent l'en-tête, le menu Ressources et le pied de page est
+décidé dans `src/lib/structure.ts`, et ce fichier est verrouillé** :
+`+layout.svelte` ne fait que l'afficher, et `garde-fous/structure.test.ts`
+échoue dès qu'on y ajoute une entrée. Ce n'est pas de la raideur : trois fois
+une rubrique de plus est arrivée dans l'en-tête (la revue de presse, le menu
+« Actualités », les dessins), et trois fois il a fallu tout re-ranger. Une
+nouvelle page va dans le menu Ressources ou dans le pied de page.
+
 L'en-tête porte les deux portes du site, **Agenda** et **Articles**, en liens
-simples (`liensPrincipaux` dans `src/routes/+layout.svelte`), puis le menu
+simples (`LIENS_PRINCIPAUX`), puis le menu
 **Ressources** (bibliothèque, outils, jeux, dessins, médias), « Qui sommes-nous ? »
 et le bouton « Nous rejoindre ». Le logo ramène à l'accueil. Le menu mobile
 reprend la même chose. « Agenda » s'allume aussi sur les fiches d'événements
@@ -812,7 +848,7 @@ dans l'en-tête de bureau le fait déborder sur les écrans moyens : préférer 
 pied de page.
 
 Le pied de page range ses liens en trois colonnes titrées - Le groupe,
-Ressources, Le site (`groupesPied`) - à droite de la présentation du groupe sur
+Ressources, Le site (`PIED_DE_PAGE`) - à droite de la présentation du groupe sur
 grand écran, en dessous ailleurs. Le choix d'affichage est dans la barre du
 bas, avec le copyright. En une seule liste de onze liens, la colonne faisait
 plus de 400 pixels de haut et laissait la moitié gauche vide.
@@ -1215,66 +1251,155 @@ distinctes aux yeux des daltoniens, dans les deux thèmes : les changer demande
 de refaire cette vérification. Chaque graphique se parcourt au clavier et a son
 tableau de chiffres dépliable.
 
+## La relecture des articles
+
+Un article n'est mis en ligne qu'après avoir été lu par une deuxième personne.
+Toutes les règles sont dans `src/lib/server/relecture.ts` ; l'écran et les
+actions interrogent la même fonction, `droitsRelecture`.
+
+Quatre étapes, toujours dans cet ordre, et **un seul bouton à chaque étape** :
+
+| Étape | Qui agit | Bouton |
+| --- | --- | --- |
+| Rédaction | l'auteur | « Enregistrer et envoyer en relecture » |
+| Relecture | un autre compte | « Enregistrer et valider », ou « Demander des corrections » |
+| Validé | l'auteur | « Enregistrer et mettre en ligne » |
+| En ligne | toute l'équipe corrige | « Retirer du site… » |
+
+- La première version (novembre 2026) proposait neuf actions sur le même
+  écran - troisième avis, demande d'avis sur un brouillon, priorité, nouvelle
+  relecture, commentaire… - réparties sur deux pages, « Rédaction » et
+  « Vérifications ». Personne ne savait laquelle était la sienne. Tout tient
+  maintenant dans **Administration → Relecture** (`admin/(interne)/relecture`) :
+  ce qui m'attend, puis mes articles en cours. Les anciennes adresses y
+  redirigent.
+- **Enregistrer un article ne change jamais son état.** Le formulaire n'a pas
+  de menu « État » pour un article : seul le parcours le met en ligne, et
+  « Retirer du site » l'en retire (il redevient un brouillon, à relire de
+  nouveau). `createPublication` et `updatePublication` ignorent l'état envoyé
+  pour un article.
+- **Chaque bouton du parcours enregistre d'abord le texte**, dans la même
+  transaction : personne ne perd ce qu'il vient d'écrire, et un refus
+  n'enregistre rien à moitié. C'est pour cela que les boutons du panneau
+  (`PanneauRelecture.svelte`) appartiennent au formulaire de la publication.
+- En rédaction, le texte n'appartient qu'à son auteur ; les autres le lisent.
+  Dès qu'il est envoyé, la personne qui relit peut corriger elle-même une
+  coquille. **Corriger un texte validé ne retire pas la validation** : la
+  première version annulait tout à la moindre virgule, et plus personne ne
+  corrigeait rien. Changer l'auteur ou le type, si.
+- **Le propriétaire du site peut publier sans relecture** (« Mettre en ligne
+  sans relecture… ») : sans cette sortie de secours, un communiqué urgent
+  attend un deuxième compte, et l'article d'un auteur parti reste bloqué pour
+  toujours. C'est inscrit dans l'historique et au journal
+  (`publication.sans-relecture`).
+- Une validation ne vaut que pour la version qu'on a lue : la fiche envoie le
+  numéro de version (`revision`), et le serveur refuse d'enregistrer par-dessus
+  un texte que quelqu'un d'autre a modifié entre-temps.
+- Les rendez-vous ne passent pas par ce parcours : ils se publient directement.
+
+La ligne de suivi d'un article et son numéro de version sont tenus par des
+déclencheurs SQLite (migrations 022 à 029), pas par `relecture.ts`. Les
+colonnes sont en anglais : `author_approved_by` veut dire « envoyé en relecture
+par », `reviewer_id` « validé par ». Tests : `tests/relecture.test.ts`.
+
 ## Comptes rendus internes
 
-Les routes `/admin/comptes-rendus` et leurs téléchargements exigent une
-session avec double authentification activée, vérifiée explicitement dans
-les chargements, actions et endpoints. Les fichiers originaux restent dans
-`data/uploads/.meeting-reports/`, sans entrée dans la médiathèque publique.
-Les données sont dans `meeting_reports` et passent par les fonctions de
-présentation avant d'être envoyées au navigateur.
+Administration → Comptes rendus de réunions. **Ils ne sont jamais publics** :
+pas de route hors de `/admin`, rien dans le flux RSS ni dans le plan du site.
+La session et la double authentification sont revérifiées dans chaque
+chargement, action et route - le `+layout.server.ts` de l'administration ne
+protège pas les actions de formulaire, qui s'exécutent avant lui.
 
-`meeting-reports.ts` vérifie les limites des archives DOCX avec Yauzl avant
-conversion par Mammoth, sans accès aux fichiers externes, puis convertit le
-texte en Markdown. Le rendu privé utilise `html: false` et ne charge pas les
-images. Les originaux sont servis en pièce jointe avec `private, no-store`.
-Les tâches Markdown sont rendues comme des cases natives. L'action `task`
-valide la ligne avec les tokens du parseur, sauvegarde `[ ]` ou `[x]` avec
-contrôle de version et journalise `meeting-report.task`. Aucun HTML fourni
-par le document n'est exécuté. Le module partagé `meeting-markdown.ts` garantit le même rendu privé dans
-la lecture et l’aperçu de `MeetingReportEditor.svelte`. Cet éditeur reprend
-les classes et boutons des publications, avec un modèle facultatif sur texte
-vide. Ne pas y importer le module serveur ni le moteur des articles publics.
-`POST /admin/comptes-rendus/import` convertit un fichier pour remplir l’éditeur,
-sans le sauvegarder. L’accès exige la session et la 2FA. À la création, le texte
-corrigé est enregistré avec les octets du fichier original, revalidé côté serveur.
-Ne jamais ajouter ces comptes rendus aux publications, au RSS ou au sitemap.
+- `src/lib/server/comptes-rendus.ts` : un fichier `.docx` ou `.md` est
+  converti en Markdown pour remplir l'éditeur. Un document Word est une
+  archive ZIP : `verifierDocx` en contrôle la taille réelle, décompressée,
+  avant de la confier à `mammoth` - sans cela, quelques kilo-octets peuvent en
+  contenir des gigaoctets. Ni macros, ni chiffrement, ni accès à un fichier
+  extérieur ; les images ne sont pas reprises.
+- Le fichier d'origine est gardé dans `data/uploads/.meeting-reports/`, sous un
+  nom au hasard, sans ligne dans la table `media` : la route `/media/…` ne
+  peut pas le servir. Il n'est proposé qu'en téléchargement, sans cache.
+- `src/lib/markdown-compte-rendu.ts` fait le rendu, partagé entre la page de
+  lecture et l'aperçu de `EditeurCompteRendu.svelte` : `html: false`, pas
+  d'images. Une ligne `- [ ] à faire` devient une case que l'équipe coche
+  depuis la page de lecture (action `cocher`), sans rouvrir l'éditeur.
+- Deux personnes qui modifient le même compte rendu : la seconde est refusée
+  (`modifierCompteRendu` compare la date de dernière modification lue).
+- Ne pas importer ici le moteur des articles publics, et ne jamais ajouter ces
+  comptes rendus aux publications, au RSS ou au sitemap.
+
+Parcours complet, après compilation : `node tests/integration/meeting-reports-http.mjs`.
 
 ## Dessins et caricatures
 
-La rubrique `/dessins` affiche les dessins publiés ; chaque fiche `/dessins/ID`
-conserve une adresse stable, son aperçu de partage et le téléchargement de
-l'image originale. Les images ne sont jamais recadrées. La galerie utilise des vignettes WebP de
-640 pixels maximum, créées à la demande par Sharp et conservées dans
-`data/uploads/.thumbnails/`. Le téléchargement conserve l'original. Le lecteur
-en grand propose un zoom, Échap pour fermer et les dessins précédent/suivant
-parmi les seules fiches publiées.
+`/dessins` affiche les dessins publiés ; chaque fiche `/dessins/ID` a une
+adresse stable, son aperçu de partage et le téléchargement de l'image. **La
+page est dans le menu Ressources**, pas dans les liens principaux (voir
+« L'en-tête »). La galerie montre des vignettes WebP de 640 pixels au plus,
+fabriquées à la première demande par `sharp` et gardées dans
+`data/uploads/.thumbnails/` (`vignettes.ts`) ; la taille est fixe et ne vient
+jamais de l'adresse. La visionneuse (`VisionneuseDessin.svelte`) propose un
+zoom, Échap pour fermer et les dessins précédent et suivant.
 
-Le formulaire public `/dessins/proposer` est accessible sans compte. Chaque
-proposition reste dans `drawing_submissions`, avec son fichier privé sous
-`data/uploads/.drawing-submissions/`, jusqu'à la décision de l'équipe.
-Le fichier n'entre dans `media` qu'après acceptation. Son aperçu privé exige
-une session administrateur avec la double authentification activée. Les envois
-sont limités par empreinte d'IP, avec preuve de travail et champ-piège ; les
-images sont vérifiées par leurs octets et décodées avant stockage.
-Un refus supprime la proposition et son fichier. Les décisions sont auditées.
+Le formulaire public `/dessins/proposer` ne demande pas de compte
+(`propositions-dessins.ts`) :
 
-Administration → Dessins permet l'ajout, la modification, la mise en brouillon
-et la suppression d'une fiche. Le nom de l'auteur, une description accessible,
-les conditions de partage et l'autorisation de publication sont obligatoires.
-Les brouillons restent hors de la galerie et du plan du site. Comme les autres
-images de la médiathèque, leurs fichiers ne sont pas confidentiels.
-Une image liée à un dessin ne peut pas être supprimée dans Administration →
-Images. Supprimer une fiche conserve son image dans la médiathèque.
+- **Rien n'est public avant d'être accepté.** Le fichier d'une proposition est
+  rangé dans `data/uploads/.drawing-submissions/`, sans ligne dans `media`, et
+  n'est montré qu'à une session d'administration avec la double
+  authentification. Un refus supprime la ligne et le fichier.
+- **L'image est nettoyée de ses métadonnées dès la réception, et une seconde
+  fois à l'acceptation** (règle n° 10). Un dessin photographié au téléphone
+  porte la position de la prise de vue, et la galerie propose de télécharger
+  le fichier. La première version copiait le fichier tel quel dans la
+  médiathèque, sans passer par `storeUpload`.
+- Même circuit que les sources des apéros : champ-piège, preuve de travail,
+  quotas par empreinte d'adresse, relecture systématique. La file est bornée
+  à cent propositions, pour qu'un robot ne remplisse pas le disque.
 
-Vérification du parcours sur une base temporaire, après compilation :
-`node tests/integration/drawings-http.mjs` et
-`node tests/integration/drawing-submissions-http.mjs`.
+Administration → Dessins trie les propositions et gère les fiches
+(`dessins.ts`). Le nom de l'auteur, une description pour les personnes qui ne
+voient pas l'image, les conditions de partage et l'autorisation de publication
+sont obligatoires. Une image liée à un dessin ne peut pas être supprimée dans
+Administration → Images ; supprimer une fiche garde son image dans la
+médiathèque. Chaque décision passe par `audit()`.
+
+Parcours complets, après compilation : `node tests/integration/drawings-http.mjs`
+et `node tests/integration/drawing-submissions-http.mjs`.
+
+## Les garde-fous
+
+Le dépôt a plusieurs contributeurs, dont certains travaillent avec un
+assistant de code sans lancer les vérifications. En novembre 2026, vingt-quatre
+commits sont partis en production sans relecture : quatre dépendances, un
+troisième lien dans l'en-tête, du code en anglais sans commentaires, et des
+images publiées avec leur position GPS. Rien de malveillant, mais rien non plus
+qui l'aurait arrêté. Trois barrières répondent à cela :
+
+1. **`main` est protégée sur GitHub.** On n'y pousse plus directement : une
+   branche, une demande de fusion, la réussite des vérifications
+   (`.github/workflows/verifications.yml`) et l'approbation du propriétaire du
+   dépôt (`.github/CODEOWNERS`). Le propriétaire garde le droit de passer
+   outre, pour une urgence.
+2. **`garde-fous/`** : des tests qui échouent quand une règle du projet est
+   cassée, même si le site « marche ». La structure du site
+   (`structure.test.ts`), la charte et la lisibilité du code
+   (`charte.test.ts`), la sécurité (`securite.test.ts`), les dépendances
+   (`dependances.test.ts`), les migrations (`migrations.test.ts`). Chaque
+   fichier commence par dire quoi faire quand il échoue. **On ne modifie pas
+   un garde-fou pour le faire passer** ; leurs listes d'exceptions sont des
+   décisions, relues comme telles.
+3. **`AGENTS.md`**, lu par les assistants de code (ChatGPT, Codex…) : le résumé
+   impératif de ce fichier-ci. Le tenir à jour quand une règle change.
+
+Les garde-fous ne voient que ce qu'une machine peut voir. Ils ne remplacent
+pas la relecture : ils la déchargent de ce qui se vérifie tout seul.
 
 ## Ajouter une page fixe
 
-Créer `src/routes/mon-adresse/+page.svelte`, puis ajouter le lien dans la
-navigation de `src/routes/+layout.svelte` et dans `PAGES_FIXES` de
+Créer `src/routes/mon-adresse/+page.svelte` sur le gabarit de `CHARTE.md`,
+puis ajouter le lien dans `src/lib/structure.ts` - menu Ressources ou pied de
+page, jamais les liens principaux - et dans `PAGES_FIXES` de
 `src/routes/sitemap.xml/+server.ts`. Ajouter aussi son titre dans `PAGES_FIXES`
 de `src/routes/admin/(interne)/frequentation/+page.server.ts`, pour que la page
 Fréquentation l'affiche par son nom plutôt que par son adresse.

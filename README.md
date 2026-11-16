@@ -47,8 +47,8 @@ scripts/           sauvegarde et restauration
 | Ajouter un rendez-vous | Choisir directement « Événement », « Formation » ou « Apéro thématique » |
 | Mettre une publication à la une | Sur une publication en ligne, choisir « Enregistrer et mettre à la une » ; gérer l’ordre et le retrait dans Administration → À la une |
 | Consulter les rendez-vous | Agenda : navigation par mois et filtres par catégorie |
-| Retrouver mes articles en cours | Administration → Vérifications → Mes articles |
-| Vérifier un article avant publication | Administration → Vérifications → À vérifier |
+| Retrouver mes articles en cours | Administration → Relecture → Mes articles en cours |
+| Relire l’article de quelqu’un d’autre | Administration → Relecture → À relire |
 | Relire les commentaires reçus | Administration → Commentaires |
 | Relire les sources proposées pour un apéro | Administration → Sources des apéros |
 | Consulter les ressources validées | Bibliothèque |
@@ -96,68 +96,40 @@ lien d’inscription. Pour un apéro, les informations propres à la fiche prime
 sur le lieu et l’horaire habituels définis dans les réglages ; ces derniers ne
 servent que de valeurs de repli.
 
-## Validation des articles
+## Relecture des articles
 
-Le circuit concerne uniquement le type « Article ». Les événements, formations
-et apéros conservent leur publication habituelle dans Publications.
-La création d’un article propose directement « Enregistrer le brouillon » et
-« Enregistrer et soumettre ». Le second bouton crée le texte et l’envoie à la
-relecture en une seule opération, puis ouvre « Mes articles » avec une
-confirmation. Il n’est plus nécessaire d’enregistrer puis de soumettre sur
-une deuxième page. Seul l’auteur responsable peut soumettre ; un brouillon
-créé pour un autre auteur attend sa soumission depuis son propre compte.
-Le serveur refuse une tentative de publication directe,
-y compris par le raccourci de mise à la une. Après validation, seule l’action
-« Publier » de l’auteur met l’article en ligne ; enregistrer ou mettre à la une
-ne permet pas de contourner cette étape.
+Un article n’est mis en ligne qu’après avoir été relu par une deuxième
+personne. Les événements, formations et apéros ne sont pas concernés : ils se
+publient directement.
 
-Administration → Vérifications comporte deux onglets. « Mes articles » rassemble
-les textes non publiés dont le compte connecté est l’auteur responsable, ainsi
-que ses articles en ligne pour lesquels une nouvelle relecture est demandée.
-« À vérifier » contient uniquement les articles des autres sur lesquels ce
-compte peut intervenir : une relecture après soumission, ou un avis demandé
-personnellement sur un brouillon. Le compteur du menu correspond à cet onglet.
-Un brouillon non soumis apparaît dans « À vérifier » uniquement chez la
-personne à laquelle l’auteur a demandé un avis.
+Un article passe par quatre étapes, affichées en tête de sa fiche, avec un seul
+bouton à chaque fois :
 
-L’auteur et le relecteur peuvent corriger le texte sans effacer les validations
-ni recommencer la soumission. Un article publié reste en ligne lorsqu’il est
-modifié ; sa date de publication et sa place à la une sont conservées.
-Le bouton « Publier » enregistre les dernières corrections et met l’article
-en ligne dès que la validation initiale de deux administrateurs distincts
-est acquise. L’auteur ne peut pas valider sa propre relecture.
+1. **Rédaction** - l’auteur écrit. Quand le texte est prêt : « Enregistrer et
+   envoyer en relecture ». Tant qu’il ne l’a pas envoyé, lui seul peut le
+   modifier.
+2. **Relecture** - une autre personne de l’équipe lit le texte, corrige ce
+   qu’elle veut, puis clique sur « Enregistrer et valider ». Si quelque chose
+   doit être repris par l’auteur : « Demander des corrections », avec un mot
+   qui dit quoi. L’article repart alors en rédaction.
+3. **Validé** - l’auteur clique sur « Enregistrer et mettre en ligne ». C’est
+   lui qui décide du moment.
+4. **En ligne** - toute l’équipe peut corriger une coquille. « Retirer du
+   site… » le remet en brouillon ; il devra être relu de nouveau.
 
-Une nouvelle relecture se demande volontairement sur la fiche, en précisant
-ce qui doit être relu. La soumission de l’auteur est conservée et la validation
-du relecteur est rouverte. Pour un article déjà publié, cette demande apparaît
-dans Vérifications sans retirer l’article du site. Pour un brouillon validé,
-elle suspend la première publication jusqu’à la nouvelle validation.
+Chaque bouton enregistre le texte avant de faire avancer l’article : on ne
+perd jamais ce qu’on vient d’écrire. Corriger un texte déjà validé ne retire
+pas la validation. On peut laisser un mot à tout moment (« Laisser un mot »),
+et l’historique de la fiche garde la trace de tout.
 
-Les versions continuent d’être suivies : un formulaire ancien ne peut pas
-écraser les corrections récentes de quelqu’un d’autre. Le changement de compte
-auteur ou de catégorie réinitialise les accords liés à cette identité ; les
-corrections du titre, du texte, de l’image, de la signature affichée et de la
-mise en page ne les réinitialisent pas.
+**Administration → Relecture** rassemble ce qui vous attend : les articles des
+autres à relire, puis vos propres articles en cours, avec ce qu’il leur
+manque. Le chiffre à côté de « Relecture » dans le menu est le nombre
+d’articles à relire.
 
-Le bloc de suivi se trouve au-dessus du texte. Après validation, il confirme
-que l'auteur peut publier. Il affiche l'action attendue ; les commentaires
-récents sont visibles directement. Les autres actions
-s'ouvrent au clic : commenter, demander des corrections ou demander un autre
-avis. Les dates, versions et priorités restent dans l'historique.
-
-Pendant la rédaction, l'auteur peut demander un avis à une personne désignée.
-Celle-ci retrouve la demande dans « À vérifier » et peut donner son avis,
-sans valider ni modifier ce brouillon. L'auteur peut soumettre son article
-sans attendre la réponse. Cette soumission clôt la demande informelle.
-
-Lors d'une relecture, demander un autre avis bloque la validation jusqu'à
-l'intervention de la personne sollicitée, différente de l'auteur et du demandeur.
-La demande quitte la liste des interventions du demandeur et apparaît chez la
-personne sollicitée. Le suivi reste visible sur la fiche de l'article.
-
-Les articles déjà publiés restent en ligne lors de la mise à jour du logiciel.
-La base est migrée automatiquement au démarrage. Les exemples de la
-prévisualisation utilisent une base séparée de la production.
+En cas d’urgence, ou si l’auteur d’un article n’est plus là, le propriétaire
+du site peut mettre un article en ligne sans relecture. C’est inscrit au
+journal.
 
 ## Comptes rendus de réunions internes
 
@@ -253,60 +225,37 @@ Pour faire tester le site gratuitement avec des contenus fictifs, voir
 
 Voir **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
 
-## Maintenance assistée
+## Proposer une modification
 
-Le fichier **[CLAUDE.md](CLAUDE.md)** décrit l'architecture, les conventions et
-les règles de sécurité à ne pas casser. Claude Code le lit automatiquement :
-une demande du type « ajoute une page Agenda » ou « permets de trier les
-articles par thème » part donc du bon contexte.
+**On ne pousse pas directement sur `main`** : la branche est protégée, parce
+qu'elle part en production en cinq minutes. Pour proposer un changement :
 
-Avant tout changement : `npm run check`. Avant livraison :
+1. Créer une branche (`git switch -c ma-modification`).
+2. Faire le changement, puis lancer `npm run verifier` : il doit passer.
+3. Pousser la branche et ouvrir une demande de fusion (pull request) sur
+   GitHub. Les vérifications y tournent toutes seules ; tant qu'elles
+   échouent, la fusion est impossible.
+4. La demande est relue et approuvée par le propriétaire du dépôt, puis
+   fusionnée.
+
+Les règles du projet sont dans trois fichiers :
+
+- **[CLAUDE.md](CLAUDE.md)** - l'architecture, les conventions, les règles de
+  sécurité, et la raison de chaque choix. Claude Code le lit automatiquement.
+- **[AGENTS.md](AGENTS.md)** - le résumé impératif, lu par les autres
+  assistants de code (ChatGPT, Codex…).
+- **[CHARTE.md](CHARTE.md)** - à quoi ressemble une page et où elle se range.
+
+Le dossier `garde-fous/` contient des tests qui échouent quand une de ces
+règles est cassée (une rubrique de plus dans l'en-tête, une dépendance
+nouvelle, une couleur hors charte…). Leur message dit quoi faire. On ne les
+modifie pas pour les faire passer.
 
 ```bash
-npm run check
-npm run build
-node --experimental-strip-types --test tests/*.test.ts
-node --test src/lib/jeux/mythology-rts/tests/*.test.js
+npm run verifier                                          # tout ce qu'il faut avant de proposer
+node tests/integration/drawings-http.mjs                  # parcours complets, après compilation
+node --test src/lib/jeux/mythology-rts/tests/*.test.js    # le jeu de stratégie, à part
 ```
 
 Les jeux sont des applications JavaScript autonomes, exclues du contrôle
-TypeScript/Svelte du site. Le jeu de stratégie possède donc sa propre suite de
-tests, exécutée par la quatrième commande.
-
-Pour vérifier le parcours éditorial sur le serveur compilé, après `npm run build` :
-
-```bash
-node --experimental-strip-types tests/integration/article-workflow-http.mjs
-```
-
-Ce contrôle utilise des comptes fictifs, une base temporaire et un serveur local
-sur le port 5191 (`TEST_PORT` permet de le changer). Il vérifie aussi les
-requêtes de formulaires avec et sans amélioration JavaScript, les refus d'accès,
-les tentatives de publication directe et le fonctionnement habituel
-des événements, formations et apéros. Le serveur de test est arrêté à la fin.
-
-Pour vérifier les dessins et les contributions publiques, après compilation :
-
-```bash
-node tests/integration/drawings-http.mjs
-node tests/integration/drawing-submissions-http.mjs
-```
-
-Ces contrôles utilisent des bases temporaires, des images et comptes fictifs,
-et des serveurs locaux sur les ports 5193 et 5194. Ils couvrent les vignettes,
-le téléchargement original, les brouillons, les autorisations, les fichiers
-privés avant acceptation, la publication après modération, le refus et
-l'anti-spam. Les serveurs sont arrêtés à la fin.
-
-Vérification du stockage et des imports des comptes rendus internes :
-
-```bash
-node tests/integration/meeting-reports-http.mjs
-```
-
-Ce test utilise une base temporaire et le port 5196. Il vérifie les imports
-Word et Markdown, les cases à cocher et leur sauvegarde, les corrections,
-les conflits de version, la recherche, le téléchargement original et la
-suppression. Il contrôle aussi le refus des accès sans session ou sans double
-authentification, des modifications depuis un autre site et l'absence de
-comptes rendus dans les pages publiques, le RSS et le plan du site.
+TypeScript/Svelte du site : le jeu de stratégie a sa propre suite de tests.

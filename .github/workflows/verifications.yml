@@ -1,0 +1,61 @@
+# Les vérifications lancées sur chaque demande de fusion, et sur `main`.
+#
+# `main` part en production en cinq minutes. Ce fichier fait tourner, sur les
+# machines de GitHub, ce que `npm run verifier` fait sur un ordinateur : tant
+# qu'une étape échoue, la demande de fusion ne peut pas être fusionnée (la
+# branche `main` est protégée, et exige la réussite de « verifications »).
+#
+# Aucun secret n'est utilisé ici, et le jeton de GitHub n'a que le droit de
+# lire le dépôt : une demande de fusion ne peut rien faire d'autre que
+# s'exécuter et échouer.
+name: Vérifications
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verifications-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifications:
+    name: verifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # `npm ci` installe exactement ce que dit package-lock.json, sans exécuter
+      # les scripts d'installation des paquets.
+      - name: Installer les dépendances
+        run: npm ci --ignore-scripts
+
+      - name: Vérifier le code (TypeScript et Svelte)
+        run: npm run check
+
+      - name: Tests et garde-fous
+        run: npm test
+
+      - name: Compiler le site
+        run: npm run build
+
+      # Ces parcours démarrent le site compilé sur une base temporaire et
+      # l'utilisent comme un navigateur le ferait.
+      - name: Parcours complets (dessins, propositions, comptes rendus)
+        run: |
+          node tests/integration/drawings-http.mjs
+          node tests/integration/drawing-submissions-http.mjs
+          node tests/integration/meeting-reports-http.mjs
+
+      - name: Tests du jeu de stratégie
+        run: node --test src/lib/jeux/mythology-rts/tests/*.test.js

@@ -1,0 +1,6 @@
+# Qui relit quoi.
+#
+# La branche `main` part en production en cinq minutes : aucun changement n'y
+# entre sans avoir été relu et approuvé par le propriétaire du dépôt. GitHub
+# lui demande automatiquement sa relecture sur chaque demande de fusion.
+*	@ataieb3342
