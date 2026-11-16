@@ -8,10 +8,12 @@ impératif.
 ## Avant de proposer un changement
 
 1. `npm run verifier` doit passer (vérification TypeScript, tests, garde-fous,
-   compilation). Ne propose jamais un changement sans l'avoir lancé.
-2. On ne pousse pas sur `main` : une branche, puis une demande de fusion
-   (pull request), relue avant d'être fusionnée. `main` part en production en
-   cinq minutes.
+   compilation). **Ne pousse jamais, et ne propose jamais de pousser, sans
+   l'avoir lancé** : `main` part en production en cinq minutes.
+2. Si une vérification échoue, corrige le changement - pas le test. Explique à
+   la personne avec qui tu travailles ce que le garde-fou protège.
+3. Après chaque envoi, GitHub relance ces vérifications. En cas d'échec, le
+   propriétaire du dépôt est prévenu par courriel.
 
 ## Ce qu'on ne fait pas
 

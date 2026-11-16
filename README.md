@@ -227,16 +227,20 @@ Voir **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
 
 ## Proposer une modification
 
-**On ne pousse pas directement sur `main`** : la branche est protégée, parce
-qu'elle part en production en cinq minutes. Pour proposer un changement :
+Un envoi sur `main` part en production en cinq minutes. Avant de pousser :
 
-1. Créer une branche (`git switch -c ma-modification`).
-2. Faire le changement, puis lancer `npm run verifier` : il doit passer.
-3. Pousser la branche et ouvrir une demande de fusion (pull request) sur
-   GitHub. Les vérifications y tournent toutes seules ; tant qu'elles
-   échouent, la fusion est impossible.
-4. La demande est relue et approuvée par le propriétaire du dépôt, puis
-   fusionnée.
+```bash
+npm run verifier
+```
+
+Il vérifie le code, lance les tests et les garde-fous, et compile le site. S'il
+échoue, son message dit quoi corriger.
+
+GitHub relance ces vérifications après chaque envoi. Si elles échouent, le
+propriétaire du dépôt est prévenu par courriel, pour qu'on répare ensemble :
+personne n'est bloqué, mais rien ne casse en silence. Pour un changement
+important, on peut aussi passer par une branche et une demande de fusion
+(pull request), qui se relit tranquillement avant de partir.
 
 Les règles du projet sont dans trois fichiers :
 

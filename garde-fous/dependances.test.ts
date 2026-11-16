@@ -14,7 +14,7 @@ import { lire } from './fichiers.ts';
  * Demandez-vous d'abord si Node ne le fait pas déjà (`node:crypto`,
  * `node:sqlite`, `fetch`…) ou si vingt lignes de code ne suffisent pas. Si la
  * dépendance est vraiment nécessaire, ajoutez-la à la liste ci-dessous avec la
- * raison, dans le même changement : le propriétaire du dépôt la relira.
+ * raison, dans le même changement, après en avoir parlé au propriétaire du dépôt.
  */
 const APPROUVEES: Record<string, string> = {
 	'markdown-it': 'le rendu des articles',

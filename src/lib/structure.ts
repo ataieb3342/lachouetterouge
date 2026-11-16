@@ -25,8 +25,8 @@
  *
  * `garde-fous/structure.test.ts` compare ce fichier à la liste décidée : le
  * modifier fait échouer les vérifications tant que le test n'a pas été mis à
- * jour dans le même changement - ce qui demande l'accord du propriétaire du
- * dépôt (`.github/CODEOWNERS`). C'est voulu : ajouter une rubrique est une
+ * jour dans le même changement, et le propriétaire du dépôt en est prévenu par
+ * courriel. C'est voulu : ajouter une rubrique est une
  * décision du groupe, pas un détail technique. Voir aussi `CHARTE.md`.
  */
 

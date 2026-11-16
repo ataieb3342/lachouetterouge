@@ -15,8 +15,8 @@ import { lire } from './fichiers.ts';
  * Ne le modifiez pas pour le faire passer. Lisez d'abord l'en-tête de
  * `src/lib/structure.ts` : une nouvelle page va dans le menu Ressources ou
  * dans le pied de page, jamais dans les liens principaux. Si la structure
- * doit vraiment changer, c'est avec l'accord du propriétaire du dépôt, qui
- * relit de toute façon tout changement de ce dossier.
+ * doit vraiment changer, c'est une décision à prendre avec le propriétaire du
+ * dépôt - qui est de toute façon prévenu quand ce test échoue.
  */
 
 const AIDE = '\n→ Lisez l’en-tête de src/lib/structure.ts avant de continuer.';

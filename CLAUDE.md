@@ -1376,11 +1376,19 @@ troisième lien dans l'en-tête, du code en anglais sans commentaires, et des
 images publiées avec leur position GPS. Rien de malveillant, mais rien non plus
 qui l'aurait arrêté. Trois barrières répondent à cela :
 
-1. **`main` est protégée sur GitHub.** On n'y pousse plus directement : une
-   branche, une demande de fusion, la réussite des vérifications
-   (`.github/workflows/verifications.yml`) et l'approbation du propriétaire du
-   dépôt (`.github/CODEOWNERS`). Le propriétaire garde le droit de passer
-   outre, pour une urgence.
+1. **Les vérifications tournent après chaque envoi, et préviennent.**
+   `.github/workflows/verifications.yml` lance sur GitHub ce que fait
+   `npm run verifier`. Quand elles échouent sur `main`, une fiche (« issue »)
+   est ouverte au nom du propriétaire du dépôt, qui reçoit un courriel avec
+   l'auteur, le commit et l'étape en échec ; elle se referme toute seule quand
+   un envoi suivant répare. **`main` n'est pas verrouillée, et c'est voulu**
+   (novembre 2026) : chacun peut y pousser, pour que contribuer reste simple
+   et agréable. La contrepartie est à garder en tête : un envoi part en
+   production dans les cinq minutes, que les vérifications réussissent ou
+   non - l'alerte arrive après. Si cela pose un jour problème, le pas suivant
+   n'est pas de verrouiller la branche mais de faire attendre le serveur :
+   `scripts/deployer.sh` peut ne déployer qu'un commit dont les vérifications
+   ont réussi.
 2. **`garde-fous/`** : des tests qui échouent quand une règle du projet est
    cassée, même si le site « marche ». La structure du site
    (`structure.test.ts`), la charte et la lisibilité du code
@@ -1388,7 +1396,7 @@ qui l'aurait arrêté. Trois barrières répondent à cela :
    (`dependances.test.ts`), les migrations (`migrations.test.ts`). Chaque
    fichier commence par dire quoi faire quand il échoue. **On ne modifie pas
    un garde-fou pour le faire passer** ; leurs listes d'exceptions sont des
-   décisions, relues comme telles.
+   décisions, pas des commodités.
 3. **`AGENTS.md`**, lu par les assistants de code (ChatGPT, Codex…) : le résumé
    impératif de ce fichier-ci. Le tenir à jour quand une règle change.
 

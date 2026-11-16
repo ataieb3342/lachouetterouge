@@ -1,8 +1,10 @@
 # Les garde-fous
 
 Des tests qui échouent quand un changement casse une règle du projet, même si
-le site « marche ». Ils tournent avec `npm test`, et sur GitHub à chaque
-demande de fusion : tant qu'ils échouent, on ne peut pas fusionner.
+le site « marche ». Ils tournent avec `npm test`, et sur GitHub après chaque
+envoi : quand l'un d'eux échoue sur `main`, le propriétaire du dépôt reçoit un
+courriel (`.github/workflows/verifications.yml`). Ils n'empêchent personne de
+pousser - ils font que rien ne casse en silence.
 
 | Fichier | Ce qu'il garde |
 | --- | --- |
@@ -14,7 +16,7 @@ demande de fusion : tant qu'ils échouent, on ne peut pas fusionner.
 
 **Un garde-fou échoue : que faire ?** Lire son message et l'en-tête du fichier,
 qui disent quoi faire. Presque toujours, c'est le changement qu'il faut revoir.
-On ne modifie pas un garde-fou pour le faire passer : ce dossier ne se change
-qu'avec l'accord du propriétaire du dépôt (`.github/CODEOWNERS`).
+On ne modifie pas un garde-fou pour le faire passer : changer une règle du
+projet se décide avec le propriétaire du dépôt, pas dans un test.
 
 Après avoir ajouté une migration : `npm run garde-fous:migrations`.
