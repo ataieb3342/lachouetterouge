@@ -41,7 +41,7 @@ https://github.com (compte gratuit), puis dans le dossier du projet :
 git init -b main
 git add .
 git commit -m "Site LFI Dijon"
-git remote add origin https://github.com/VOTRE-COMPTE/lfi-site.git
+git remote add origin https://github.com/VOTRE-COMPTE/lachouetterouge.git
 git push -u origin main
 ```
 
@@ -53,7 +53,7 @@ aucun secret ni aucune donnée ne part sur GitHub.
 1. Créez un compte sur https://render.com (l'inscription avec le compte GitHub
    est la plus simple, aucune carte bancaire n'est demandée).
 2. Tableau de bord → **New** → **Blueprint**.
-3. Choisissez le dépôt `lfi-site`. Render lit `render.yaml` et propose un
+3. Choisissez le dépôt `lachouetterouge`. Render lit `render.yaml` et propose un
    service `lfi-dijon-demo` sur l'offre gratuite. Validez.
 4. Le premier déploiement prend 3 à 5 minutes (construction de l'image Docker).
 

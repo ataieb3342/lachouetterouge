@@ -3,7 +3,7 @@
 #
 # Lancé toutes les cinq minutes par /etc/cron.d/deploiement-site, et
 # utilisable à la main :
-#     ssh lfi '/srv/lfi-site/scripts/deployer.sh'
+#     ssh lfi '/srv/lachouetterouge/scripts/deployer.sh'
 #
 # S'il n'y a rien de neuf, il ne fait rien et ne dit rien - il peut donc
 # tourner en boucle sans remplir le journal ni sauvegarder pour rien.
