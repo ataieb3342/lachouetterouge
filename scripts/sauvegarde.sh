@@ -5,7 +5,7 @@
 #     ./scripts/sauvegarde.sh
 #
 # Pour une sauvegarde quotidienne automatique, ajoutez au crontab (crontab -e) :
-#     30 4 * * * cd /srv/lfi-site && ./scripts/sauvegarde.sh >> /var/log/sauvegarde-site.log 2>&1
+#     30 4 * * * cd /srv/lachouetterouge && ./scripts/sauvegarde.sh >> /var/log/sauvegarde-site.log 2>&1
 #
 # IMPORTANT : copier data/site.db à la main ne suffit PAS. En mode WAL, les
 # écritures récentes vivent dans un fichier séparé et la copie serait

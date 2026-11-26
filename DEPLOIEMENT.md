@@ -58,8 +58,8 @@ résolve pour obtenir le certificat HTTPS.
 
 ```bash
 mkdir -p /srv && cd /srv
-git clone <adresse-du-dépôt> lfi-site
-cd lfi-site
+git clone <adresse-du-dépôt> lachouetterouge
+cd lachouetterouge
 
 cp .env.example .env
 ```
@@ -117,7 +117,7 @@ crontab -e
 ```
 
 ```
-30 4 * * * cd /srv/lfi-site && ./scripts/sauvegarde.sh >> /var/log/sauvegarde-site.log 2>&1
+30 4 * * * cd /srv/lachouetterouge && ./scripts/sauvegarde.sh >> /var/log/sauvegarde-site.log 2>&1
 ```
 
 **Copiez les archives ailleurs.** Une sauvegarde qui ne vit que sur la machine
@@ -138,11 +138,11 @@ suffit donc à mettre le site à jour.
 cat > /etc/cron.d/deploiement-site <<'FIN'
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-*/5 * * * * root /srv/lfi-site/scripts/deployer.sh >> /var/log/deploiement-site.log 2>&1
+*/5 * * * * root /srv/lachouetterouge/scripts/deployer.sh >> /var/log/deploiement-site.log 2>&1
 FIN
 
 # Pour déployer tout de suite sans attendre, ou pour voir ce qui se passe :
-ssh lfi '/srv/lfi-site/scripts/deployer.sh'
+ssh lfi '/srv/lachouetterouge/scripts/deployer.sh'
 
 # Ce qu'ont donné les derniers passages :
 ssh lfi 'tail -30 /var/log/deploiement-site.log'
@@ -156,7 +156,7 @@ changé - le fichier est monté dans le conteneur, qui garde l'ancien sinon -,
 et le **ménage** des anciennes images et du cache de compilation, qui sinon
 s'accumulent jusqu'à remplir le disque.
 
-**Tout dossier ajouté dans `/srv/lfi-site` sur le serveur doit figurer dans
+**Tout dossier ajouté dans `/srv/lachouetterouge` sur le serveur doit figurer dans
 `.dockerignore`.** Ce dossier est ce que Docker reçoit pour compiler. Le
 19 octobre 2026, le disque de 40 Go était plein : les sauvegardes et les
 preuves de l'attaque, qui n'y figuraient pas, étaient recopiées dans la
@@ -184,13 +184,13 @@ poussée sur `main`) :
 
 ```bash
 # 1. Une sauvegarde d'abord : le nettoyage ne se défait pas.
-ssh lfi '/srv/lfi-site/scripts/sauvegarde.sh'
+ssh lfi '/srv/lachouetterouge/scripts/sauvegarde.sh'
 
 # 2. Un essai : la liste de ce qui serait nettoyé. Rien n'est modifié.
-ssh lfi '/srv/lfi-site/scripts/nettoyer-images.sh'
+ssh lfi '/srv/lachouetterouge/scripts/nettoyer-images.sh'
 
 # 3. Le nettoyage, si la liste de l'essai convient.
-ssh lfi '/srv/lfi-site/scripts/nettoyer-images.sh --appliquer'
+ssh lfi '/srv/lachouetterouge/scripts/nettoyer-images.sh --appliquer'
 ```
 
 Le site reste en ligne pendant l'opération : chaque image est remplacée d'un
@@ -246,13 +246,13 @@ poussée sur `main`) :
 
 ```bash
 # 1. Une sauvegarde d'abord : le nettoyage ne se défait pas.
-ssh lfi '/srv/lfi-site/scripts/sauvegarde.sh'
+ssh lfi '/srv/lachouetterouge/scripts/sauvegarde.sh'
 
 # 2. Un essai : la liste de ce qui serait nettoyé. Rien n'est modifié.
-ssh lfi '/srv/lfi-site/scripts/nettoyer-pdf.sh'
+ssh lfi '/srv/lachouetterouge/scripts/nettoyer-pdf.sh'
 
 # 3. Le nettoyage, si la liste de l'essai convient.
-ssh lfi '/srv/lfi-site/scripts/nettoyer-pdf.sh --appliquer'
+ssh lfi '/srv/lachouetterouge/scripts/nettoyer-pdf.sh --appliquer'
 ```
 
 Comme pour les images, le site reste en ligne pendant l'opération, chaque PDF
@@ -300,7 +300,7 @@ démarrer - le site entier est alors injoignable. D'où la marche à suivre :
    redirection marche.
 2. Attendre que `dig +short lachouetterouge.fr` renvoie l'adresse du serveur.
 3. Sur le serveur, **avant** de récupérer le nouveau code, dans
-   `/srv/lfi-site/.env` :
+   `/srv/lachouetterouge/.env` :
 
    ```bash
    ORIGIN=https://lachouetterouge.fr
@@ -312,7 +312,7 @@ démarrer - le site entier est alors injoignable. D'où la marche à suivre :
    qu'à leur création :
 
    ```bash
-   cd /srv/lfi-site
+   cd /srv/lachouetterouge
    git pull --ff-only origin main
    docker compose -f docker/compose.yml up -d --build --force-recreate
    ```
