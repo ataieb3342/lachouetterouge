@@ -1324,12 +1324,25 @@ demanderait une migration pour rien.
 
 ## Le menu de l'administration
 
-Quatre groupes, dans `admin/(interne)/+layout.svelte` : **Publier**
-(Publications, À la une, Séries), **À relire**
-(Commentaires, Sources des apéros, Dessins, avec le nombre en attente),
-**Le site** (Médias recommandés, Images, Fréquentation, Réglages) et
-**L'équipe** (Comptes, Mon compte). C'était une liste de
-quinze entrées dans l'ordre où elles avaient été ajoutées.
+**Deux niveaux** (`admin/(interne)/+layout.svelte`) : en haut, les grandes
+catégories - Accueil, **Publier**, **À relire**, **Le site**, **L'équipe** -
+et à gauche, seulement les pages de la catégorie ouverte (en pastilles sur
+téléphone) :
+
+| Catégorie | Pages |
+| --- | --- |
+| Publier | Toutes les publications, Articles, Apéros (la liste filtrée), À la une, Séries |
+| À relire | Commentaires, Sources des apéros, Dessins - la catégorie porte le total en attente |
+| Le site | Réglages, Médias recommandés, Images, Fréquentation |
+| L'équipe | Mon compte, Comptes (propriétaires seulement) |
+
+C'était une seule colonne de quinze entrées, dans l'ordre où elles avaient
+été ajoutées (novembre 2026) : on n'y retrouvait plus rien. Le classement
+suit l'usage mesuré dans le journal : on écrit et on range la une tous les
+jours, on relit ce que les visiteurs envoient de loin en loin, on touche aux
+réglages presque jamais. **Une nouvelle page d'administration va dans l'une
+de ces catégories ; avant d'en créer une, se demander si elle ne tient pas
+dans une page existante.**
 
 Le tableau de bord dit **ce qui attend quelqu'un** - ce que les visiteurs ont
 envoyé, les brouillons, le prochain apéro (ou son absence) - puis la
