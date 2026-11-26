@@ -56,11 +56,10 @@ jobs:
 
       # Ces parcours démarrent le site compilé sur une base temporaire et
       # l'utilisent comme un navigateur le ferait.
-      - name: Parcours complets (dessins, propositions, comptes rendus)
+      - name: Parcours complets (dessins, propositions)
         run: |
           node tests/integration/drawings-http.mjs
           node tests/integration/drawing-submissions-http.mjs
-          node tests/integration/meeting-reports-http.mjs
 
       - name: Tests du jeu de stratégie
         run: node --test src/lib/jeux/mythology-rts/tests/*.test.js

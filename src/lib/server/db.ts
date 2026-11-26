@@ -623,7 +623,8 @@ export const MIGRATIONS: string[] = [
   mime text not null, bytes integer not null, created_at text not null
  );
  `,
-	// 028 - les comptes rendus de réunion, internes (voir `comptes-rendus.ts`)
+	// 028 - les comptes rendus de réunion, internes. La fonction a été retirée
+	// le 26 novembre 2026 ; la table reste, avec ce qu'elle contenait.
 	`
  create table meeting_reports (
   id integer primary key autoincrement, title text not null,

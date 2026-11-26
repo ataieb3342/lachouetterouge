@@ -45,17 +45,15 @@ scripts/           sauvegarde et restauration
 
 | Je veux… | Où |
 | --- | --- |
-| Écrire un article ou un compte rendu | Administration → Publications → Nouvelle publication → Article, puis choisir le format : Actu, Article ou Série |
+| Écrire un article | Administration → Publications → Nouvelle publication → Article, puis choisir le format : Actu, Article ou Série |
 | Commencer une série d’articles | Administration → Séries, puis le format « Série » dans chaque article |
 | Annoncer un apéro | Nouvelle publication → Apéro thématique |
 | Mettre une publication à la une | Sur une publication en ligne, choisir « Enregistrer et mettre à la une » ; gérer l’ordre et le retrait dans Administration → À la une |
-| Retrouver mes articles en cours | Administration → Relecture → Mes articles en cours |
-| Relire l’article de quelqu’un d’autre | Administration → Relecture → À relire |
+| Retrouver les brouillons | Tableau de bord → À faire, ou Publications filtrées sur « Brouillons » |
 | Relire les commentaires reçus | Administration → Commentaires |
 | Relire les sources proposées pour un apéro | Administration → Sources des apéros |
 | Consulter les ressources validées | Bibliothèque |
 | Ajouter un jeu | Déposer son dossier dans `src/lib/jeux/` et l'ajouter à `src/lib/jeux.ts` |
-| Ajouter ou importer un compte rendu de réunion interne | Administration → Comptes rendus de réunions |
 | Proposer un dessin sans compte | Dessins → Proposer un dessin |
 | Vérifier les dessins reçus | Administration → Dessins → Propositions à vérifier |
 | Ajouter une image | Administration → Images |
@@ -94,78 +92,20 @@ Un apéro a ses propres horaires, lieu, adresse, point de rendez-vous et
 responsables ; ces informations priment sur le lieu et l’horaire habituels
 définis dans les réglages, qui ne servent que de valeurs de repli.
 
-## Relecture des articles
+## Mettre un article en ligne
 
-Un article n’est mis en ligne qu’après avoir été relu par une deuxième
-personne. Les événements, formations et apéros ne sont pas concernés : ils se
-publient directement.
+Un article se publie comme un apéro : le menu « État » de sa fiche, puis
+« Enregistrer ». « Brouillon » le garde pour l’équipe, « En ligne » le montre à
+tout le monde ; repasser en « Brouillon » le retire du site. Toute l’équipe
+peut modifier toute publication, et le journal garde la trace de chaque mise en
+ligne et de chaque retrait.
 
-Un article passe par quatre étapes, affichées en tête de sa fiche, avec un seul
-bouton à chaque fois :
+Si deux personnes modifient le même article en même temps, la seconde à
+enregistrer est arrêtée et prévenue, au lieu d’effacer sans le savoir le
+travail de la première.
 
-1. **Rédaction** - l’auteur écrit. Quand le texte est prêt : « Enregistrer et
-   envoyer en relecture ». Tant qu’il ne l’a pas envoyé, lui seul peut le
-   modifier.
-2. **Relecture** - une autre personne de l’équipe lit le texte, corrige ce
-   qu’elle veut, puis clique sur « Enregistrer et valider ». Si quelque chose
-   doit être repris par l’auteur : « Demander des corrections », avec un mot
-   qui dit quoi. L’article repart alors en rédaction.
-3. **Validé** - l’auteur clique sur « Enregistrer et mettre en ligne ». C’est
-   lui qui décide du moment.
-4. **En ligne** - toute l’équipe peut corriger une coquille. « Retirer du
-   site… » le remet en brouillon ; il devra être relu de nouveau.
-
-Chaque bouton enregistre le texte avant de faire avancer l’article : on ne
-perd jamais ce qu’on vient d’écrire. Corriger un texte déjà validé ne retire
-pas la validation. On peut laisser un mot à tout moment (« Laisser un mot »),
-et l’historique de la fiche garde la trace de tout.
-
-**Administration → Relecture** rassemble ce qui vous attend : les articles des
-autres à relire, puis vos propres articles en cours, avec ce qu’il leur
-manque. Le chiffre à côté de « Relecture » dans le menu est le nombre
-d’articles à relire.
-
-En cas d’urgence, ou si l’auteur d’un article n’est plus là, le propriétaire
-du site peut mettre un article en ligne sans relecture. C’est inscrit au
-journal.
-
-## Comptes rendus de réunions internes
-
-Administration → Comptes rendus de réunions est réservée aux administrateurs
-connectés avec la double authentification activée. Un titre et une date
-permettent de classer les comptes rendus et de les retrouver par recherche.
-
-Importez un fichier `.docx` (10 Mo maximum) ou `.md` (1 Mo maximum).
-Les anciens fichiers Word `.doc` ne sont pas pris en charge.
-La sélection d’un fichier remplit directement l’éditeur et remplace le modèle.
-Le texte peut être corrigé et prévisualisé avant l’enregistrement ; le fichier
-original est conservé à l’identique. La lecture préalable ne crée aucun compte rendu.
-Il est aussi possible d’écrire directement en Markdown. Les titres,
-liens et listes peuvent être insérés avec les mêmes boutons que dans les
-publications. « Case à cocher » ajoute une tâche et « Aperçu » affiche le
-rendu avant enregistrement. Le bouton « Utiliser le modèle », disponible
-quand le texte est vide, propose les rubriques participants, points discutés,
-décisions et actions à mener. L'import d'un fichier reste facultatif.
-
-Les tâches `- [ ]` et `- [x]`
-deviennent des cases cliquables : chaque changement est enregistré dans le
-texte du compte rendu, sans modifier l'original. Si une autre personne a
-modifié le document entre-temps, rechargez-le avant de recommencer.
-
-Le texte importé est consultable et modifiable dans cette rubrique. La mise
-en page Word est simplifiée ; les images et pièces jointes restent dans
-l'original. Les images mentionnées dans le Markdown ne sont pas chargées.
-L'original peut être téléchargé uniquement après connexion ; modifier le
-texte du compte rendu ne modifie pas ce fichier initial.
-
-Les documents sont conservés dans `data/uploads/.meeting-reports/`, inclus
-dans les sauvegardes de `uploads`. Ils ne passent jamais par la médiathèque
-publique et ne figurent ni dans les articles, ni dans le RSS ou le plan du
-site. Les pages et les téléchargements sont privés et ne sont pas mis en
-cache. La suppression d'un compte rendu supprime également son original.
-Les créations, modifications et suppressions sont inscrites dans le journal
-d'administration. Les modifications simultanées sont détectées pour éviter
-d'écraser le travail d'une autre personne.
+Le parcours de relecture à quatre étapes (rédaction, relecture, validé, en
+ligne) a été retiré le 26 novembre 2026.
 
 ## Galerie collaborative de dessins
 

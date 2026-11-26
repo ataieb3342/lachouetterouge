@@ -16,15 +16,11 @@ import { fichiersDuSite, lire, lister } from './fichiers.ts';
 // `media.ts` crée son dossier à l'import : on l'envoie dans un dossier temporaire.
 process.env.UPLOADS_PATH = mkdtempSync(join(tmpdir(), 'chouette-garde-fous-'));
 const { renderMarkdown } = await import('../src/lib/markdown.ts');
-const { rendreCompteRendu } = await import('../src/lib/markdown-compte-rendu.ts');
 const { sniffImage } = await import('../src/lib/server/media.ts');
 
 test('règle 1 - le HTML écrit dans un texte n’est jamais interprété', () => {
 	const attaque = '<script>alert(1)</script>\n\n<img src=x onerror=alert(1)>\n\n[clic](javascript:alert(1))';
-	for (const [nom, rendre] of [
-		['articles', renderMarkdown],
-		['comptes rendus', rendreCompteRendu]
-	] as const) {
+	for (const [nom, rendre] of [['articles', renderMarkdown]] as const) {
 		const html = rendre(attaque);
 		assert.ok(!/<script/i.test(html), `${nom} : une balise <script> est passée.`);
 		assert.ok(!/<img[^>]+onerror/i.test(html), `${nom} : un attribut onerror est passé.`);
@@ -45,11 +41,9 @@ test('règle 1 bis - aucun nouvel endroit n’affiche du HTML brut', () => {
 	// structurées. En ajouter un demande la même relecture.
 	const AUTORISES = [
 		'src/lib/components/ArticleEditor.svelte',
-		'src/lib/components/EditeurCompteRendu.svelte',
 		'src/lib/components/FormulairePublication.svelte',
 		'src/lib/components/Metadonnees.svelte',
 		'src/routes/[rubrique=rubrique]/[slug]/+page.svelte',
-		'src/routes/admin/(interne)/comptes-rendus/[id]/+page.svelte',
 		'src/routes/admin/(interne)/publications/[id]/+page.svelte'
 	];
 	const trouves = lister('src', ['.svelte']).filter((fichier) => lire(fichier).includes('{@html'));

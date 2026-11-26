@@ -19,10 +19,9 @@ voter. Les articles peuvent parler de politique ; le site ne doit pas
 ressembler à la communication d'une organisation.
 
 **Le site en ligne : https://lachouetterouge.fr/** (production, mise à jour par
-`main`, voir « Déploiement ») - **fermé depuis le 17 novembre 2026** : Caddy y
-sert une page « temporairement fermé » et les mises à jour automatiques sont en
-pause. La marche à suivre pour rouvrir est sur le serveur, dans
-`/root/fermeture-site/LISEZMOI.txt`. Le domaine était `lfi-dijon.fr` jusqu'en
+`main`, voir « Déploiement »). Fermé du 17 au 26 novembre 2026 ; la marche à
+suivre pour le fermer de nouveau en urgence, et le rouvrir, est sur le serveur,
+dans `/root/fermeture-site/LISEZMOI.txt`. Le domaine était `lfi-dijon.fr` jusqu'en
 novembre 2026 ; le nouveau est `lachouetterouge.fr`, réglé sur le serveur par
 `SITE_DOMAIN` et `ORIGIN` dans `.env`. L'ancien domaine renvoie vers le
 nouveau (bloc `lfi-dijon.fr` de `docker/Caddyfile`) ; la bascule a un ordre à
@@ -75,9 +74,7 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/server/media.ts` | Envoi et diffusion des images |
 | `src/lib/server/metadonnees-images.ts` | Retire des images envoyées la position GPS, la date, l'appareil (règle n° 10) |
 | `src/lib/server/metadonnees-pdf.ts` | Retire des PDF proposés le nom de l'auteur, le logiciel, les dates (règle n° 11) |
-| `src/lib/server/relecture.ts` | Le parcours de relecture des articles, en quatre étapes (voir « La relecture des articles ») |
 | `src/lib/server/dessins.ts`, `propositions-dessins.ts`, `vignettes.ts` | La galerie de dessins, les dessins proposés par les visiteurs, leurs vignettes |
-| `src/lib/server/comptes-rendus.ts` | Les comptes rendus de réunion, internes |
 | `src/lib/structure.ts` | **Verrouillé** : ce que contiennent l'en-tête, le menu Ressources et le pied de page |
 | `garde-fous/` | Les tests qui échouent quand une règle du projet est cassée |
 | `CHARTE.md` | La charte graphique et la structure du site, en court |
@@ -101,10 +98,10 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/fichiers-embarques.ts` | Sert les fichiers des jeux et des modules, avec leur CSP |
 | `src/routes/admin/(interne)/` | Pages d'administration (session obligatoire) |
 
-Les dépendances runtime sont `markdown-it`, `qrcode`, `turndown`, `sharp`
-(vignettes des dessins), `mammoth` et `yauzl` (import Word privé). Elles
-étaient deux ; quatre sont arrivées en novembre 2026 sans que personne l'ait
-décidé. **Ne pas en ajouter sans nécessité** : chaque dépendance est une porte
+Les dépendances runtime sont `markdown-it`, `qrcode`, `turndown` (éditeur
+visuel) et `sharp` (vignettes des dessins). Elles étaient deux ; quatre sont
+arrivées en novembre 2026 sans que personne l'ait décidé, et deux sont
+reparties avec les comptes rendus de réunion. **Ne pas en ajouter sans nécessité** : chaque dépendance est une porte
 d'entrée possible et une mise à jour à suivre. La liste est désormais fermée
 par `garde-fous/dependances.test.ts`, qui dit comment en faire approuver une.
 
@@ -350,7 +347,7 @@ les articles, par `format_article` (migration 031) :
   qui le place dans les prochains apéros, puis dans l'archive.
 
 Le format n'est pas un type : il ne change ni l'adresse (`/articles/…`), ni
-la couleur, ni le parcours de relecture. C'est une étiquette (« Actu »,
+la couleur. C'est une étiquette (« Actu »,
 « Série · La santé (2) ») et un filtre de la page Articles. Le format n'est
 gardé que pour un article : `champsFormat` (`content.ts`) enregistre
 « article » sans série pour toute autre fiche, et efface la série d'un
@@ -1298,84 +1295,71 @@ distinctes aux yeux des daltoniens, dans les deux thèmes : les changer demande
 de refaire cette vérification. Chaque graphique se parcourt au clavier et a son
 tableau de chiffres dépliable.
 
-## La relecture des articles
+## Mettre un article en ligne (la relecture a été retirée)
 
-Un article n'est mis en ligne qu'après avoir été lu par une deuxième personne.
-Toutes les règles sont dans `src/lib/server/relecture.ts` ; l'écran et les
-actions interrogent la même fonction, `droitsRelecture`.
+**Un article se publie comme un apéro** : le menu « État » de la fiche
+(Brouillon / En ligne), puis « Enregistrer ». Toute l'équipe peut modifier
+toute publication. Le journal distingue la mise en ligne
+(`publication.publication`), le retrait (`publication.retrait`) et la simple
+modification.
 
-Quatre étapes, toujours dans cet ordre, et **un seul bouton à chaque étape** :
+Jusqu'au 26 novembre 2026, un article passait par un **parcours de relecture**
+en quatre étapes - rédaction, relecture par un autre compte, validé, en
+ligne -, avec sa page (Administration → Relecture), un panneau dans la fiche
+et `relecture.ts`. Le groupe l'a retiré : à quatre personnes, attendre un
+deuxième compte bloquait plus de textes qu'il n'en corrigeait, et le
+propriétaire publiait de toute façon « sans relecture ». Si on le remet un
+jour, il est dans l'historique git ; la première version proposait neuf
+actions sur le même écran et personne ne savait laquelle était la sienne :
+un seul bouton par étape, toujours.
 
-| Étape | Qui agit | Bouton |
-| --- | --- | --- |
-| Rédaction | l'auteur | « Enregistrer et envoyer en relecture » |
-| Relecture | un autre compte | « Enregistrer et valider », ou « Demander des corrections » |
-| Validé | l'auteur | « Enregistrer et mettre en ligne » |
-| En ligne | toute l'équipe corrige | « Retirer du site… » |
+**Ce qui en reste** : le numéro de version d'un article (`revision` de la
+table `article_reviews`, tenu par des déclencheurs SQLite, migrations 022 à
+029). La fiche l'envoie, et `verifierRevision` (`formulaires.ts`) refuse
+d'enregistrer par-dessus un texte que quelqu'un d'autre a modifié
+entre-temps : sans cela, la seconde personne effacerait le travail de la
+première sans le savoir. Les tables `article_reviews` et
+`article_review_history` restent en base avec leur historique ; les retirer
+demanderait une migration pour rien.
 
-- La première version (novembre 2026) proposait neuf actions sur le même
-  écran - troisième avis, demande d'avis sur un brouillon, priorité, nouvelle
-  relecture, commentaire… - réparties sur deux pages, « Rédaction » et
-  « Vérifications ». Personne ne savait laquelle était la sienne. Tout tient
-  maintenant dans **Administration → Relecture** (`admin/(interne)/relecture`) :
-  ce qui m'attend, puis mes articles en cours. Les anciennes adresses y
-  redirigent.
-- **Enregistrer un article ne change jamais son état.** Le formulaire n'a pas
-  de menu « État » pour un article : seul le parcours le met en ligne, et
-  « Retirer du site » l'en retire (il redevient un brouillon, à relire de
-  nouveau). `createPublication` et `updatePublication` ignorent l'état envoyé
-  pour un article.
-- **Chaque bouton du parcours enregistre d'abord le texte**, dans la même
-  transaction : personne ne perd ce qu'il vient d'écrire, et un refus
-  n'enregistre rien à moitié. C'est pour cela que les boutons du panneau
-  (`PanneauRelecture.svelte`) appartiennent au formulaire de la publication.
-- En rédaction, le texte n'appartient qu'à son auteur ; les autres le lisent.
-  Dès qu'il est envoyé, la personne qui relit peut corriger elle-même une
-  coquille. **Corriger un texte validé ne retire pas la validation** : la
-  première version annulait tout à la moindre virgule, et plus personne ne
-  corrigeait rien. Changer l'auteur ou le type, si.
-- **Le propriétaire du site peut publier sans relecture** (« Mettre en ligne
-  sans relecture… ») : sans cette sortie de secours, un communiqué urgent
-  attend un deuxième compte, et l'article d'un auteur parti reste bloqué pour
-  toujours. C'est inscrit dans l'historique et au journal
-  (`publication.sans-relecture`).
-- Une validation ne vaut que pour la version qu'on a lue : la fiche envoie le
-  numéro de version (`revision`), et le serveur refuse d'enregistrer par-dessus
-  un texte que quelqu'un d'autre a modifié entre-temps.
-- Les rendez-vous ne passent pas par ce parcours : ils se publient directement.
+## Le menu de l'administration
 
-La ligne de suivi d'un article et son numéro de version sont tenus par des
-déclencheurs SQLite (migrations 022 à 029), pas par `relecture.ts`. Les
-colonnes sont en anglais : `author_approved_by` veut dire « envoyé en relecture
-par », `reviewer_id` « validé par ». Tests : `tests/relecture.test.ts`.
+**Deux niveaux** (`admin/(interne)/+layout.svelte`) : en haut, les grandes
+catégories - Accueil, **Publier**, **À relire**, **Le site**, **L'équipe** -
+et à gauche, seulement les pages de la catégorie ouverte (en pastilles sur
+téléphone) :
 
-## Comptes rendus internes
+| Catégorie | Pages |
+| --- | --- |
+| Publier | Toutes les publications, Articles, Apéros (la liste filtrée), À la une, Séries |
+| À relire | Commentaires, Sources des apéros, Dessins - la catégorie porte le total en attente |
+| Le site | Réglages, Médias recommandés, Images, Fréquentation |
+| L'équipe | Mon compte, Comptes (propriétaires seulement) |
 
-Administration → Comptes rendus de réunions. **Ils ne sont jamais publics** :
-pas de route hors de `/admin`, rien dans le flux RSS ni dans le plan du site.
-La session et la double authentification sont revérifiées dans chaque
-chargement, action et route - le `+layout.server.ts` de l'administration ne
-protège pas les actions de formulaire, qui s'exécutent avant lui.
+C'était une seule colonne de quinze entrées, dans l'ordre où elles avaient
+été ajoutées (novembre 2026) : on n'y retrouvait plus rien. Le classement
+suit l'usage mesuré dans le journal : on écrit et on range la une tous les
+jours, on relit ce que les visiteurs envoient de loin en loin, on touche aux
+réglages presque jamais. **Une nouvelle page d'administration va dans l'une
+de ces catégories ; avant d'en créer une, se demander si elle ne tient pas
+dans une page existante.**
 
-- `src/lib/server/comptes-rendus.ts` : un fichier `.docx` ou `.md` est
-  converti en Markdown pour remplir l'éditeur. Un document Word est une
-  archive ZIP : `verifierDocx` en contrôle la taille réelle, décompressée,
-  avant de la confier à `mammoth` - sans cela, quelques kilo-octets peuvent en
-  contenir des gigaoctets. Ni macros, ni chiffrement, ni accès à un fichier
-  extérieur ; les images ne sont pas reprises.
-- Le fichier d'origine est gardé dans `data/uploads/.meeting-reports/`, sous un
-  nom au hasard, sans ligne dans la table `media` : la route `/media/…` ne
-  peut pas le servir. Il n'est proposé qu'en téléchargement, sans cache.
-- `src/lib/markdown-compte-rendu.ts` fait le rendu, partagé entre la page de
-  lecture et l'aperçu de `EditeurCompteRendu.svelte` : `html: false`, pas
-  d'images. Une ligne `- [ ] à faire` devient une case que l'équipe coche
-  depuis la page de lecture (action `cocher`), sans rouvrir l'éditeur.
-- Deux personnes qui modifient le même compte rendu : la seconde est refusée
-  (`modifierCompteRendu` compare la date de dernière modification lue).
-- Ne pas importer ici le moteur des articles publics, et ne jamais ajouter ces
-  comptes rendus aux publications, au RSS ou au sitemap.
+Le tableau de bord dit **ce qui attend quelqu'un** - ce que les visiteurs ont
+envoyé, les brouillons, le prochain apéro (ou son absence) - puis la
+fréquentation et le journal. Ses cinq compteurs et la liste des dernières
+publications, qui ne disaient quoi faire à personne, ont été retirés
+(novembre 2026). **Avant d'ajouter une page à l'administration, se demander
+si elle ne tient pas dans une page existante.**
 
-Parcours complet, après compilation : `node tests/integration/meeting-reports-http.mjs`.
+## Comptes rendus de réunion (retirés)
+
+L'administration a eu une rubrique « Comptes rendus de réunions », internes,
+avec import de fichiers Word (`mammoth`, `yauzl`) et cases à cocher. Elle a
+servi une fois : le groupe l'a retirée le 26 novembre 2026, avec ses deux
+dépendances. La table `meeting_reports` et les originaux de
+`data/uploads/.meeting-reports/` restent tels quels ; les retirer demanderait
+une migration qui efface des données pour rien. Le code est dans l'historique
+git si le besoin revient.
 
 ## Dessins et caricatures
 

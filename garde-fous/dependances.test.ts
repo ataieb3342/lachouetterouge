@@ -8,7 +8,8 @@ import { lire } from './fichiers.ts';
  * Chacune est une porte d'entrée possible et une mise à jour à suivre : une
  * dépendance compromise, c'est le site compromis. Elles étaient deux
  * (`markdown-it`, `qrcode`) ; quatre sont arrivées en novembre 2026 sans que
- * personne l'ait décidé.
+ * personne l'ait décidé. Deux sont reparties avec les comptes rendus de
+ * réunion (`mammoth`, `yauzl`), retirés le 26 novembre 2026.
  *
  * VOUS VOULEZ EN AJOUTER UNE, ET CE TEST ÉCHOUE ?
  * Demandez-vous d'abord si Node ne le fait pas déjà (`node:crypto`,
@@ -20,9 +21,7 @@ const APPROUVEES: Record<string, string> = {
 	'markdown-it': 'le rendu des articles',
 	qrcode: 'le QR code de la double authentification',
 	sharp: 'les vignettes de la galerie de dessins (binaire natif : la seule exception)',
-	mammoth: 'l’import des comptes rendus au format Word',
-	yauzl: 'le contrôle de l’archive Word avant conversion',
-	turndown: 'la conversion du HTML en Markdown (import Word, éditeur visuel)'
+	turndown: 'la conversion du HTML en Markdown (éditeur visuel)'
 };
 
 test('aucune dépendance nouvelle sans décision', () => {

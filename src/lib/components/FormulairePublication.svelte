@@ -31,8 +31,6 @@
 
 	let {
 		publication = null,
-		actionPrincipale = null,
-		adminCourantId,
 		valeurs = {},
 		erreur = '',
 		libelleValider = 'Enregistrer',
@@ -43,14 +41,6 @@
 		actionUne
 	}: {
 		publication?: PublicationVue | null;
-		/**
-		 * Le bouton qui fait avancer un article dans son parcours de relecture
-		 * (« Enregistrer et envoyer en relecture », « Valider »…). Il enregistre
-		 * toujours le texte d'abord. Nul quand il n'y a rien à faire avancer.
-		 */
-		actionPrincipale?: { libelle: string; action: string; aide: string } | null;
-		/** Le compte connecté, sur la page de création : pour savoir si l'auteur choisi est soi-même. */
-		adminCourantId?: number;
 		valeurs?: Champs;
 		erreur?: string;
 		libelleValider?: string;
@@ -140,15 +130,6 @@
 	let lieu = $state(lieuInitial());
 	let pointRendezVous = $state(pointRendezVousInitial());
 	let auteurChoisi = $state(auteurInitial());
-	// Sur la page de création, quand on écrit pour quelqu'un d'autre : c'est
-	// cette personne, l'auteur, qui enverra le texte en relecture.
-	const auteurEstUnAutreCompte = $derived(
-		!publication &&
-			!!adminCourantId &&
-			!!auteurChoisi &&
-			auteurChoisi !== 'other' &&
-			auteurChoisi !== String(adminCourantId)
-	);
 
 	/** Ce que chaque type veut dire, affiché sous le menu pour éviter les erreurs de case. */
 	const aideType: Record<string, string> = {
@@ -316,28 +297,18 @@
 				<input type="hidden" name="layoutStyle" value="standard" />
 			{/if}
 
-			{#if typeSelectionne === 'article'}
-				<!-- Un article n'a pas de menu « État » : il n'est mis en ligne
-				     qu'au bout de son parcours de relecture (`relecture.ts`), et
-				     l'enregistrer ne change jamais son état. -->
-				<input type="hidden" name="status" value={publication ? v.status : 'draft'} />
-				{#if !publication}
-					<p class="aide">
-						Un article est mis en ligne après avoir été relu par une deuxième personne. Enregistrez un
-						brouillon pour y revenir, ou envoyez-le tout de suite en relecture.
-					</p>
-				{/if}
-			{:else}
-				<div>
-					<label class="etiquette" for="status">État</label>
-					<select id="status" name="status" class="champ">
-						<option value="draft" selected={v.status === 'draft'}>Brouillon</option>
-						<option value="published" selected={v.status === 'published'}>Publié</option>
-					</select>
-					<p class="aide">Un brouillon n'est visible que par les administrateurs connectés.</p>
-				</div>
-			{/if}
-
+			<!-- Le même menu pour tout : un article se met en ligne comme un apéro.
+			     Le parcours de relecture à quatre étapes, qui demandait une
+			     deuxième personne avant toute mise en ligne, a été retiré le
+			     26 novembre 2026. -->
+			<div>
+				<label class="etiquette" for="status">État</label>
+				<select id="status" name="status" class="champ">
+					<option value="draft" selected={v.status === 'draft'}>Brouillon</option>
+					<option value="published" selected={v.status === 'published'}>En ligne</option>
+				</select>
+				<p class="aide">Un brouillon n'est visible que par l'équipe, depuis l'administration.</p>
+			</div>
 
 			{#if !estRendezVous}
 				<div>
@@ -434,9 +405,6 @@
 			     page sans rien enregistrer, et le texte en cours était perdu.
 			     Le bouton enregistre d'abord, puis met la fiche à la une ; la
 			     page de la une ne s'ouvre que dans un nouvel onglet. -->
-			<!-- Un article qui n'est pas encore en ligne ne peut pas être à la
-			     une : inutile de lui proposer un bouton qui refuserait. -->
-			{#if positionUne || typeSelectionne !== 'article' || publication?.status === 'published'}
 			<div class="text-sm text-ink">
 				{#if positionUne}
 					<p>
@@ -452,12 +420,11 @@
 						Enregistrer et mettre à la une
 					</button>
 					<p class="aide">
-						Seule une publication à l'état « Publié » peut être à la une. Le texte est enregistré
-						d'abord : rien n'est perdu.
+						Seule une publication « En ligne » peut être à la une. Le texte est enregistré d'abord :
+						rien n'est perdu.
 					</p>
 				{/if}
 			</div>
-			{/if}
 		</div>
 
 		<div class="carte space-y-3">
@@ -486,24 +453,6 @@
 			</div>
 		</div>
 
-		{#if typeSelectionne === 'article'}
-			<!-- Deux boutons au plus : celui qui fait avancer l'article d'une
-			     étape, et « Enregistrer » tout court. Le premier enregistre aussi. -->
-			{#if actionPrincipale && !auteurEstUnAutreCompte}
-				<div>
-					<button class="bouton w-full justify-center" type="submit" formaction={actionPrincipale.action}>
-						{actionPrincipale.libelle}
-					</button>
-					<p class="aide">{actionPrincipale.aide}</p>
-				</div>
-			{:else if auteurEstUnAutreCompte}
-				<p class="aide">C'est l’auteur choisi qui enverra ce brouillon en relecture, depuis son compte.</p>
-			{/if}
-			<button class="bouton-secondaire w-full justify-center" type="submit">
-				{publication ? 'Enregistrer' : 'Enregistrer le brouillon'}
-			</button>
-		{:else}
-			<button class="bouton w-full justify-center" type="submit">{libelleValider}</button>
-		{/if}
+		<button class="bouton w-full justify-center" type="submit">{libelleValider}</button>
 	</aside>
 </div>
