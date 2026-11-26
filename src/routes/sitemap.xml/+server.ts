@@ -4,6 +4,7 @@ import { RUBRIQUE_PAR_KIND } from '$lib/rubriques';
 import { JEUX, urlJeu } from '$lib/jeux';
 import { OUTILS, urlOutil } from '$lib/boite-a-outils';
 import { listerDessins } from '$lib/server/dessins';
+import { listSeries } from '$lib/server/series';
 import type { Kind } from '$lib/rubriques';
 
 /**
@@ -18,8 +19,8 @@ const PAGES_FIXES = [
 	'/',
 	'/articles',
 	'/dessins',
-	'/agenda',
 	'/aperos',
+	'/series',
 	'/bibliotheque',
 	'/boite-a-outils',
 	'/jeux',
@@ -33,7 +34,6 @@ const PAGES_FIXES = [
 /** Les pages de liste, datées de leur publication la plus récente. */
 const LISTES: Record<string, Kind> = {
 	'/articles': 'article',
-	'/agenda': 'actu',
 	'/aperos': 'apero'
 };
 
@@ -65,6 +65,10 @@ export const GET: RequestHandler = async ({ url }) => {
 			ligne(chemin, chemin === '/' ? dernierTout : dernierParKind.get(LISTES[chemin]))
 		),
 		...listerDessins().map((dessin) => ligne(`/dessins/${dessin.id}`, dessin.updated_at.slice(0, 10))),
+		// Les séries qui ont au moins un article en ligne, comme sur /series.
+		...listSeries()
+			.filter((serie) => serie.en_ligne > 0)
+			.map((serie) => ligne(`/series/${serie.slug}`, serie.updated_at.slice(0, 10))),
 		...publications.map((p) =>
 			ligne(
 				`/${RUBRIQUE_PAR_KIND[p.kind]}/${p.slug}`,

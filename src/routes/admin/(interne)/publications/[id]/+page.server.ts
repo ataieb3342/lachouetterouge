@@ -25,6 +25,7 @@ import {
 	valeursSaisies
 } from '$lib/server/formulaires';
 import { audit, listAdminChoices } from '$lib/server/auth';
+import { choixSeries } from '$lib/server/series';
 
 function charger(id: string) {
 	const publication = getById(Number(id));
@@ -43,6 +44,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 			profilePublic: !!profile_public
 		})),
 		corps: publication.body,
+		series: choixSeries(),
 		// Le parcours de relecture : ce que la personne connectée peut faire de
 		// cet article, et ce qui s'est passé jusqu'ici. `etape` est nul pour un
 		// rendez-vous, qui se publie directement.
@@ -87,7 +89,8 @@ async function enregistrer({ request, params, locals }: RequestEvent<{ id: strin
 				form,
 				admin.id,
 				publication.cover_media_id,
-				publication.event_map_media_id
+				publication.event_map_media_id,
+				publication.kind
 			);
 			titre = saisie.title;
 			etat = saisie.status;

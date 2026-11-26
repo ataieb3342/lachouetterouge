@@ -1,26 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360">
-	<defs>
-		<linearGradient id="g" x1="0" y1="0.15" x2="1" y2="0.85">
-<stop offset="0" stop-color="#e83e3f"/>
-			<stop offset="0.03" stop-color="#de3c43"/>
-			<stop offset="0.08" stop-color="#c43850"/>
-			<stop offset="0.14" stop-color="#9a3263"/>
-			<stop offset="0.19" stop-color="#6b2a79"/>
-			<stop offset="0.24" stop-color="#63297b"/>
-			<stop offset="0.36" stop-color="#58277e"/>
-			<stop offset="0.53" stop-color="#512680"/>
-			<stop offset="1" stop-color="#4f2680"/>
-		</linearGradient>
-	</defs>
-	<rect width="360" height="360" rx="76" fill="url(#g)"/>
 	<!--
-		Le phi seul. Le fichier d'origine portait aussi le sigle « LFI » en
-		lettres verticales sur le bord droit : à seize pixels dans un onglet,
-		elles n'étaient plus qu'une bavure grise, et elles débordaient du cadre.
-		Un favicon n'est pas un logo réduit, c'est une marque à part entière.
-		L'en-tête et le pied de page, eux, gardent le logo complet.
+		La chouette rouge, en blanc sur une tuile rouge. Les yeux, le bec et
+		les ailes sont découpés dans la silhouette (variante « mono » de
+		src/lib/components/Logo.svelte) : à seize pixels dans un onglet, les
+		détails de la version en couleur se fondraient en une tache.
 	-->
-	<g fill="#fff" transform="translate(58 27)">
-		<path d="m 222.99999,54.12 c -16.44,-24.23 -41.32,-24.88 -49.32,-24.88 -8,0 -37.42999,1.08 -59.70999,40 -22.28,38.92 -26.84,89.76 -29.22,122.47 0,0 -46.3,-18.61 -45.86,-75.72 0,0 -0.48,-41.66 38.81,-66.26 0,0 -1.52,12.3 8.76,19 10.28,6.7 19.71,1.18 22.75,-1.35 3.04,-2.53 21.56,-21.06 25.44,-37.91 C 138.53,12.62 124.2,-0.65 108.2,0 92.2,0.65 62.7,7.27 34.4,34.23 6.1,61.19 -0.48,102.3 0,120.66 c 0.48,18.36 4,49.37 30.49,78.52 26.49,29.15 54.26,34.87 54.26,34.87 0,0 3.7,35.72 10.44,58.3 0,0 4.38,14.32 18.37,13.48 13.99,-0.84 21.23,-11.12 20,-20.72 -4.27748,-15.05194 -7.26495,-30.44091 -8.93,-46 0,0 47.43999,1.93 82.48999,-37.45 35.05,-39.38 35.48,-76.58 35.48,-86.1 0,-9.52 -3.16,-37.21 -19.6,-61.44 z m -35.13,109.26 c 0,0 -21.87,35.62 -64.26999,36.87 0,0 0.48,-75.68 26.91999,-116.43 0,0 30.32,-42.2 49,10.43 0,0 11.64,39.06 -11.65,69.13 z" />
+	<rect width="360" height="360" rx="76" fill="#cc1420"/>
+	<g fill="#fff" transform="translate(65 36) scale(2.3)">
+		<path fill-rule="evenodd" d="M50 15C42 6 30 3 20 7C11 11 7 23 7 39C7 66 18 92 34 108C40 113 45 115 50 115C55 115 60 113 66 108C82 92 93 66 93 39C93 23 89 11 80 7C70 3 58 6 50 15Z M20.5 34.6A12 12 0 1 0 41.5 34.6L31 31.1Z M58.5 34.6A12 12 0 1 0 79.5 34.6L69 31.1Z M45 51L55 51L50 63Z M15 58C16.5 76 23.5 92 34.5 104C28 93 23.5 79 21.5 63Z M85 58C83.5 76 76.5 92 65.5 104C72 93 76.5 79 78.5 63Z"/>
+		<circle cx="31" cy="41" r="6.5"/>
+		<circle cx="69" cy="41" r="6.5"/>
 	</g>
 </svg>

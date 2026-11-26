@@ -6,6 +6,7 @@ import {
 	getBySlugAnyStatus,
 	isIpBlocked,
 	listApprovedComments,
+	listArticlesDeSerie,
 	listApprovedSources
 } from '$lib/server/content';
 import { presentComment, presentPublication, presentSource } from '$lib/server/present';
@@ -54,8 +55,26 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const vue = presentPublication(publication);
 	const commentairesOuverts = commentsGloballyOpen() && vue.commentsOpen;
 
+	// Un article de série dit où il se trouve dans la série, et mène au
+	// précédent et au suivant. Un brouillon (aperçu) n'est pas dans la liste
+	// des articles en ligne : il n'a ni rang affiché ni voisins.
+	let serie = null;
+	if (vue.serie) {
+		const articles = listArticlesDeSerie(vue.serie.id).map((a) => ({ titre: a.title, slug: a.slug, id: a.id }));
+		const i = articles.findIndex((a) => a.id === publication.id);
+		serie = {
+			titre: vue.serie.titre,
+			slug: vue.serie.slug,
+			position: i >= 0 ? i + 1 : null,
+			total: articles.length,
+			precedent: i > 0 ? articles[i - 1] : null,
+			suivant: i >= 0 && i < articles.length - 1 ? articles[i + 1] : null
+		};
+	}
+
 	return {
 		publication: vue,
+		serie,
 		corpsHtml: renderMarkdown(publication.body),
 		resume: vue.summary || toPlainText(publication.body, 200),
 		commentaires: listApprovedComments(publication.id).map(presentComment),

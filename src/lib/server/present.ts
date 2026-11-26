@@ -1,5 +1,6 @@
 import { listPublicationManagerProfiles, type Comment, type PublicationListItem, type Publication, type Source } from './content.ts';
 import { getMedia } from './media.ts';
+import { getSerie } from './series.ts';
 import type { MediaRecommande } from './medias-recommandes.ts';
 import { getAdmin, publicProfileAnchor } from './auth.ts';
 import type { PublicationVue, CommentaireVue, SourceVue } from '$lib/types';
@@ -61,8 +62,21 @@ export function presentPublication(row: PublicationListItem | Publication): Publ
 		// Comparaison de chaînes AAAA-MM-JJ : correcte, et sans piège de fuseau
 		// horaire contrairement à un calcul sur des objets Date.
 		aVenir: !!row.event_at && row.event_at >= aujourdHui,
-		cover: media ? { url: `/media/${media.filename}`, alt: media.alt } : null
+		cover: media ? { url: `/media/${media.filename}`, alt: media.alt } : null,
+		formatArticle: row.format_article,
+		// Le titre de la série vient de la jointure de `PUBLIC_SELECT` ; une
+		// ligne lue sans elle (`getById`) va chercher la série elle-même.
+		serie: serieDe(row)
 	};
+}
+
+function serieDe(row: PublicationListItem | Publication): PublicationVue['serie'] {
+	if (row.kind !== 'article' || row.format_article !== 'serie' || !row.serie_id) return null;
+	if ('serie_titre' in row && row.serie_titre && row.serie_slug) {
+		return { id: row.serie_id, titre: row.serie_titre, slug: row.serie_slug, rang: row.rang_serie };
+	}
+	const serie = getSerie(row.serie_id);
+	return serie ? { id: serie.id, titre: serie.titre, slug: serie.slug, rang: row.rang_serie } : null;
 }
 
 /** Les commentaires publics sortent sans empreinte d'IP ni agent utilisateur. */

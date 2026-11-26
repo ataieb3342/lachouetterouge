@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
 
-const scratch = mkdtempSync(join(tmpdir(), 'lfi-meeting-reports-'));
+const scratch = mkdtempSync(join(tmpdir(), 'chouette-meeting-reports-'));
 const origin = 'http://127.0.0.1:5196';
 Object.assign(process.env, {
 	DATABASE_PATH: join(scratch, 'site.db'),

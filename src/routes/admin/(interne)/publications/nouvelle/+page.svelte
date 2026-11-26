@@ -39,6 +39,7 @@
 		}}
 		adminCourantId={data.adminCourantId}
 		admins={data.admins}
+		series={data.series}
 		valeurs={form ?? { authorAdminId: String(data.adminCourantId) }}
 		erreur={form?.erreur ?? ''}
 		apercu={form?.apercu ?? ''}

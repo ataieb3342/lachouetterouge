@@ -665,6 +665,34 @@ export const MIGRATIONS: string[] = [
 	 requested_by = null, requested_id = null, request_note = '',
 	 advice_requested_id = null, advice_requested_by = null, advice_note = '', advice_requested_at = null,
 	 priority = 0;
+	`,
+	// 031 - trois formats d'article, et les séries
+	//
+	// Décidé en réunion le 25 novembre 2026. Un article est :
+	// - une « actu » : des faits, des témoignages (une manifestation, une
+	//   décision municipale…) ;
+	// - un « article » : un avis subjectif, mais sourcé ;
+	// - un épisode d'une « série » : des articles qui suivent un même fil,
+	//   thème par thème, avec une structure commune.
+	// Le format ne concerne que les articles (`kind = 'article'`) ; les autres
+	// fiches gardent la valeur par défaut, sans effet. Une série ne peut pas
+	// être supprimée tant qu'elle contient des articles (`series.ts`) : le
+	// `on delete set null` n'est qu'un filet.
+	`
+	create table series (
+	 id integer primary key,
+	 slug text not null unique,
+	 titre text not null,
+	 presentation text not null default '',
+	 position integer not null default 0,
+	 created_at text not null,
+	 updated_at text not null
+	);
+	alter table publications add column format_article text not null default 'article'
+	 check (format_article in ('actu', 'article', 'serie'));
+	alter table publications add column serie_id integer references series(id) on delete set null;
+	alter table publications add column rang_serie integer;
+	create index publications_serie on publications(serie_id, rang_serie);
 	`
 ];
 

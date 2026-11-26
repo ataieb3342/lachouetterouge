@@ -1,7 +1,7 @@
 # Consignes pour les assistants de code (ChatGPT, Codex, Claude…)
 
-Ce dépôt est le site d'un groupe militant. Il est en production, et c'est une
-cible politique. **Lis `CLAUDE.md` en entier avant de modifier quoi que ce
+Ce dépôt est le site de La chouette rouge, un collectif militant
+indépendant. Il est en production, et c'est une cible politique. **Lis `CLAUDE.md` en entier avant de modifier quoi que ce
 soit** : il explique chaque choix. Ce fichier-ci n'en est que le résumé
 impératif.
 
@@ -17,9 +17,14 @@ impératif.
 
 ## Ce qu'on ne fait pas
 
+- **Rien qui rattache le site à un parti, un candidat ou une campagne
+  électorale** : ni nom, ni logo, ni lien vers un site de candidat, ni appel à
+  voter. Le site a été fermé une fois pour cela (voir le début de `CLAUDE.md`).
 - **Pas de nouvelle rubrique dans l'en-tête.** La navigation est décidée dans
   `src/lib/structure.ts`, qui est verrouillé. Une nouvelle page va dans le
-  menu Ressources ou dans le pied de page. Pas de nouveau type de publication.
+  menu Ressources ou dans le pied de page. Pas de nouveau type de publication :
+  un nouveau genre de texte est un format d'article (actu, article, série).
+  L'agenda a été retiré en novembre 2026 : on ne recrée pas d'événements.
 - **Pas de nouvelle dépendance** sans décision (`garde-fous/dependances.test.ts`).
 - **On ne modifie jamais une migration existante** de `db.ts` : on en ajoute
   une à la fin, puis `npm run garde-fous:migrations`.

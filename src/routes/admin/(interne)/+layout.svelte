@@ -11,6 +11,7 @@
 		{ href: '/admin/comptes-rendus', label: 'Comptes rendus de réunions' },
 		{ href: '/admin/relecture', label: 'Relecture', badge: data.articlesARelire },
 		{ href: '/admin/a-la-une', label: 'À la une' },
+		{ href: '/admin/series', label: 'Séries' },
 		{ href: '/admin/commentaires', label: 'Commentaires', badge: data.commentairesEnAttente },
 		{ href: '/admin/sources', label: 'Sources des apéros', badge: data.sourcesEnAttente },
 		{ href: '/admin/medias', label: 'Images', exact: true },

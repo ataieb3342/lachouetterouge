@@ -21,10 +21,12 @@ import { lire } from './fichiers.ts';
 
 const AIDE = '\n→ Lisez l’en-tête de src/lib/structure.ts avant de continuer.';
 
-test('l’en-tête n’a que deux portes : Agenda et Articles', () => {
+// L'agenda a été retiré le 26 novembre 2026, sur décision du groupe : la
+// seconde porte est devenue « Apéros ». Deux portes, toujours.
+test('l’en-tête n’a que deux portes : Articles et Apéros', () => {
 	assert.deepEqual(
 		LIENS_PRINCIPAUX.map((lien) => lien.href),
-		['/agenda', '/articles'],
+		['/articles', '/aperos'],
 		'Les liens principaux de l’en-tête ont changé. Une nouvelle page se range dans le menu Ressources.' + AIDE
 	);
 });

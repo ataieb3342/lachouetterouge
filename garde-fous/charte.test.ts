@@ -45,9 +45,8 @@ test('couleurs : aucune valeur écrite en dur dans une page', () => {
 	// Une couleur en `#rrggbb` ne change pas avec le thème sombre et échappe à
 	// toute retouche de la palette. Les couleurs sont des jetons d'`app.css`.
 	const EXCEPTIONS = [
-		// Les couleurs d'Action populaire, qui ne sont pas celles du site.
-		'src/lib/components/BandeauApplication.svelte',
-		// Le dégradé officiel du logo.
+		// Les couleurs du logo : rouge, yeux ocre. Elles ne changent pas avec le
+		// thème, comme un logo imprimé.
 		'src/lib/components/Logo.svelte',
 		// Les pastilles des fiches membres.
 		'src/routes/le-groupe/+page.svelte',
@@ -69,12 +68,12 @@ test('surfaces : jamais `.carte` sur une surface colorée', () => {
 	assert.deepEqual(enFaute(composants(), MELANGE), []);
 });
 
-test('texte sur fond violet : `text-sur-brand`, jamais `text-white`', () => {
-	// En thème sombre, le violet devient un lavande clair : le texte doit
+test('texte sur fond rouge : `text-sur-brand`, jamais `text-white`', () => {
+	// En thème sombre, le rouge devient un corail clair : le texte doit
 	// devenir sombre. `text-white` reste blanc et devient illisible.
-	const BLANC_SUR_VIOLET =
+	const BLANC_SUR_ROUGE =
 		/class="[^"]*\bbg-brand\b(?!-)[^"]*\btext-white\b[^"]*"|class="[^"]*\btext-white\b[^"]*\bbg-brand\b(?!-)[^"]*"/g;
-	assert.deepEqual(enFaute(composants(), BLANC_SUR_VIOLET), []);
+	assert.deepEqual(enFaute(composants(), BLANC_SUR_ROUGE), []);
 });
 
 test('titres : `.titre-affiche` reste en casse normale, sans italique', () => {

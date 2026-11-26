@@ -34,7 +34,7 @@
 
 <!-- Pas de filet : le bandeau du prochain apéro pose déjà la limite. -->
 <header>
-	<p class="text-xs font-bold tracking-[0.2em] text-pourpre uppercase">
+	<p class="text-xs font-bold tracking-[0.2em] text-ocre uppercase">
 		{cadre.rythme}{cadre.heure ? ` · ${cadre.heure}` : ''}{cadre.lieu ? ` · ${cadre.lieu}` : ''}
 	</p>
 	<h1 class="titre-affiche mt-2 text-3xl text-ink sm:text-4xl">{TITRE_RUBRIQUE.aperos}</h1>
@@ -45,10 +45,10 @@
 
 <!-- Le prochain apéro : la date et le thème avant tout le reste.
 
-     Le filet est sous le bandeau et non sous l'en-tête : la surface pourpre
+     Le filet est sous le bandeau et non sous l'en-tête : la surface ocre
      pose déjà la limite en haut, c'est en bas qu'il faut la détacher de
      l'archive. Il est porté par un conteneur et non par la section elle-même,
-     qui est arrondie : une bordure s'y dessinerait par-dessus le pourpre au
+     qui est arrondie : une bordure s'y dessinerait par-dessus le ocre au
      lieu de faire un trait gris en dessous. -->
 <div class="border-b border-line pb-5">
 	<section class="fond-apero mt-5 overflow-hidden rounded-2xl px-6 py-7 sm:px-8 sm:py-8" aria-labelledby="prochain">
@@ -67,7 +67,7 @@
 					<div class="mt-8 flex flex-wrap items-center gap-4">
 						<a
 							href="/aperos/{prochain.slug}"
-							class="inline-block rounded-full bg-white px-5 py-2.5 text-sm font-bold text-pourpre transition-colors hover:bg-white/90"
+							class="inline-block rounded-full bg-white px-5 py-2.5 text-sm font-bold text-ocre transition-colors hover:bg-white/90"
 							>En savoir plus</a
 						>
 						<a href="/aperos/{prochain.slug}#sources" class="text-sm font-semibold text-white/90 underline-offset-4 hover:underline">

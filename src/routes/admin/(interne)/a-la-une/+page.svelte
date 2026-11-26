@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { COULEUR_KIND, formatDate, libellePublication, lienPublication } from '$lib/format';
+	import { COULEUR_KIND, formatDate, libelleFiche, lienPublication } from '$lib/format';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -33,7 +33,7 @@
 				<div class="min-w-0 flex-1">
 					<p class="text-xs font-semibold text-ink-faint">
 						{i === 0 ? 'Grande fiche' : `Carte ${i}`}
-						· <span class={COULEUR_KIND[p.kind]}>{libellePublication(p.kind, p.eventCategory)}</span>
+						· <span class={COULEUR_KIND[p.kind]}>{libelleFiche(p)}</span>
 						{#if p.pinnedAt}· depuis le {formatDate(p.pinnedAt)}{/if}
 					</p>
 					<p class="font-bold text-ink">{p.title}</p>
@@ -90,7 +90,7 @@
 				<div class="min-w-0 flex-1">
 					<p class="font-semibold text-ink">{p.title}</p>
 					<p class="mt-0.5 text-xs text-ink-faint">
-						<span class="font-semibold {COULEUR_KIND[p.kind]}">{libellePublication(p.kind, p.eventCategory)}</span>
+						<span class="font-semibold {COULEUR_KIND[p.kind]}">{libelleFiche(p)}</span>
 						· Publié le {formatDate(p.publishedAt)}
 					</p>
 				</div>

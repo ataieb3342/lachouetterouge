@@ -7,9 +7,14 @@
  * └──────────────────────────────────────────────────────────────────────┘
  *
  * Le site répond à deux questions, et l'en-tête n'a que deux portes :
- * « où est-ce que je peux venir ? » (l'agenda) et « qu'est-ce que vous faites,
- * qu'est-ce que vous pensez ? » (les articles). Tout le reste - ce qu'on
+ * « qu'est-ce que vous faites, qu'est-ce que vous pensez ? » (les articles)
+ * et « où est-ce que je peux venir ? » (les apéros). Tout le reste - ce qu'on
  * consulte ou dont on se sert - est rangé dans **Ressources**.
+ *
+ * La seconde porte a été l'agenda jusqu'au 26 novembre 2026 : événements,
+ * formations et apéros. Le groupe a décidé de le retirer et de ne garder que
+ * les apéros (voir CLAUDE.md, « L'agenda (retiré) ») ; « Apéros » a pris sa
+ * place, sans ajouter de lien.
  *
  * Trois fois déjà, une rubrique de plus est arrivée dans l'en-tête parce
  * qu'une nouveauté semblait la mériter : la revue de presse, le menu
@@ -32,11 +37,11 @@
 
 /**
  * Les deux portes du site. `sections` liste les adresses où le lien s'allume :
- * la fiche d'un événement est sous /actualites, celle d'un apéro sous /aperos.
+ * une série fait partie des articles, la fiche d'un apéro est sous /aperos.
  */
 export const LIENS_PRINCIPAUX = [
-	{ href: '/agenda', label: 'Agenda', sections: ['/agenda', '/actualites', '/aperos'] },
-	{ href: '/articles', label: 'Articles', sections: ['/articles'] }
+	{ href: '/articles', label: 'Articles', sections: ['/articles', '/series'] },
+	{ href: '/aperos', label: 'Apéros', sections: ['/aperos'] }
 ] as const;
 
 /** Tout ce qu'on consulte ou dont on se sert, sans date. Le titre du menu mène à la bibliothèque. */
@@ -66,7 +71,6 @@ export const PIED_DE_PAGE = [
 		liens: [
 			{ href: '/le-groupe', label: 'Qui sommes-nous ?' },
 			{ href: '/nous-rejoindre', label: 'Nous rejoindre' },
-			{ href: '/agenda', label: 'Agenda' },
 			{ href: '/aperos', label: 'Apéros' }
 		]
 	},

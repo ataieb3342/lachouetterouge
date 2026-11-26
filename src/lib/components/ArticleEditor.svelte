@@ -453,8 +453,8 @@
 							styleMarkdown('couleur', event.currentTarget.value);
 							event.currentTarget.value = '';
 						}}
-						><option value="">Choisir une couleur</option><option value="violet">Violet LFI</option><option
-							value="rouge">Rouge LFI</option
+						><option value="">Choisir une couleur</option><option value="violet">Violet</option><option
+							value="rouge">Rouge</option
 						><option value="turquoise">Turquoise</option><option value="vert">Vert</option><option value="rose"
 							>Rose</option
 						><option value="jaune">Jaune sur fond sombre</option></select

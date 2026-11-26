@@ -4,7 +4,9 @@ import { hashPassword, randomToken, sha256, verifyPassword, encryptAtRest, decry
 import { verifyTotp } from './totp.ts';
 import { rateLimit, rateLimitPeek, rateLimitReset } from './ratelimit.ts';
 
-export const SESSION_COOKIE = 'lfi_session';
+// Renommé de « lfi_session » en « chouette_session » en novembre 2026 : les
+// administrateurs connectés à ce moment-là ont dû se reconnecter une fois.
+export const SESSION_COOKIE = 'chouette_session';
 
 const SESSION_TTL_MS = 12 * 3600_000; // inactivité tolérée
 const SESSION_MAX_MS = 7 * 24 * 3600_000; // durée de vie absolue

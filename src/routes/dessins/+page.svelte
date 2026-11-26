@@ -15,7 +15,7 @@
 	])}
 />
 <header class="border-b border-line pb-4">
-	<p class="text-xs font-bold tracking-[0.2em] text-pourpre uppercase">Ressources</p>
+	<p class="text-xs font-bold tracking-[0.2em] text-ocre uppercase">Ressources</p>
 	<h1 class="titre-affiche mt-2 text-3xl text-ink sm:text-4xl">Dessins et caricatures</h1>
 	<p class="mt-3 max-w-2xl text-lg text-ink-soft">
 		Vous pouvez proposer un dessin sans créer de compte. Il sera vérifié avant d’être publié.

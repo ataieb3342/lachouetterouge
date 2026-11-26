@@ -12,7 +12,7 @@
  *
  *  - dans le `<head>`, le titre et la description que Google affiche dans ses
  *    résultats. Ces pages sont les plus susceptibles d'être trouvées par
- *    quelqu'un qui ne connaît pas le groupe - on ne cherche pas « LFI Dijon »,
+ *    quelqu'un qui ne connaît pas le groupe - on ne cherche pas « La chouette rouge Dijon »,
  *    on cherche « combien d'impôts je paie » - et sans description, le moteur
  *    affiche à la place la première phrase qu'il trouve dans la page ;
  *  - en bas de page, les liens « et maintenant ? ».

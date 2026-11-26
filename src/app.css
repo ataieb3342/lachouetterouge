@@ -51,20 +51,22 @@
  */
 @theme {
 	/*
-	 * Couleurs reprises telles quelles du logo officiel 2024 : le dégradé va du
-	 * rouge (à gauche) au violet (à droite), avec le phi et le texte en blanc.
-	 * Le violet sert de couleur principale, le rouge d'accent.
+	 * Les couleurs de la chouette rouge, prises à son logo
+	 * (`Logo.svelte`) : le rouge vif de son plumage, qui se fond dans le noir
+	 * sur les surfaces fortes, et l'ocre de ses yeux. Le rouge est la couleur
+	 * principale (titres, liens, boutons) ; le bleu nuit et l'ocre ne servent
+	 * qu'aux types de publication (événements, apéros).
 	 */
-	--color-brand: #58277e; /* violet officiel */
-	--color-brand-dark: #43206c;
-	--color-brand-soft: #f1ebf8;
+	--color-brand: #cc1420; /* rouge chouette : le plus vif qui reste lisible
+	                           en texte sur le fond clair (5 pour 1) */
+	--color-brand-dark: #a30f19;
+	--color-brand-soft: #fde4e2;
 
-	--color-accent: #b8334a; /* rouge officiel, assombri juste ce qu'il faut
-	                            pour rester lisible sur le fond clair */
-	--color-accent-dark: #9c1e33;
-	--color-accent-soft: #fbeaee;
+	--color-accent: #1f3f73; /* bleu nuit */
+	--color-accent-dark: #152d55;
+	--color-accent-soft: #e4ebf6;
 
-	--color-pourpre: #9a3263; /* teinte intermédiaire du dégradé */
+	--color-ocre: #8a5208; /* l'ocre des yeux, assombri pour le texte */
 
 	/* Le vert des formations dans l'agenda. Il n'est pas au logo : c'est la
 	   seule catégorie de rendez-vous qui n'a pas de couleur de rubrique à
@@ -73,7 +75,7 @@
 	--color-vert: #1f6650;
 
 	/*
-	 * Texte et fond. Le fond n'est pas un blanc pur mais un lavande très clair,
+	 * Texte et fond. Le fond n'est pas un blanc pur mais un crème très clair,
 	 * et le texte un noir adouci : le contraste reste très large (au-delà de 12
 	 * pour 1, la norme demande 4,5) mais la page n'éblouit plus et ne paraît pas
 	 * vide.
@@ -83,31 +85,31 @@
 	 * `surface-alt` est ce qui s'y creuse (étiquettes, zones désactivées). Cette
 	 * petite hiérarchie suffit à donner du relief sans ajouter d'ombres.
 	 */
-	--color-ink: #2a1f36;
-	--color-ink-soft: #4d4459;
-	--color-ink-faint: #6f6679;
+	--color-ink: #241b19;
+	--color-ink-soft: #4f4541;
+	--color-ink-faint: #6e635d;
 
-	--color-surface: #f4eefb;
-	--color-carte: #fdfbff;
-	--color-surface-alt: #e9dff6;
+	--color-surface: #f7f2ec;
+	--color-carte: #fffcf8;
+	--color-surface-alt: #efe6dc;
 	/* Filet décoratif : séparateurs, bordures de cartes. Volontairement discret. */
-	--color-line: #e1dbe8;
+	--color-line: #e6ddd3;
 	/* Contour des éléments qu'on manipule : champs, boutons secondaires,
 	   pastilles. Plus soutenu, pour atteindre le contraste de 3 pour 1 que
 	   demande la norme sur les contours de commande. */
-	--color-line-forte: #918799;
-	/* Couleur du texte posé sur un fond violet (boutons, pastilles). Blanc en
-	   thème clair ; en thème sombre le violet devient un lavande clair, et le
+	--color-line-forte: #8c8079;
+	/* Couleur du texte posé sur un fond rouge (boutons, pastilles). Blanc en
+	   thème clair ; en thème sombre le rouge devient un corail clair, et le
 	   texte doit passer au sombre pour rester lisible. */
 	--color-sur-brand: #ffffff;
 
-	/* Les barres des graphiques de l'administration (Fréquentation). Le violet
-	   de la marque est trop sombre pour une barre et le rouge trop pâle en
-	   thème sombre : ces deux teintes en sont dérivées, et la paire a été
-	   vérifiée pour rester distincte aux yeux des daltoniens, dans les deux
-	   thèmes. Le rouge marque les requêtes bloquées. */
-	--color-graphe: #7445a8;
-	--color-graphe-alerte: #b8334a;
+	/* Les barres des graphiques de l'administration (Fréquentation) : le bleu
+	   nuit éclairci pour le trafic, le rouge pour les requêtes bloquées. Un
+	   bleu et un rouge restent distincts pour les daltoniens les plus courants
+	   (deutéranopie, protanopie), qui confondent le rouge avec le vert, pas
+	   avec le bleu. Changer l'une des deux demande de refaire la vérification. */
+	--color-graphe: #2f5fa8;
+	--color-graphe-alerte: #c0303a;
 
 	--font-sans:
 		ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -127,14 +129,12 @@
 /*
  * Surfaces de marque.
  *
- * Le dégradé diagonal du logo, appliqué tel quel en fond de bloc, fait très
- * « affiche de campagne ». Les surfaces fortes du site sont donc un violet
- * profond éclairé par deux lueurs douces, l'une rouge, l'autre violette : les
- * couleurs officielles restent là, mais en lumière plutôt qu'en aplat. Le
- * dégradé pur ne sert plus qu'en filet fin.
+ * Un aplat rouge vif en fond de bloc fait « affiche de campagne ». Les
+ * surfaces fortes du site sont donc un rouge vif qui se fond dans le noir :
+ * la chouette dans la nuit. Le dégradé pur ne sert qu'en filet fin.
  */
 :root {
-	--filet-degrade: linear-gradient(90deg, #e83e3f 0%, #9a3263 45%, #4f2680 100%);
+	--filet-degrade: linear-gradient(90deg, #ff3b30 0%, #cc1420 45%, #0b0809 100%);
 }
 
 /*
@@ -148,55 +148,55 @@
  */
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme='clair']) {
-		--color-brand: #c1a0ef;
-		--color-brand-dark: #d8c2f7;
-		--color-brand-soft: #2a1d3d;
+		--color-brand: #ff5a5f;
+		--color-brand-dark: #ff8a8d;
+		--color-brand-soft: #3a1618;
 
-		--color-accent: #ff6d80;
-		--color-accent-dark: #ff9aa7;
-		--color-accent-soft: #3a1820;
+		--color-accent: #9dbcf2;
+		--color-accent-dark: #c2d6f8;
+		--color-accent-soft: #18233a;
 
-		--color-pourpre: #d67bb0;
+		--color-ocre: #e9ad5a;
 		--color-vert: #6fd3ad;
 
-		--color-ink: #f3eff8;
-		--color-ink-soft: #bbb2c8;
-		--color-ink-faint: #9a92a6;
+		--color-ink: #f3eee8;
+		--color-ink-soft: #c2b9b2;
+		--color-ink-faint: #9d948e;
 
-		--color-surface: #130f1a;
-		--color-carte: #1d1629;
-		--color-surface-alt: #271e36;
-		--color-line: #2f2740;
-		--color-line-forte: #6d6280;
-		--color-sur-brand: #1a0f2e;
-		--color-graphe: #9b7bd8;
-		--color-graphe-alerte: #e0566b;
+		--color-surface: #121218;
+		--color-carte: #1b1b24;
+		--color-surface-alt: #25242f;
+		--color-line: #2e2d3a;
+		--color-line-forte: #7a7585;
+		--color-sur-brand: #1a0b0d;
+		--color-graphe: #7fa6ea;
+		--color-graphe-alerte: #ff6b70;
 	}
 }
 :root[data-theme='sombre'] {
-	--color-brand: #c1a0ef;
-	--color-brand-dark: #d8c2f7;
-	--color-brand-soft: #2a1d3d;
+	--color-brand: #ff5a5f;
+	--color-brand-dark: #ff8a8d;
+	--color-brand-soft: #3a1618;
 
-	--color-accent: #ff6d80;
-	--color-accent-dark: #ff9aa7;
-	--color-accent-soft: #3a1820;
+	--color-accent: #9dbcf2;
+	--color-accent-dark: #c2d6f8;
+	--color-accent-soft: #18233a;
 
-	--color-pourpre: #d67bb0;
+	--color-ocre: #e9ad5a;
 	--color-vert: #6fd3ad;
 
-	--color-ink: #f3eff8;
-	--color-ink-soft: #bbb2c8;
-	--color-ink-faint: #9a92a6;
+	--color-ink: #f3eee8;
+	--color-ink-soft: #c2b9b2;
+	--color-ink-faint: #9d948e;
 
-	--color-surface: #130f1a;
-	--color-carte: #1d1629;
-	--color-surface-alt: #271e36;
-	--color-line: #2f2740;
-	--color-line-forte: #6d6280;
-	--color-sur-brand: #1a0f2e;
-	--color-graphe: #9b7bd8;
-	--color-graphe-alerte: #e0566b;
+	--color-surface: #121218;
+	--color-carte: #1b1b24;
+	--color-surface-alt: #25242f;
+	--color-line: #2e2d3a;
+	--color-line-forte: #7a7585;
+	--color-sur-brand: #1a0b0d;
+	--color-graphe: #7fa6ea;
+	--color-graphe-alerte: #ff6b70;
 }
 
 html {
@@ -248,43 +248,44 @@ h1, h2, h3, h4 {
 	left: 0;
 }
 
-/* Surface forte : violet profond, lueur rouge en haut à droite, lueur violette
-   en bas à gauche. Texte blanc. Identique en thème clair et sombre. */
+/* Surface forte : un rouge vif en haut à droite, qui se fond dans le noir
+   vers le bas à gauche. Le texte blanc se pose sur la partie sombre. Identique
+   en thème clair et sombre. */
 .fond-degrade {
-	background-color: #24123f;
+	background-color: #0b0809;
 	background-image:
-		radial-gradient(70% 90% at 100% 0%, rgba(232, 62, 63, 0.55) 0%, transparent 62%),
-		radial-gradient(80% 100% at 0% 100%, rgba(111, 58, 173, 0.75) 0%, transparent 65%);
+		radial-gradient(150% 200% at 100% 0%, rgba(232, 24, 32, 0.95) 0%, rgba(176, 14, 22, 0.75) 40%, rgba(110, 8, 14, 0.4) 65%, transparent 90%),
+		linear-gradient(200deg, rgba(150, 10, 18, 0.55) 0%, transparent 75%);
 	color: #fff;
 }
 /* Chaque type de publication a sa couleur, prise aux trois couleurs du logo :
-   violet pour les articles (c'est .fond-degrade), rouge pour les actualités,
-   pourpre pour les apéros. Les trois surfaces partagent la même construction,
-   un fond profond et deux lueurs, pour rester de la même famille. Texte blanc,
-   identiques en thème clair et sombre. */
+   rouge pour les articles (c'est .fond-degrade), bleu nuit pour les
+   événements, ocre pour les apéros. Les trois surfaces partagent la même
+   construction, un fond profond et deux lueurs, pour rester de la même
+   famille. Texte blanc, identiques en thème clair et sombre. */
 .fond-actu {
-	background-color: #521424;
+	background-color: #0e1a33;
 	background-image:
-		radial-gradient(70% 90% at 100% 0%, rgba(232, 62, 63, 0.7) 0%, transparent 62%),
-		radial-gradient(80% 100% at 0% 100%, rgba(154, 50, 99, 0.6) 0%, transparent 65%);
+		radial-gradient(70% 90% at 100% 0%, rgba(64, 110, 190, 0.7) 0%, transparent 62%),
+		radial-gradient(80% 100% at 0% 100%, rgba(168, 30, 42, 0.45) 0%, transparent 65%);
 	color: #fff;
 }
 .fond-apero {
-	background-color: #3a1032;
+	background-color: #2e1a06;
 	background-image:
-		radial-gradient(70% 90% at 100% 0%, rgba(154, 50, 99, 0.85) 0%, transparent 62%),
-		radial-gradient(80% 100% at 0% 100%, rgba(111, 58, 173, 0.55) 0%, transparent 65%);
+		radial-gradient(70% 90% at 100% 0%, rgba(214, 140, 40, 0.65) 0%, transparent 62%),
+		radial-gradient(80% 100% at 0% 100%, rgba(168, 30, 42, 0.5) 0%, transparent 65%);
 	color: #fff;
 }
-/* Surface sombre unie, pour le pied de page. */
+/* Surface sombre unie, pour le pied de page : la nuit. */
 .fond-degrade-sombre {
-	background: #1a0f2e;
+	background: #0f0c0d;
 	color: #fff;
 }
 
-/* L'image d'un article qui n'en a pas (`CarteArticle.svelte`) : le phi
-   officiel, en couleur, sur une carte. Deux essais avant celui-ci : un aplat
-   lavande presque de la couleur de la page avec un phi pâle, qui se lisait
+/* L'image d'un article qui n'en a pas (`CarteArticle.svelte`) : la chouette,
+   en couleur, sur une carte. Deux essais avant celui-ci : un aplat
+   crème presque de la couleur de la page avec un logo pâle, qui se lisait
    comme une image qui n'a pas chargé ; puis la construction de `.fond-degrade`
    en clair, qui tournait au rose-mauve délavé, une teinte que le site n'a
    nulle part ailleurs. Le logo en couleur sur `--color-carte` est la signature
@@ -295,7 +296,7 @@ h1, h2, h3, h4 {
 }
 
 /* Le bouton d'une surface colorée. Ses couleurs sont fixes, comme celles des
-   surfaces elles-mêmes : `text-brand` deviendrait un lavande clair en thème
+   surfaces elles-mêmes : `text-brand` deviendrait un corail clair en thème
    sombre, donc illisible sur la pastille blanche. */
 .bouton-sur-fond {
 	display: inline-block;
@@ -304,7 +305,7 @@ h1, h2, h3, h4 {
 	padding: 0.5rem 1rem;
 	font-size: 0.875rem;
 	font-weight: 700;
-	color: #43206c;
+	color: #a30f19;
 	transition: background-color 150ms;
 }
 .bouton-sur-fond:hover { background: rgba(255, 255, 255, 0.9); }
@@ -462,24 +463,24 @@ h1, h2, h3, h4 {
    page reste claire ; un choix explicite « Sombre » reste prioritaire. */
 :root:not([data-theme='sombre']):has(.article-aquarelle) {
 	color-scheme: light;
-	--color-brand: #58277e;
-	--color-brand-dark: #43206c;
-	--color-brand-soft: #f1ebf8;
-	--color-accent: #b8334a;
-	--color-accent-dark: #9c1e33;
-	--color-accent-soft: #fbeaee;
-	--color-ink: #2a1f36;
-	--color-ink-soft: #4d4459;
-	--color-ink-faint: #6f6679;
-	--color-surface: #f4eefb;
-	--color-carte: #fdfbff;
-	--color-surface-alt: #e9dff6;
-	--color-line: #e1dbe8;
-	--color-line-forte: #918799;
+	--color-brand: #cc1420;
+	--color-brand-dark: #a30f19;
+	--color-brand-soft: #fde4e2;
+	--color-accent: #1f3f73;
+	--color-accent-dark: #152d55;
+	--color-accent-soft: #e4ebf6;
+	--color-ink: #241b19;
+	--color-ink-soft: #4f4541;
+	--color-ink-faint: #6e635d;
+	--color-surface: #f7f2ec;
+	--color-carte: #fffcf8;
+	--color-surface-alt: #efe6dc;
+	--color-line: #e6ddd3;
+	--color-line-forte: #8c8079;
 	--color-sur-brand: #fff;
 }
 .article-aquarelle {
-	--lavis-violet: color-mix(in srgb, var(--color-brand) 26%, transparent);
+	--lavis-marque: color-mix(in srgb, var(--color-brand) 26%, transparent);
 	--lavis-vert: color-mix(in srgb, #2f9a68 20%, transparent);
 	--lavis-rouge: color-mix(in srgb, var(--color-accent) 17%, transparent);
 	max-width: 52rem;
@@ -491,7 +492,7 @@ h1, h2, h3, h4 {
 	border: 1px solid color-mix(in srgb, var(--color-line) 72%, var(--color-brand) 28%);
 	border-radius: 0.5rem 1.5rem 0.7rem 1.1rem;
 	background:
-		radial-gradient(ellipse 24rem 32rem at -8% 18%, var(--lavis-violet), transparent 65%),
+		radial-gradient(ellipse 24rem 32rem at -8% 18%, var(--lavis-marque), transparent 65%),
 		radial-gradient(ellipse 18rem 25rem at 108% 42%, var(--lavis-vert), transparent 68%),
 		radial-gradient(ellipse 21rem 30rem at -8% 74%, var(--lavis-rouge), transparent 68%),
 		repeating-linear-gradient(0deg, color-mix(in srgb, var(--color-ink) 2%, transparent) 0 1px, transparent 1px 5px),
@@ -1036,8 +1037,8 @@ main > :first-child {
    discrète, et la première fiche se cale sur le bord du contenu. */
 .fil-jours { scrollbar-width: thin; scroll-padding-inline: 0; }
 .agenda-action { color: var(--color-accent); }
-.agenda-reunion { color: var(--color-brand); }
-.agenda-apero { color: var(--color-pourpre); }
+.agenda-reunion { color: var(--color-accent); }
+.agenda-apero { color: var(--color-ocre); }
 .agenda-formation { color: var(--color-vert); }
 .agenda-autre { color: var(--color-ink-soft); }
 

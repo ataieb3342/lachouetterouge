@@ -351,7 +351,7 @@ function drawFood() {
     const paperX = x + (CELL_SIZE - paperWidth) / 2;
     const paperY = y + (CELL_SIZE - paperHeight) / 2;
 
-    // Feuille du bulletin
+    // La feuille à ramasser
     ctx.fillStyle = "#f7f4ea";
     ctx.beginPath();
     ctx.roundRect(paperX, paperY, paperWidth, paperHeight, 3);
@@ -379,7 +379,7 @@ function drawFood() {
     ctx.lineTo(paperX + paperWidth, paperY + paperHeight * 0.22);
     ctx.stroke();
 
-    // Lignes du bulletin pour donner l'effet "papier imprimé"
+    // Lignes de la feuille, pour donner l'effet "papier imprimé"
     ctx.strokeStyle = "#8a8a8a";
     ctx.lineWidth = 1;
 
@@ -442,7 +442,7 @@ function endGame() {
     pauseButton.disabled = true;
 
     showOverlay(
-        "Perdu ! Tortue melanchon a rencontré de méchant militants.",
+        "Perdu ! La tortue s’est cognée.",
         `Score : ${score}.`,
         "Rejouer"
     );
@@ -457,8 +457,8 @@ function winGame() {
     pauseButton.disabled = true;
 
     showOverlay(
-        "Victoire ! Tortue Melanchon est président en 2027.",
-        `Tu as récupérer tous les bulletins ${score}.`,
+        "Victoire ! La tortue a ramassé toutes les feuilles.",
+        `Score : ${score}.`,
         "Rejouer"
     );
 }

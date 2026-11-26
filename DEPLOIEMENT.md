@@ -282,6 +282,51 @@ les copies déjà téléchargées gardent la version d'origine. Un navigateur qu
 ouvert le PDF dans les dernières vingt-quatre heures peut aussi en garder
 l'ancienne version en mémoire jusqu'au lendemain.
 
+## 9. Changer de domaine (lfi-dijon.fr → lachouetterouge.fr, novembre 2026)
+
+Le site a quitté `lfi-dijon.fr` pour `lachouetterouge.fr`. L'ancien domaine
+reste branché et renvoie vers le nouveau en gardant le chemin : les liens déjà
+partagés continuent de fonctionner (bloc `lfi-dijon.fr` de `docker/Caddyfile`).
+
+**L'ordre compte.** Ce bloc suppose que `.env` désigne déjà le nouveau
+domaine : si Caddy reçoit le nouveau Caddyfile alors que `SITE_DOMAIN` vaut
+encore `lfi-dijon.fr`, il trouve deux blocs pour la même adresse et refuse de
+démarrer - le site entier est alors injoignable. D'où la marche à suivre :
+
+1. Chez le registrar de `lachouetterouge.fr`, deux enregistrements `A` vers
+   l'adresse du serveur, pour `lachouetterouge.fr` et `www.lachouetterouge.fr`.
+   Pas d'`AAAA` (voir la partie 2). Ne pas toucher aux enregistrements de
+   `lfi-dijon.fr` : ils doivent continuer de viser le serveur pour que la
+   redirection marche.
+2. Attendre que `dig +short lachouetterouge.fr` renvoie l'adresse du serveur.
+3. Sur le serveur, **avant** de récupérer le nouveau code, dans
+   `/srv/lfi-site/.env` :
+
+   ```bash
+   ORIGIN=https://lachouetterouge.fr
+   SITE_DOMAIN=lachouetterouge.fr
+   ```
+
+   (et `ADMIN_EMAIL` s'il était sur l'ancien domaine).
+4. Récupérer le code et recréer les deux conteneurs, qui ne relisent `.env`
+   qu'à leur création :
+
+   ```bash
+   cd /srv/lfi-site
+   git pull --ff-only origin main
+   docker compose -f docker/compose.yml up -d --build --force-recreate
+   ```
+
+5. Vérifier : `curl -I https://lachouetterouge.fr` répond 200, et
+   `curl -I https://lfi-dijon.fr/articles` répond 301 vers
+   `https://lachouetterouge.fr/articles`. Les premières requêtes peuvent
+   échouer quelques secondes, le temps que Caddy obtienne le certificat.
+6. Dans la Search Console de Google : déclarer la nouvelle propriété, y envoyer
+   `/sitemap.xml`, puis utiliser « Changement d'adresse » depuis l'ancienne.
+
+Quand `lfi-dijon.fr` ne sera plus renouvelé, retirer son bloc du Caddyfile :
+sinon Caddy réclamera en vain un certificat pour lui chaque jour.
+
 ## Ce que ce dispositif protège - et ce qu'il ne protège pas
 
 **Protégé :** injection de script (CSP stricte, HTML non interprété), injection

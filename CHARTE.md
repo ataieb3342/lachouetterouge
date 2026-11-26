@@ -15,20 +15,22 @@ Le site répond à deux questions. L'en-tête n'a donc que deux portes.
 
 | Le visiteur se demande | Il va dans | Ce qu'il y trouve |
 | --- | --- | --- |
-| « Où est-ce que je peux venir ? » | **Agenda** | événements, formations, apéros |
-| « Qu'est-ce que vous faites, qu'est-ce que vous pensez ? » | **Articles** | tout texte sans date de rendez-vous |
+| « Qu'est-ce que vous faites, qu'est-ce que vous pensez ? » | **Articles** | tout texte sans date de rendez-vous : actus, articles, séries |
+| « Où est-ce que je peux venir ? » | **Apéros** | les apéros thématiques (l'agenda a été retiré le 26 novembre 2026) |
 | « De quoi puis-je me servir ? » | **Ressources** (menu) | bibliothèque, boîte à outils, jeux, dessins, médias |
 
 Puis « Qui sommes-nous ? » et le bouton « Nous rejoindre ». C'est tout.
 
-- ✅ **On n'ajoute rien à côté d'Agenda et d'Articles.** La navigation est
+- ✅ **On n'ajoute rien à côté d'Articles et d'Apéros.** La navigation est
   décidée dans `src/lib/structure.ts`, et nulle part ailleurs.
 - Une nouvelle page qu'on consulte ou dont on se sert va dans le menu
   **Ressources**, et en carte en bas de la bibliothèque. C'est une décision à
   faire relire, pas un ajout en passant.
 - Une page secondaire (mentions, confidentialité…) va dans le **pied de page**.
 - ✅ **Trois types de publication** (`article`, `actu`, `apero`), pas un de
-  plus. Avant d'en imaginer un quatrième : c'est presque toujours un article.
+  plus - et `actu` (événements, formations) ne se crée plus depuis le retrait
+  de l'agenda. Avant d'en imaginer un nouveau : c'est presque toujours un
+  article, au format actu, article ou série.
 
 Pour ajouter une page, suivre « Ajouter une page fixe » dans `CLAUDE.md`.
 
@@ -40,7 +42,7 @@ Toutes les pages publiques commencent de la même façon. À recopier :
 <Metadonnees titre="Ma page - {data.settings.siteName}" description="Une phrase." />
 
 <header class="border-b border-line pb-4">
-	<p class="text-xs font-bold tracking-[0.2em] text-pourpre uppercase">Ressources</p>
+	<p class="text-xs font-bold tracking-[0.2em] text-ocre uppercase">Ressources</p>
 	<h1 class="titre-affiche mt-2 text-3xl text-ink sm:text-4xl">Le titre de la page</h1>
 	<p class="mt-3 max-w-2xl text-lg text-ink-soft">Le chapô : une ou deux phrases.</p>
 </header>
@@ -67,23 +69,23 @@ thème sombre. On n'écrit jamais une couleur directement.
 | Pour | Classe |
 | --- | --- |
 | Le texte | `text-ink`, puis `text-ink-soft`, puis `text-ink-faint` |
-| La page | `bg-surface` (un lavande très clair, pas un blanc pur) |
+| La page | `bg-surface` (un crème très clair, pas un blanc pur) |
 | Ce qui se pose sur la page (carte, champ, menu) | `bg-carte` ou `.carte` |
 | Ce qui s'y creuse (étiquette, encadré discret) | `bg-surface-alt` |
 | Un filet décoratif | `border-line` |
 | Le contour d'une commande (champ, bouton secondaire) | `border-line-forte` |
-| Les liens et la couleur principale | `text-brand` (violet) |
-| Un accent, une alerte | `text-accent` (rouge) - avec parcimonie |
+| Les liens et la couleur principale | `text-brand` (rouge chouette) |
+| Un accent | `text-accent` (bleu nuit) - avec parcimonie |
 
-Chaque type de publication a sa couleur, prise au logo : **violet** pour les
-articles (`text-brand`), **rouge** pour les événements (`text-accent`),
-**pourpre** pour les apéros (`text-pourpre`).
+Chaque type de publication a sa couleur, prise au logo de la chouette :
+**rouge** pour les articles (`text-brand`), **bleu nuit** pour les événements
+(`text-accent`), **ocre** pour les apéros (`text-ocre`).
 
 - ✅ Pas de couleur Tailwind par défaut (`bg-red-50`, `text-green-900`,
   `bg-gray-100`…) : elles ne suivent ni la palette ni le thème sombre.
 - ✅ Pas de couleur en `#rrggbb` dans une page.
-- ✅ Sur un fond violet, le texte est `text-sur-brand`, jamais `text-white` :
-  en thème sombre le violet devient clair, et le texte doit devenir sombre.
+- ✅ Sur un fond rouge, le texte est `text-sur-brand`, jamais `text-white` :
+  en thème sombre le rouge devient clair, et le texte doit devenir sombre.
 - Pas d'ombre portée : le relief vient des trois niveaux page / carte / creux.
 
 ## 4. Les briques
@@ -96,7 +98,7 @@ Avant d'écrire une classe à la main, prendre celle qui existe.
 | Un champ de formulaire | `.champ`, son libellé `.etiquette`, son explication `.aide` |
 | Un message d'erreur | `.alerte` ; une réussite : `.alerte alerte-succes` |
 | Une carte | `.carte` ; cliquable : le lien du titre étendu par `after:absolute after:inset-0`, **sans bouton** |
-| Une surface colorée | `.fond-degrade` (violet), `.fond-actu` (rouge), `.fond-apero` (pourpre) |
+| Une surface colorée | `.fond-degrade` (rouge), `.fond-actu` (bleu nuit), `.fond-apero` (ocre) |
 | Une invitation vers une autre page | `Encart.svelte` : une bande, une seule phrase |
 | Le logo | `Logo.svelte`, dimensionné par la hauteur (`h-10 w-auto`) |
 

@@ -7,7 +7,7 @@ import { join } from 'node:path';
 // Le parcours de relecture des articles, de bout en bout, sur une base
 // temporaire : rédaction → relecture → validé → en ligne.
 
-process.env.DATABASE_PATH = join(mkdtempSync(join(tmpdir(), 'lfi-relecture-')), 'test.db');
+process.env.DATABASE_PATH = join(mkdtempSync(join(tmpdir(), 'chouette-relecture-')), 'test.db');
 const { db } = await import('../src/lib/server/db.ts');
 const { createPublication, updatePublication, getById, getPublishedBySlug } =
 	await import('../src/lib/server/content.ts');

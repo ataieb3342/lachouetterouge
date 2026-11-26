@@ -23,6 +23,24 @@ www.{$SITE_DOMAIN} {
 	redir https://{$SITE_DOMAIN}{uri} permanent
 }
 
+# L'ancien domaine du site, du temps où il s'appelait « LFI Dijon Centre »
+# (jusqu'en novembre 2026). Il renvoie vers le nouveau en gardant le chemin :
+# un lien partagé avant le changement, /articles/mon-article par exemple,
+# mène toujours au même article. La redirection est permanente (301), ce qui
+# dit aussi à Google de reporter l'ancienne adresse sur la nouvelle.
+#
+# Attention : ce bloc suppose que SITE_DOMAIN, dans .env, vaut déjà le
+# nouveau domaine. S'il valait encore lfi-dijon.fr, Caddy verrait deux blocs
+# pour la même adresse et refuserait de démarrer. Changer .env et déployer ce
+# fichier vont donc ensemble (voir DEPLOIEMENT.md, « Changer de domaine »).
+#
+# Quand le domaine lfi-dijon.fr ne sera plus renouvelé, retirer ce bloc :
+# sinon Caddy réclamera en vain, jour après jour, un certificat pour lui.
+lfi-dijon.fr, www.lfi-dijon.fr {
+	header -Server
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
 {$SITE_DOMAIN} {
 	encode zstd gzip
 

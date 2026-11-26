@@ -1,5 +1,5 @@
 {
-	"name": "lfi-site",
+	"name": "lachouetterouge-site",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
@@ -41,5 +41,5 @@
 	"engines": {
 		"node": ">=24"
 	},
-	"description": "Site du groupe d'action LFI Dijon"
+	"description": "Site de La chouette rouge, collectif militant du centre de Dijon"
 }

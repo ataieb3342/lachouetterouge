@@ -62,10 +62,30 @@ export const LIBELLE_KIND: Record<string, string> = {
 	apero: 'Apéro thématique'
 };
 
-/** Libellé du type tel qu'il est choisi dans l'administration. */
-export function libellePublication(kind: string, eventCategory: string): string {
-	if (kind === 'actu' && eventCategory === 'formation') return 'Formation';
-	return LIBELLE_KIND[kind] ?? 'Publication';
+/** Les trois formats d'un article, décidés en réunion le 25 novembre 2026. */
+export const LIBELLE_FORMAT: Record<string, string> = {
+	actu: 'Actu',
+	article: 'Article',
+	serie: 'Série'
+};
+
+/**
+ * Ce qu'est une fiche, en un mot ou deux : « Actu », « Article »,
+ * « Série · La santé », « Apéro thématique »… Pour les étiquettes de
+ * l'administration et le surlignage d'une fiche.
+ */
+export function libelleFiche(p: {
+	kind: string;
+	eventCategory: string;
+	formatArticle: string;
+	serie: { titre: string } | null;
+}): string {
+	if (p.kind === 'article') {
+		if (p.formatArticle === 'serie') return p.serie ? `Série · ${p.serie.titre}` : 'Série';
+		return LIBELLE_FORMAT[p.formatArticle] ?? 'Article';
+	}
+	if (p.kind === 'actu' && p.eventCategory === 'formation') return 'Formation';
+	return LIBELLE_KIND[p.kind] ?? 'Publication';
 }
 
 /** « 18:00 » devient « 18 h », « 18:30 » devient « 18 h 30 ». */
@@ -94,13 +114,13 @@ export const LIBELLE_EVENEMENT: Record<string, string> = {
 
 /**
  * Couleur de chaque type de publication, prise aux trois couleurs du logo :
- * violet pour les articles, rouge pour les événements, pourpre pour les apéros.
+ * rouge pour les articles, bleu nuit pour les événements, ocre pour les apéros.
  * Sert aux étiquettes des listes et aux surfaces colorées.
  */
 export const COULEUR_KIND: Record<string, string> = {
 	article: 'text-brand',
 	actu: 'text-accent',
-	apero: 'text-pourpre'
+	apero: 'text-ocre'
 };
 
 /** Surface colorée de chaque type (voir app.css), pour les diapositives. */

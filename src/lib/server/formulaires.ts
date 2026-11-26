@@ -1,5 +1,6 @@
-import type { PublicationInput, Kind, Status } from './content.ts';
-import { getById, listALaUne, MAX_A_LA_UNE, mettreALaUne } from './content.ts';
+import type { PublicationInput, Kind, Status, FormatArticle } from './content.ts';
+import { FORMATS_ARTICLE, getById, listALaUne, MAX_A_LA_UNE, mettreALaUne } from './content.ts';
+import { getSerie } from './series.ts';
 import { storeUpload } from './media.ts';
 import { renderMarkdown } from './markdown.ts';
 import { audit, listAdmins } from './auth.ts';
@@ -15,11 +16,15 @@ export async function lirePublication(
 	form: FormData,
 	adminId: number,
 	couvertureActuelle: number | null,
-	carteActuelle: number | null = null
+	carteActuelle: number | null = null,
+	/** Le type de la fiche modifiée, ou null pour une création. */
+	kindActuel: Kind | null = null
 ): Promise<PublicationInput> {
-	// Quatre types : un texte (article) ou un rendez-vous (événement, formation,
-	// apéro). Événements et formations partagent le `kind` 'actu' et se
-	// distinguent par leur catégorie d'agenda.
+	// Deux types se créent : un article (au format actu, article ou série) ou
+	// un apéro. Les événements et formations ('actu', distingués par leur
+	// catégorie d'agenda) ne se créent plus depuis le retrait de l'agenda en
+	// novembre 2026 ; une ancienne fiche peut encore être corrigée, sans
+	// changer de type pour autant.
 	const typeAffiche = String(form.get('kind') ?? 'article');
 	const kind = typeAffiche === 'reunion' || typeAffiche === 'formation' ? 'actu' : typeAffiche;
 	const estRendezVous = kind !== 'article';
@@ -59,6 +64,35 @@ export async function lirePublication(
 
 	if (!['article', 'reunion', 'formation', 'apero'].includes(typeAffiche)) {
 		throw new ErreurFormulaire('Type de publication inconnu.');
+	}
+	if (kind === 'actu' && kindActuel !== 'actu') {
+		throw new ErreurFormulaire(
+			'Les événements et les formations ne se publient plus : le site n’a plus d’agenda. Choisissez « Article » ou « Apéro ».'
+		);
+	}
+
+	// Le format d'un article, et sa série. Ce qu'aurait laissé un changement de
+	// format en cours de saisie est ignoré (voir `champsFormat` de content.ts).
+	const formatArticle = String(form.get('formatArticle') ?? 'article') as FormatArticle;
+	let serieId: number | null = null;
+	let rangSerie: number | null = null;
+	if (kind === 'article') {
+		if (!FORMATS_ARTICLE.includes(formatArticle)) throw new ErreurFormulaire('Format d’article inconnu.');
+		if (formatArticle === 'serie') {
+			serieId = Number(form.get('serieId'));
+			if (!Number.isInteger(serieId) || !getSerie(serieId)) {
+				throw new ErreurFormulaire(
+					'Choisissez la série de cet article. Si elle n’existe pas encore, créez-la dans Administration → Séries.'
+				);
+			}
+			const rang = String(form.get('rangSerie') ?? '').trim();
+			if (rang) {
+				if (!/^\d{1,3}$/.test(rang) || Number(rang) < 1) {
+					throw new ErreurFormulaire('La place dans la série est un nombre : 1 pour le premier article, 2 pour le suivant…');
+				}
+				rangSerie = Number(rang);
+			}
+		}
 	}
 
 	if (status !== 'draft' && status !== 'published') throw new ErreurFormulaire('État inconnu.');
@@ -120,6 +154,9 @@ export async function lirePublication(
 
 	return {
 		kind: kind as Kind,
+		formatArticle: kind === 'article' ? formatArticle : 'article',
+		serieId,
+		rangSerie,
 		status: status as Status,
 		title,
 		summary,
@@ -176,6 +213,9 @@ export function enregistrerALaUne(
 export function valeursSaisies(form: FormData) {
 	return {
 		kind: String(form.get('kind') ?? 'article'),
+		formatArticle: String(form.get('formatArticle') ?? 'article'),
+		serieId: String(form.get('serieId') ?? ''),
+		rangSerie: String(form.get('rangSerie') ?? ''),
 		title: String(form.get('title') ?? ''),
 		summary: String(form.get('summary') ?? ''),
 		body: String(form.get('body') ?? ''),

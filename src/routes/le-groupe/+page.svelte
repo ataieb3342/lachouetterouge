@@ -10,7 +10,7 @@
 
 <Metadonnees
 	titre="Qui sommes-nous ? - {data.settings.siteName}"
-	description="Qui nous sommes, comment fonctionne un groupe d'action de La France insoumise, et où nous trouver dans le centre de Dijon."
+	description="Qui nous sommes, comment fonctionne La chouette rouge, et où nous trouver dans le centre de Dijon."
 	donnees={filAriane(page.url.origin, [
 		{ nom: 'Accueil', chemin: '/' },
 		{ nom: 'Qui sommes-nous ?', chemin: '/le-groupe' }
@@ -75,38 +75,26 @@
 	</div>
 </section>
 
-<section class="mt-6 rounded-2xl border border-line bg-carte p-5" aria-labelledby="mouvement-lfi">
-	<p class="text-xs font-bold tracking-[0.18em] text-brand uppercase">Le mouvement</p>
-	<h2 id="mouvement-lfi" class="mt-2 text-2xl font-extrabold tracking-tight text-ink">La France insoumise</h2>
+<section class="mt-6 rounded-2xl border border-line bg-carte p-5" aria-labelledby="pourquoi-chouette">
+	<p class="text-xs font-bold tracking-[0.18em] text-brand uppercase">Le nom</p>
+	<h2 id="pourquoi-chouette" class="mt-2 text-2xl font-extrabold tracking-tight text-ink">Pourquoi une chouette rouge ?</h2>
 	<p class="mt-3 max-w-3xl leading-relaxed text-ink-soft">
-		La France insoumise a été lancée le 10 février 2016 par Jean-Luc Mélenchon. Son programme,
-		<em>L’Avenir en commun</em>, a été rédigé de façon participative à partir de plusieurs milliers
-		de contributions et est régulièrement mis à jour.
+		La chouette, c’est la hulotte qu’on entend la nuit dans les parcs de Dijon. Elle voit clair
+		quand il fait sombre : c’est ce qu’on essaie de faire avec l’actualité, en allant chercher les chiffres et les sources plutôt que les slogans.
 	</p>
 	<p class="mt-3 max-w-3xl leading-relaxed text-ink-soft">
-		Notre groupe agit localement autour de ce programme. Les groupes, actions et événements sont reliés sur
-		<a href="https://actionpopulaire.fr" rel="noopener noreferrer" target="_blank">Action populaire</a>.
-		En Côte-d’Or, retrouvez aussi
-		<a href="https://lafranceinsoumise21.fr" rel="noopener noreferrer" target="_blank">La France insoumise 21</a>.
-	</p>
-	<p class="mt-3">
-		<a
-			class="font-bold text-brand"
-			href="https://melenchon2027.fr"
-			rel="noopener noreferrer"
-			target="_blank"
-			>Site de la candidature de Jean-Luc Mélenchon pour 2027 ↗</a
-		>
+		La chouette rouge est un collectif indépendant. Ce site n’est celui d’aucun parti, d’aucun candidat ni
+		d’aucune campagne électorale : il est écrit et financé par ses membres.
 	</p>
 </section>
 
 <section class="mt-6 flex flex-col gap-3 rounded-2xl bg-brand-soft p-5 sm:flex-row sm:items-center sm:justify-between">
 	<div>
 		<h2 class="text-xl font-extrabold text-ink">Envie de nous rencontrer ?</h2>
-		<p class="mt-1 text-sm text-ink-soft">Consultez les prochaines dates ou venez discuter avec nous.</p>
+		<p class="mt-1 text-sm text-ink-soft">Le plus simple : venir à un apéro, un lundi sur deux.</p>
 	</div>
 	<div class="flex shrink-0 flex-wrap gap-2">
-		<a class="bouton-secondaire" href="/agenda">Voir l’agenda</a>
+		<a class="bouton-secondaire" href="/aperos">Le prochain apéro</a>
 		<a class="bouton" href="/nous-rejoindre">Nous rejoindre</a>
 	</div>
 </section>

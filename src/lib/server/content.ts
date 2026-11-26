@@ -6,6 +6,13 @@ export type Status = 'draft' | 'published';
 export type StyleMiseEnPage = 'standard' | 'carnet-aquarelle';
 /** Catégorie d'un rendez-vous dans l'agenda ; 'autre' pour un article. */
 export type CategorieEvenement = 'reunion' | 'apero' | 'formation' | 'autre';
+/**
+ * Les trois formats d'un article (migration 031) : une actu (des faits), un
+ * article (un avis sourcé), ou un épisode d'une série. Sans effet sur les
+ * autres types de fiche.
+ */
+export type FormatArticle = 'actu' | 'article' | 'serie';
+export const FORMATS_ARTICLE: FormatArticle[] = ['actu', 'article', 'serie'];
 
 export type Publication = {
 	id: number;
@@ -40,9 +47,20 @@ export type Publication = {
 	author_id: number | null;
 	author_name: string;
 	layout_style: StyleMiseEnPage;
+	format_article: FormatArticle;
+	serie_id: number | null;
+	rang_serie: number | null;
 };
 
-export type PublicationListItem = Publication & { comment_count: number };
+/**
+ * Une fiche telle que la lisent les pages : le nombre de commentaires, et le
+ * titre et l'adresse de sa série quand elle en a une.
+ */
+export type PublicationListItem = Publication & {
+	comment_count: number;
+	serie_titre: string | null;
+	serie_slug: string | null;
+};
 
 /* ------------------------------------------------------------------ slugs */
 
@@ -78,8 +96,10 @@ const PUBLIC_SELECT = `
 	select p.*, (
 		select count(*) from comments c
 		where c.publication_id = p.id and c.status = 'approved'
-	) as comment_count
-	from publications p`;
+	) as comment_count,
+	s.titre as serie_titre, s.slug as serie_slug
+	from publications p
+	left join series s on s.id = p.serie_id`;
 
 /**
  * Deux tris possibles :
@@ -115,18 +135,36 @@ const ORDRE = {
 export type Ordre = keyof typeof ORDRE;
 
 export function listPublished(
-	opts: { kind?: Kind; eventCategory?: CategorieEvenement; limit?: number; offset?: number; ordre?: Ordre } = {}
+	opts: {
+		kind?: Kind;
+		eventCategory?: CategorieEvenement;
+		/** Seulement les articles de ce format (page Articles, `?format=`). */
+		format?: FormatArticle;
+		limit?: number;
+		offset?: number;
+		ordre?: Ordre;
+	} = {}
 ) {
-	const { kind, eventCategory, limit = 20, offset = 0, ordre = 'chronologique' } = opts;
+	const { kind, eventCategory, format, limit = 20, offset = 0, ordre = 'chronologique' } = opts;
 	return db()
 		.prepare(
 			`${PUBLIC_SELECT}
 			 where p.status = 'published' and (? is null or p.kind = ?)
 			   and (? is null or p.event_category = ?)
+			   and (? is null or p.format_article = ?)
 			 ${ORDRE[ordre]}
 			 limit ? offset ?`
 		)
-		.all(kind ?? null, kind ?? null, eventCategory ?? null, eventCategory ?? null, limit, offset) as PublicationListItem[];
+		.all(
+			kind ?? null,
+			kind ?? null,
+			eventCategory ?? null,
+			eventCategory ?? null,
+			format ?? null,
+			format ?? null,
+			limit,
+			offset
+		) as PublicationListItem[];
 }
 
 /**
@@ -144,29 +182,66 @@ export function listPinnedPublished() {
 		.all() as PublicationListItem[];
 }
 
-export function countPublished(kind?: Kind, eventCategory?: CategorieEvenement): number {
+export function countPublished(kind?: Kind, eventCategory?: CategorieEvenement, format?: FormatArticle): number {
 	return (
 		db()
 			.prepare(
 				`select count(*) as n from publications
 				 where status = 'published' and (? is null or kind = ?)
-				   and (? is null or event_category = ?)`
+				   and (? is null or event_category = ?)
+				   and (? is null or format_article = ?)`
 			)
-			.get(kind ?? null, kind ?? null, eventCategory ?? null, eventCategory ?? null) as { n: number }
+			.get(
+				kind ?? null,
+				kind ?? null,
+				eventCategory ?? null,
+				eventCategory ?? null,
+				format ?? null,
+				format ?? null
+			) as { n: number }
 	).n;
 }
 
-/** Rendez-vous publiés d'un mois, classés par jour puis par titre. */
-export function listAgenda(debut: string, fin: string) {
+/**
+ * Apéros publiés entre deux dates, classés par jour puis par titre : le fil
+ * « Les prochains apéros » de l'accueil.
+ *
+ * Seulement les apéros : l'agenda des événements et formations a été retiré
+ * en novembre 2026 (voir CLAUDE.md, « L'agenda (retiré) »). Les anciennes
+ * fiches d'événements restent en base et à leur adresse, mais ne sont plus
+ * listées nulle part.
+ */
+export function listAperosEntre(debut: string, fin: string) {
 	return db()
 		.prepare(
 			`${PUBLIC_SELECT}
-			 where p.status = 'published'
+			 where p.status = 'published' and p.kind = 'apero'
 			   and p.event_at is not null
 			   and p.event_at >= ? and p.event_at < ?
 			 order by p.event_at asc, p.title collate nocase asc`
 		)
 		.all(debut, fin) as PublicationListItem[];
+}
+
+/**
+ * L'ordre de lecture d'une série : le rang choisi dans le formulaire, puis,
+ * pour les articles sans rang, la date. Voir `series.ts`.
+ */
+export const ORDRE_SERIE = `order by
+	case when p.rang_serie is null then 1 else 0 end,
+	p.rang_serie asc,
+	coalesce(p.published_at, p.created_at) asc,
+	p.id asc`;
+
+/** Les articles en ligne d'une série, dans leur ordre de lecture. */
+export function listArticlesDeSerie(serieId: number) {
+	return db()
+		.prepare(
+			`${PUBLIC_SELECT}
+			 where p.status = 'published' and p.kind = 'article' and p.serie_id = ?
+			 ${ORDRE_SERIE}`
+		)
+		.all(serieId) as PublicationListItem[];
 }
 
 export function getPublishedBySlug(slug: string): PublicationListItem | undefined {
@@ -225,6 +300,12 @@ export function listForAdmin(
 
 export type PublicationInput = {
 	kind: Kind;
+	/** Format d'un article ; ignoré pour les autres types (enregistré 'article'). */
+	formatArticle?: FormatArticle;
+	/** La série d'un article au format « serie », sinon null. */
+	serieId?: number | null;
+	/** Place dans la série (1 pour le premier), ou null pour « à la suite ». */
+	rangSerie?: number | null;
 	title: string;
 	summary: string;
 	body: string;
@@ -262,8 +343,9 @@ export function createPublication(input: PublicationInput, authorId: number): nu
 			  event_at, event_category, event_start_time, event_end_time,
 			  event_location, event_address, event_location_url, event_managers, event_signup_url,
 			  event_meeting_point, event_map_media_id, event_map_embed_url, byline_admin_id,
-			  published_at, created_at, updated_at, author_id, author_name, layout_style)
-			 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+			  published_at, created_at, updated_at, author_id, author_name, layout_style,
+			  format_article, serie_id, rang_serie)
+			 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		)
 		.run(
 			input.kind,
@@ -292,7 +374,8 @@ export function createPublication(input: PublicationInput, authorId: number): nu
 			timestamp,
 			authorId,
 			input.authorName,
-			input.layoutStyle ?? 'standard'
+			input.layoutStyle ?? 'standard',
+			...champsFormat(input)
 		);
 	const id = Number(result.lastInsertRowid);
 	replacePublicationManagers(id, input.eventManagerAdminIds ?? []);
@@ -324,7 +407,8 @@ export function updatePublication(id: number, input: PublicationInput, opts: { r
 		   event_start_time = ?, event_end_time = ?, event_location = ?,
 		   event_address = ?, event_location_url = ?, event_managers = ?, event_signup_url = ?,
 		   event_meeting_point = ?, event_map_media_id = ?, event_map_embed_url = ?, byline_admin_id = ?, published_at = ?,
-		   updated_at = ?, author_name = ?, layout_style = ?
+		   updated_at = ?, author_name = ?, layout_style = ?,
+		   format_article = ?, serie_id = ?, rang_serie = ?
 		 where id = ?`
 	).run(
 		input.kind,
@@ -352,10 +436,23 @@ export function updatePublication(id: number, input: PublicationInput, opts: { r
 		now(),
 		input.authorName,
 		input.layoutStyle ?? 'standard',
+		...champsFormat(input),
 		id
 	);
 	replacePublicationManagers(id, input.eventManagerAdminIds ?? []);
 	return slug;
+}
+
+/**
+ * Format, série et rang tels qu'ils sont enregistrés. Seul un article a un
+ * format ; seul un article de série a une série et un rang. Ce qu'aurait
+ * laissé un changement de type ou de format en cours de saisie est effacé.
+ */
+function champsFormat(input: PublicationInput): [FormatArticle, number | null, number | null] {
+	if (input.kind !== 'article') return ['article', null, null];
+	const format = input.formatArticle ?? 'article';
+	if (format !== 'serie') return [format, null, null];
+	return [format, input.serieId ?? null, input.rangSerie ?? null];
 }
 
 function replacePublicationManagers(publicationId: number, adminIds: number[]) {
