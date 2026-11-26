@@ -75,7 +75,6 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/server/metadonnees-images.ts` | Retire des images envoyées la position GPS, la date, l'appareil (règle n° 10) |
 | `src/lib/server/metadonnees-pdf.ts` | Retire des PDF proposés le nom de l'auteur, le logiciel, les dates (règle n° 11) |
 | `src/lib/server/dessins.ts`, `propositions-dessins.ts`, `vignettes.ts` | La galerie de dessins, les dessins proposés par les visiteurs, leurs vignettes |
-| `src/lib/server/comptes-rendus.ts` | Les comptes rendus de réunion, internes |
 | `src/lib/structure.ts` | **Verrouillé** : ce que contiennent l'en-tête, le menu Ressources et le pied de page |
 | `garde-fous/` | Les tests qui échouent quand une règle du projet est cassée |
 | `CHARTE.md` | La charte graphique et la structure du site, en court |
@@ -99,10 +98,10 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/fichiers-embarques.ts` | Sert les fichiers des jeux et des modules, avec leur CSP |
 | `src/routes/admin/(interne)/` | Pages d'administration (session obligatoire) |
 
-Les dépendances runtime sont `markdown-it`, `qrcode`, `turndown`, `sharp`
-(vignettes des dessins), `mammoth` et `yauzl` (import Word privé). Elles
-étaient deux ; quatre sont arrivées en novembre 2026 sans que personne l'ait
-décidé. **Ne pas en ajouter sans nécessité** : chaque dépendance est une porte
+Les dépendances runtime sont `markdown-it`, `qrcode`, `turndown` (éditeur
+visuel) et `sharp` (vignettes des dessins). Elles étaient deux ; quatre sont
+arrivées en novembre 2026 sans que personne l'ait décidé, et deux sont
+reparties avec les comptes rendus de réunion. **Ne pas en ajouter sans nécessité** : chaque dépendance est une porte
 d'entrée possible et une mise à jour à suivre. La liste est désormais fermée
 par `garde-fous/dependances.test.ts`, qui dit comment en faire approuver une.
 
@@ -1329,7 +1328,7 @@ Quatre groupes, dans `admin/(interne)/+layout.svelte` : **Publier**
 (Publications, À la une, Séries), **À relire**
 (Commentaires, Sources des apéros, Dessins, avec le nombre en attente),
 **Le site** (Médias recommandés, Images, Fréquentation, Réglages) et
-**L'équipe** (Comptes rendus, Comptes, Mon compte). C'était une liste de
+**L'équipe** (Comptes, Mon compte). C'était une liste de
 quinze entrées dans l'ordre où elles avaient été ajoutées.
 
 Le tableau de bord dit **ce qui attend quelqu'un** - ce que les visiteurs ont
@@ -1339,33 +1338,15 @@ publications, qui ne disaient quoi faire à personne, ont été retirés
 (novembre 2026). **Avant d'ajouter une page à l'administration, se demander
 si elle ne tient pas dans une page existante.**
 
-## Comptes rendus internes
+## Comptes rendus de réunion (retirés)
 
-Administration → Comptes rendus de réunions. **Ils ne sont jamais publics** :
-pas de route hors de `/admin`, rien dans le flux RSS ni dans le plan du site.
-La session et la double authentification sont revérifiées dans chaque
-chargement, action et route - le `+layout.server.ts` de l'administration ne
-protège pas les actions de formulaire, qui s'exécutent avant lui.
-
-- `src/lib/server/comptes-rendus.ts` : un fichier `.docx` ou `.md` est
-  converti en Markdown pour remplir l'éditeur. Un document Word est une
-  archive ZIP : `verifierDocx` en contrôle la taille réelle, décompressée,
-  avant de la confier à `mammoth` - sans cela, quelques kilo-octets peuvent en
-  contenir des gigaoctets. Ni macros, ni chiffrement, ni accès à un fichier
-  extérieur ; les images ne sont pas reprises.
-- Le fichier d'origine est gardé dans `data/uploads/.meeting-reports/`, sous un
-  nom au hasard, sans ligne dans la table `media` : la route `/media/…` ne
-  peut pas le servir. Il n'est proposé qu'en téléchargement, sans cache.
-- `src/lib/markdown-compte-rendu.ts` fait le rendu, partagé entre la page de
-  lecture et l'aperçu de `EditeurCompteRendu.svelte` : `html: false`, pas
-  d'images. Une ligne `- [ ] à faire` devient une case que l'équipe coche
-  depuis la page de lecture (action `cocher`), sans rouvrir l'éditeur.
-- Deux personnes qui modifient le même compte rendu : la seconde est refusée
-  (`modifierCompteRendu` compare la date de dernière modification lue).
-- Ne pas importer ici le moteur des articles publics, et ne jamais ajouter ces
-  comptes rendus aux publications, au RSS ou au sitemap.
-
-Parcours complet, après compilation : `node tests/integration/meeting-reports-http.mjs`.
+L'administration a eu une rubrique « Comptes rendus de réunions », internes,
+avec import de fichiers Word (`mammoth`, `yauzl`) et cases à cocher. Elle a
+servi une fois : le groupe l'a retirée le 26 novembre 2026, avec ses deux
+dépendances. La table `meeting_reports` et les originaux de
+`data/uploads/.meeting-reports/` restent tels quels ; les retirer demanderait
+une migration qui efface des données pour rien. Le code est dans l'historique
+git si le besoin revient.
 
 ## Dessins et caricatures
 

@@ -40,7 +40,6 @@
 		{
 			titre: 'L’équipe',
 			liens: [
-				{ href: '/admin/comptes-rendus', label: 'Comptes rendus de réunions' },
 				...(data.adminCourant.role === 'owner' ? [{ href: '/admin/comptes', label: 'Comptes' }] : []),
 				{ href: '/admin/mon-compte', label: 'Mon compte' }
 			]
