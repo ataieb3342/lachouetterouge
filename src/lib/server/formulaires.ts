@@ -1,5 +1,5 @@
 import type { PublicationInput, Kind, Status, FormatArticle } from './content.ts';
-import { FORMATS_ARTICLE, getById, listALaUne, MAX_A_LA_UNE, mettreALaUne } from './content.ts';
+import { FORMATS_ARTICLE, getById, listALaUne, MAX_A_LA_UNE, mettreALaUne, revisionArticle } from './content.ts';
 import { getSerie } from './series.ts';
 import { storeUpload } from './media.ts';
 import { renderMarkdown } from './markdown.ts';
@@ -180,6 +180,20 @@ export async function lirePublication(
 		eventMapMediaId,
 		eventMapEmbedUrl
 	};
+}
+
+/**
+ * Refuse d'enregistrer par-dessus une version qui n'est plus celle qu'on a
+ * ouverte : entre l'ouverture de la page et le clic, quelqu'un d'autre a
+ * modifié le texte. Sans cela, le second enregistrement effacerait le
+ * premier sans prévenir personne.
+ */
+export function verifierRevision(id: number, revisionLue: number) {
+	if (revisionArticle(id) !== revisionLue) {
+		throw new ErreurFormulaire(
+			'Le texte a été modifié par quelqu’un d’autre depuis que vous avez ouvert cette page. Copiez vos changements, rechargez la page, puis recommencez.'
+		);
+	}
 }
 
 /**

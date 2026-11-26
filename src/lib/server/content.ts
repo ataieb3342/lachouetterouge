@@ -332,9 +332,6 @@ export type PublicationInput = {
 };
 
 export function createPublication(input: PublicationInput, authorId: number): number {
-	// Un article naît toujours en brouillon : il n'est mis en ligne qu'au bout
-	// du parcours de relecture (`relecture.ts`), jamais par ce formulaire.
-	if (input.kind === 'article') input = { ...input, status: 'draft' };
 	const timestamp = now();
 	const result = db()
 		.prepare(
@@ -385,13 +382,6 @@ export function createPublication(input: PublicationInput, authorId: number): nu
 export function updatePublication(id: number, input: PublicationInput, opts: { reslug: boolean }) {
 	const existing = getById(id);
 	if (!existing) throw new Error('Publication introuvable');
-	// Enregistrer un article ne change jamais son état : seul le parcours de
-	// relecture le met en ligne ou l'en retire (`relecture.ts`). Une fiche qui
-	// devient un article repart en brouillon, pour être relue comme les autres.
-	if (input.kind === 'article') {
-		input = { ...input, status: existing.kind === 'article' ? existing.status : 'draft' };
-	}
-
 	// On ne change l'URL que si on le demande explicitement : les liens déjà
 	// partagés sur les réseaux sociaux continuent de fonctionner.
 	const slug = opts.reslug ? uniqueSlug(input.title, id) : existing.slug;
@@ -453,6 +443,23 @@ function champsFormat(input: PublicationInput): [FormatArticle, number | null, n
 	const format = input.formatArticle ?? 'article';
 	if (format !== 'serie') return [format, null, null];
 	return [format, input.serieId ?? null, input.rangSerie ?? null];
+}
+
+/**
+ * Le numéro de version d'un article. Il augmente à chaque modification du
+ * texte (déclencheur `article_review_reset`, migrations 022 à 029) : le
+ * formulaire l'envoie, et le serveur refuse d'enregistrer par-dessus un texte
+ * que quelqu'un d'autre a modifié entre-temps (`verifierRevision` de
+ * formulaires.ts). Les autres fiches n'ont pas de version : 0.
+ *
+ * La table `article_reviews` vient du parcours de relecture, retiré le
+ * 26 novembre 2026 ; seul ce numéro sert encore.
+ */
+export function revisionArticle(id: number): number {
+	const ligne = db().prepare('select revision from article_reviews where publication_id = ?').get(id) as
+		| { revision: number }
+		| undefined;
+	return ligne?.revision ?? 0;
 }
 
 function replacePublicationManagers(publicationId: number, adminIds: number[]) {

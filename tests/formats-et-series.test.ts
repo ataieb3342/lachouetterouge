@@ -10,10 +10,10 @@ import { join } from 'node:path';
 
 process.env.DATABASE_PATH = join(mkdtempSync(join(tmpdir(), 'chouette-series-')), 'test.db');
 const { db } = await import('../src/lib/server/db.ts');
-const { createPublication, updatePublication, getById, listArticlesDeSerie, listPublished, countPublished } =
+const { createPublication, updatePublication, getById, listArticlesDeSerie, listPublished, countPublished, revisionArticle } =
 	await import('../src/lib/server/content.ts');
 const { creerSerie, supprimerSerie, listSeries, getSerieParSlug } = await import('../src/lib/server/series.ts');
-const { lirePublication, ErreurFormulaire } = await import('../src/lib/server/formulaires.ts');
+const { lirePublication, ErreurFormulaire, verifierRevision } = await import('../src/lib/server/formulaires.ts');
 const { presentPublication } = await import('../src/lib/server/present.ts');
 
 db()
@@ -34,7 +34,7 @@ const saisie = {
 	eventCategory: 'autre' as const
 };
 
-/** Crée un article et le met en ligne directement, sans passer par la relecture. */
+/** Crée un article et le met en ligne directement. */
 function enLigne(champs: Partial<typeof saisie> & Record<string, unknown>) {
 	const id = createPublication({ ...saisie, ...champs }, AUTEUR);
 	db().prepare("update publications set status = 'published', published_at = ? where id = ?").run(new Date().toISOString(), id);
@@ -121,4 +121,24 @@ test('on ne crée plus d’événement ni de formation, mais on corrige les anci
 	const corrige = await lirePublication(evenement, AUTEUR, null, null, 'actu');
 	assert.equal(corrige.kind, 'actu');
 	assert.equal(corrige.eventCategory, 'reunion');
+});
+
+// La relecture à quatre étapes a été retirée le 26 novembre 2026 : un article
+// se met en ligne depuis le menu « État », comme un apéro.
+test('un article se met en ligne directement, et se retire de même', () => {
+	const id = createPublication({ ...saisie, title: 'Publié tout de suite', status: 'published' }, AUTEUR);
+	assert.equal(getById(id)!.status, 'published');
+	assert.ok(getById(id)!.published_at);
+	updatePublication(id, { ...saisie, title: 'Publié tout de suite', status: 'draft' }, { reslug: false });
+	assert.equal(getById(id)!.status, 'draft');
+});
+
+test('on n’enregistre pas par-dessus le texte qu’un autre vient de modifier', () => {
+	const id = createPublication({ ...saisie, title: 'À deux mains' }, AUTEUR);
+	const lue = revisionArticle(id);
+	assert.doesNotThrow(() => verifierRevision(id, lue));
+	// Quelqu'un d'autre enregistre entre-temps : la version change.
+	updatePublication(id, { ...saisie, title: 'À deux mains', body: 'Autre texte' }, { reslug: false });
+	assert.throws(() => verifierRevision(id, lue), ErreurFormulaire);
+	assert.doesNotThrow(() => verifierRevision(id, revisionArticle(id)));
 });

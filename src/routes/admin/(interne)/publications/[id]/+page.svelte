@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PanneauRelecture from '$lib/components/PanneauRelecture.svelte';
 	import { enhance } from '$app/forms';
 	import FormulairePublication from '$lib/components/FormulairePublication.svelte';
 	import { formatDateTime, lienPublication } from '$lib/format';
@@ -11,33 +10,6 @@
 	// contenu enregistré en base.
 	const valeurs = $derived(form && 'body' in form ? { ...form } : { body: data.corps });
 
-	const FORMULAIRE = 'formulaire-publication';
-
-	// Le bouton qui fait avancer l'article d'une étape. Il n'y en a jamais
-	// qu'un : c'est ce qui dit à chacun ce qu'on attend de lui. Il est montré
-	// deux fois - en tête de fiche et au pied du formulaire -, avec le même
-	// libellé.
-	const actionPrincipale = $derived(
-		data.droits.peutEnvoyer
-			? {
-					libelle: 'Enregistrer et envoyer en relecture',
-					action: '?/envoyer',
-					aide: 'Une autre personne de l’équipe relira le texte avant sa mise en ligne.'
-				}
-			: data.droits.peutValider
-				? {
-						libelle: 'Enregistrer et valider',
-						action: '?/valider',
-						aide: 'Enregistre vos corrections et autorise l’auteur à mettre l’article en ligne.'
-					}
-				: data.droits.peutPublier
-					? {
-							libelle: 'Enregistrer et mettre en ligne',
-							action: '?/publier',
-							aide: 'L’article sera visible de tous sur le site.'
-						}
-					: null
-	);
 </script>
 
 <svelte:head><title>{data.publication.title} - Administration</title></svelte:head>
@@ -45,7 +17,7 @@
 <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
 	<div>
 		<a class="text-sm font-semibold text-brand hover:underline" href="/admin/publications">← Publications</a>
-		<h1 class="mt-1 text-2xl font-extrabold text-ink">{data.droits.peutModifier ? 'Modifier' : 'Consulter'}</h1>
+		<h1 class="mt-1 text-2xl font-extrabold text-ink">Modifier</h1>
 		<p class="mt-1 text-xs text-ink-faint">
 			Adresse : <code class="rounded bg-surface-alt px-1"
 				>{lienPublication(data.publication.kind, data.publication.slug)}</code
@@ -82,21 +54,7 @@
 	{/if}
 {/if}
 
-
-{#if data.droits.etape}
-	<PanneauRelecture
-		droits={data.droits}
-		historique={data.historique}
-		formulaire={data.droits.peutModifier ? FORMULAIRE : null}
-		{actionPrincipale}
-		erreur={data.droits.peutModifier ? '' : (form?.erreur ?? '')}
-	/>
-{/if}
-
-{#if data.droits.peutModifier}
-
 <form
-	id={FORMULAIRE}
 	method="POST"
 	action="?/enregistrer"
 	enctype="multipart/form-data"
@@ -116,10 +74,9 @@
 >
 	<!-- La version du texte qu'on a sous les yeux : le serveur refuse
 	     d'enregistrer par-dessus une version que quelqu'un d'autre a modifiée. -->
-	<input type="hidden" name="revision" value={data.droits.revision} />
+	<input type="hidden" name="revision" value={data.revision} />
 	<FormulairePublication
 		publication={data.publication}
-		{actionPrincipale}
 		admins={data.admins}
 		series={data.series}
 		positionUne={data.positionUne}
@@ -141,19 +98,6 @@
 	</label>
 </form>
 
-
-{:else}
-	<!-- En rédaction, le texte n'appartient qu'à son auteur : les autres le
-	     lisent. Le HTML vient du même moteur que les pages publiques. -->
-	<article class="carte">
-		<h2 class="text-2xl font-bold text-ink">{data.publication.title}</h2>
-		{#if data.publication.summary}<p class="mt-3 text-ink-soft">{data.publication.summary}</p>{/if}
-		<div class="contenu mt-6">{@html data.lecture}</div>
-	</article>
-{/if}
-
-{#if data.droits.peutModifier}
-
 <section class="mt-10 rounded-lg border border-brand p-5">
 	<h2 class="font-bold text-brand">Supprimer cette publication</h2>
 	<p class="mt-1 text-sm text-ink-soft">
@@ -169,5 +113,3 @@
 		</form>
 	</details>
 </section>
-
-{/if}

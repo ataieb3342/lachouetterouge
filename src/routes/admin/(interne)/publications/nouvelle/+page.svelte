@@ -32,12 +32,6 @@
 	}}
 >
 	<FormulairePublication
-		actionPrincipale={{
-			libelle: 'Enregistrer et envoyer en relecture',
-			action: '?/creerEtEnvoyer',
-			aide: 'Une autre personne de l’équipe relira le texte avant sa mise en ligne.'
-		}}
-		adminCourantId={data.adminCourantId}
 		admins={data.admins}
 		series={data.series}
 		valeurs={form ?? { authorAdminId: String(data.adminCourantId) }}

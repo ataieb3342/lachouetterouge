@@ -49,8 +49,7 @@ scripts/           sauvegarde et restauration
 | Commencer une série d’articles | Administration → Séries, puis le format « Série » dans chaque article |
 | Annoncer un apéro | Nouvelle publication → Apéro thématique |
 | Mettre une publication à la une | Sur une publication en ligne, choisir « Enregistrer et mettre à la une » ; gérer l’ordre et le retrait dans Administration → À la une |
-| Retrouver mes articles en cours | Administration → Relecture → Mes articles en cours |
-| Relire l’article de quelqu’un d’autre | Administration → Relecture → À relire |
+| Retrouver les brouillons | Tableau de bord → À faire, ou Publications filtrées sur « Brouillons » |
 | Relire les commentaires reçus | Administration → Commentaires |
 | Relire les sources proposées pour un apéro | Administration → Sources des apéros |
 | Consulter les ressources validées | Bibliothèque |
@@ -94,40 +93,20 @@ Un apéro a ses propres horaires, lieu, adresse, point de rendez-vous et
 responsables ; ces informations priment sur le lieu et l’horaire habituels
 définis dans les réglages, qui ne servent que de valeurs de repli.
 
-## Relecture des articles
+## Mettre un article en ligne
 
-Un article n’est mis en ligne qu’après avoir été relu par une deuxième
-personne. Les événements, formations et apéros ne sont pas concernés : ils se
-publient directement.
+Un article se publie comme un apéro : le menu « État » de sa fiche, puis
+« Enregistrer ». « Brouillon » le garde pour l’équipe, « En ligne » le montre à
+tout le monde ; repasser en « Brouillon » le retire du site. Toute l’équipe
+peut modifier toute publication, et le journal garde la trace de chaque mise en
+ligne et de chaque retrait.
 
-Un article passe par quatre étapes, affichées en tête de sa fiche, avec un seul
-bouton à chaque fois :
+Si deux personnes modifient le même article en même temps, la seconde à
+enregistrer est arrêtée et prévenue, au lieu d’effacer sans le savoir le
+travail de la première.
 
-1. **Rédaction** - l’auteur écrit. Quand le texte est prêt : « Enregistrer et
-   envoyer en relecture ». Tant qu’il ne l’a pas envoyé, lui seul peut le
-   modifier.
-2. **Relecture** - une autre personne de l’équipe lit le texte, corrige ce
-   qu’elle veut, puis clique sur « Enregistrer et valider ». Si quelque chose
-   doit être repris par l’auteur : « Demander des corrections », avec un mot
-   qui dit quoi. L’article repart alors en rédaction.
-3. **Validé** - l’auteur clique sur « Enregistrer et mettre en ligne ». C’est
-   lui qui décide du moment.
-4. **En ligne** - toute l’équipe peut corriger une coquille. « Retirer du
-   site… » le remet en brouillon ; il devra être relu de nouveau.
-
-Chaque bouton enregistre le texte avant de faire avancer l’article : on ne
-perd jamais ce qu’on vient d’écrire. Corriger un texte déjà validé ne retire
-pas la validation. On peut laisser un mot à tout moment (« Laisser un mot »),
-et l’historique de la fiche garde la trace de tout.
-
-**Administration → Relecture** rassemble ce qui vous attend : les articles des
-autres à relire, puis vos propres articles en cours, avec ce qu’il leur
-manque. Le chiffre à côté de « Relecture » dans le menu est le nombre
-d’articles à relire.
-
-En cas d’urgence, ou si l’auteur d’un article n’est plus là, le propriétaire
-du site peut mettre un article en ligne sans relecture. C’est inscrit au
-journal.
+Le parcours de relecture à quatre étapes (rédaction, relecture, validé, en
+ligne) a été retiré le 26 novembre 2026.
 
 ## Comptes rendus de réunions internes
 
