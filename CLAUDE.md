@@ -401,7 +401,7 @@ l'en-tête en faisait sa première porte.
   l'accueil (`LISTE_RUBRIQUE.actualites` vaut `/`).
 - « Apéros » a pris la place d'« Agenda » dans l'en-tête : deux portes,
   toujours (`structure.ts`, et le garde-fou qui va avec).
-- Le fil de l'accueil s'appelle « Les prochains apéros » (`listAperosEntre`).
+- L'accueil s'ouvre sur le prochain apéro en grand (`listAperosEntre`, voir « L'accueil »).
 
 Si un agenda revient un jour, la version retirée est dans l'historique git
 (`src/routes/agenda/`) : deux vues par l'adresse (liste et calendrier), des
@@ -493,8 +493,8 @@ l'avance, puis publie un résumé des échanges. Sur le site :
   horaires, lieu et adresse ; dès qu'un lieu ou une adresse spécifique est
   renseigné, le couple propre à la fiche remplace entièrement le couple
   habituel afin de ne jamais associer un nouveau lieu à l'ancienne adresse.
-- Le prochain apéro a sa fiche dans le fil « Les prochains apéros » de
-  l'accueil (voir « L'accueil »). Il est aussi
+- Le prochain apéro est en grand dans le bloc d'ouverture de l'accueil (voir
+  « L'accueil »). Il est aussi
   dans le flux RSS et dans le plan du site. `BandeauApero.svelte` n'est plus
   utilisé sur l'accueil.
 - **Pas de calcul automatique des dates** tous les quinze jours : un apéro
@@ -609,16 +609,27 @@ bandeau de l'application Action populaire, a été retiré en novembre 2026 avec
 tout ce qui renvoyait à La France insoumise) :
 
 1. **L'ouverture**, sur la surface `.fond-degrade` - le seul pavé coloré de la
-   page : une ligne d'identité, la devise en `h1`, puis le **fil « Les
-   prochains apéros »** : les six prochains (`DANS_LE_FIL` dans
-   `+page.server.ts`, `listAperosEntre`). Il mêlait événements, formations
-   et apéros jusqu'au retrait de l'agenda (novembre 2026). **Un nombre et non
-   une durée** : le fil couvrait d'abord quinze jours, et n'affichait que deux
-   fiches quand le rendez-vous suivant tombait le seizième jour. Chaque fiche
-   porte « Aujourd'hui » ou « Demain » quand c'est le cas, l'heure, le titre
-   et le lieu, et un liseré ocre (la classe `agenda-apero` d'`app.css`). Sur téléphone, le fil défile au doigt
-   (`scroll-snap`, aucun script) ; la fiche suivante qui dépasse à droite dit
-   qu'on peut faire glisser. L'article à la une commence vers 340 pixels.
+   page : à gauche une ligne d'identité et la devise en `h1`, à droite (dessous
+   sur téléphone) **le prochain apéro en grand** : la date comme sur un
+   calendrier de bureau, « Aujourd'hui » ou « Demain » quand c'est le cas, le
+   thème, l'heure et le lieu (ceux des réglages à défaut), et un lien vers le
+   dossier partagé (« Préparer la soirée : 2 lectures proposées », ou
+   « Proposer une lecture » s'il est vide). Dessous, « Ensuite » : les trois
+   apéros suivants au plus (`APEROS_SUIVANTS`), un par ligne, coupés s'ils
+   sont longs. **Sans apéro annoncé, le bloc n'est jamais vide** : il annonce
+   le prochain thème et renvoie au résumé du dernier.
+
+   Ce bloc a d'abord été un **fil de six rendez-vous** qui défilait au doigt -
+   événements, formations et apéros confondus. L'agenda retiré (novembre
+   2026), il ne restait qu'un apéro tous les quinze jours : une ou deux fiches
+   perdues dans une bande faite pour six. Il est donc construit pour un seul
+   rendez-vous, avec ce qui donne envie de venir. Le regroupement des
+   rendez-vous répétés (`regrouperRepetitions`, « Chaque samedi ») a disparu
+   avec lui : les apéros ne se répètent pas.
+
+   Piège : la grille porte `grid-cols-[minmax(0,1fr)]` même sur téléphone.
+   Sans lui, la colonne prend la largeur de son contenu, et les lignes coupées
+   de « Ensuite » élargissaient le bloc hors de l'écran.
 2. **Les publications à la une**, puis les articles récents. Toute publication
    en ligne peut y être mise : article ou apéro. Cinq
    au plus (`MAX_A_LA_UNE` dans
@@ -657,27 +668,17 @@ tout ce qui renvoyait à La France insoumise) :
    l'agenda », les rendez-vous suivant ceux du fil : elle coupait le milieu de
    la page entre deux sujets, pour une liste que le lien du fil donnait
    déjà. Elle a été retirée (octobre 2026) ; **les rendez-vous de l'accueil,
-   c'est le fil du haut, et rien d'autre**.
+   c'est le bloc du haut, et rien d'autre**.
    Dessous, **« S'informer ailleurs »** (surlignage « On recommande ») : les
    médias cochés « Sur l'accueil » dans l'administration. Une phrase dit
    pourquoi, puis ils sont **rangés par format**, une rangée « À regarder »,
    une rangée « À lire ». **La liste peut être longue** et la section doit
    tenir quel que soit le nombre : sur ordinateur, tous sont visibles en
    grille de trois cartes compactes ; sur téléphone, chaque rangée défile au
-   doigt comme le fil des rendez-vous (`scroll-snap`, aucun script). Pas de
+   doigt (`scroll-snap`, aucun script). Pas de
    carrousel à diapositives : presque personne ne dépasse la première, les
    autres médias seraient cachés. Pas en tête de page : un lien sortant dès
    l'arrivée fait partir le visiteur avant qu'il ait vu ce que fait le groupe.
-
-**Un rendez-vous qui revient n'est affiché qu'une fois** (`regrouperRepetitions`
-dans `+page.server.ts`). Le site n'a pas de récurrence : le rassemblement de
-chaque samedi est une fiche par date, et six fois le même titre remplissaient
-la page. Seule la prochaine date est montrée ; si toutes les dates à venir
-sont espacées d'une semaine, la fiche dit « Chaque samedi », sinon « Et 3
-autres dates ». Le regroupement se fait sur le titre exact, mais jamais entre
-deux fiches portant la même date : deux rendez-vous réellement distincts le
-même jour restent tous les deux visibles. Pour qu'il
-fonctionne, les fiches d'un même rendez-vous doivent porter le même titre.
 
 `BandeauApero.svelte` n'est pas construit sur `Encart.svelte` : celui-ci porte un
 texte fixe, alors qu'ici la date, le lieu et l'image de couverture viennent de la
