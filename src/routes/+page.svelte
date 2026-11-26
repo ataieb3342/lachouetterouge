@@ -4,12 +4,18 @@
 	import Metadonnees from '$lib/components/Metadonnees.svelte';
 	import { organisation } from '$lib/donnees-structurees';
 	import { mediasParFormat } from '$lib/medias';
-	import { COULEUR_KIND, formatDate, formatDateCourte, formatHeure, libelleFiche, lienPublication } from '$lib/format';
+	import { COULEUR_KIND, formatDate, formatDateCourte, formatDateLongue, formatHeure, libelleFiche, lienPublication } from '$lib/format';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	const premiereUne = $derived(data.aLaUne[0] ?? null);
+
+	/** Les trois morceaux de la date « calendrier » : « lun. », « 7 », « déc. ». */
+	const enDate = (iso: string | null) => new Date(`${iso}T12:00:00`);
+	const jourSemaine = (iso: string | null) => enDate(iso).toLocaleDateString('fr-FR', { weekday: 'short' });
+	const jourDuMois = (iso: string | null) => enDate(iso).getDate();
+	const mois = (iso: string | null) => enDate(iso).toLocaleDateString('fr-FR', { month: 'short' });
 </script>
 
 <!-- Le titre de l'accueil porte la devise en plus du nom : c'est la ligne que
@@ -22,64 +28,109 @@
 />
 
 <!--
-	L'accueil s'ouvre sur ce qui se passe, pas sur un slogan : un titre d'une
-	ligne, puis le fil des prochains apéros (un nombre fixe, pour qu'il ne soit
-	jamais presque vide), dans la couleur des apéros. Il montrait tous les
-	rendez-vous - événements et formations compris - jusqu'au retrait de
-	l'agenda en novembre 2026. Le fil défile au doigt sur téléphone
-	(`scroll-snap`, aucun script, aucun défilement automatique) et tient sur
-	une seule bande : les articles restent dans le premier écran.
+	L'accueil s'ouvre sur ce qui se passe, pas sur un slogan : la devise d'une
+	ligne à gauche, le prochain apéro à droite (dessous sur téléphone).
 
-	Le tout est posé sur la surface violette du site : c'est le seul pavé
-	coloré de la page, et les fiches claires y ressortent comme des cartes
-	posées dessus. Elles gardent `bg-carte` et les couleurs de l'agenda,
-	lisibles dans les deux thèmes ; seul le texte hors des fiches est blanc.
+	Ce bloc était un fil de six rendez-vous qui défilait au doigt : événements,
+	formations et apéros confondus. L'agenda retiré (novembre 2026), il ne
+	restait qu'un apéro tous les quinze jours : une ou deux fiches perdues dans
+	une bande faite pour six. Le bloc est donc construit pour un seul rendez-vous,
+	montré en grand, avec ce qui donne envie de venir - le thème, le lieu, et
+	le dossier partagé pour préparer la soirée. Les suivants tiennent sur une
+	ligne. Sans apéro annoncé, il propose le résumé du dernier : il n'est
+	jamais vide.
 
-	Il remplace le grand bandeau d'ouverture, les trois cartes de navigation
-	et le bandeau du prochain apéro, qui repoussaient ensemble l'article à la
-	une à près de neuf cents pixels sur téléphone.
+	Le tout est posé sur la surface rouge et noire du site : c'est le seul pavé
+	coloré de la page, et la fiche claire y ressort comme une carte posée
+	dessus. Seul le texte hors de la fiche est blanc.
 -->
-<section aria-labelledby="titre-accueil" class="fond-degrade overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
-	<p class="text-xs font-bold tracking-[0.14em] text-white uppercase">Collectif militant · Dijon Centre</p>
-	<h1 id="titre-accueil" class="titre-affiche mt-1 text-2xl text-white sm:text-3xl">
-		Agir ici, discuter ensemble, changer les choses.
-	</h1>
-
-	{#if data.prochainsRendezVous.length}
-		<div class="mt-5 flex items-baseline justify-between gap-4">
-			<h2 class="text-xs font-bold tracking-[0.14em] text-white uppercase">Les prochains apéros</h2>
-			<a class="text-sm font-semibold text-white underline-offset-2 hover:underline" href="/aperos">Tous les apéros →</a>
+<section aria-labelledby="titre-accueil" class="fond-degrade overflow-hidden rounded-2xl px-4 py-5 sm:px-6 sm:py-6">
+	<!-- `minmax(0, …)` partout, téléphone compris : sans lui, une colonne de
+	     grille prend la largeur de son contenu, et les lignes coupées
+	     (`truncate`) de « Ensuite » élargissaient le bloc hors de l'écran. -->
+	<div class="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] md:items-center md:gap-8">
+		<div>
+			<p class="text-xs font-bold tracking-[0.14em] text-white uppercase">Collectif militant · Dijon Centre</p>
+			<h1 id="titre-accueil" class="titre-affiche mt-1 text-2xl text-white sm:text-3xl">
+				Agir ici, discuter ensemble, changer les choses.
+			</h1>
+			<!-- Masqué sur téléphone : la fiche de l'apéro, juste dessous, dit
+			     déjà tout, et chaque ligne repousse les articles. -->
+			<p class="mt-3 max-w-md text-sm text-white/80 max-md:hidden">
+				{data.apero.rythme}, un apéro autour d’un thème choisi à l’avance. Ouvert à toutes et tous, sans rien
+				avoir préparé.
+			</p>
 		</div>
-		<ol class="fil-jours mt-2 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-			{#each data.prochainsRendezVous as rdv (rdv.id)}
-				{@const lieu = rdv.eventLocation || (rdv.kind === 'apero' ? data.apero.lieu : '')}
-				{@const heure = rdv.eventStartTime || (rdv.kind === 'apero' ? data.apero.heure : '')}
-				<li class="agenda-{rdv.eventCategory} w-60 shrink-0 snap-start">
-					<a
-						href={lienPublication(rdv.kind, rdv.slug)}
-						class="group flex h-full flex-col rounded-xl border-t-4 border-current bg-carte px-3.5 py-3 transition hover:-translate-y-0.5"
-					>
-						<span class="text-xs font-bold">
-							{rdv.jour ?? formatDateCourte(rdv.eventAt)}{heure ? ` · ${formatHeure(heure)}` : ''}
-						</span>
-						<span class="mt-1 line-clamp-2 leading-snug font-bold text-ink group-hover:underline">{rdv.title}</span>
-						<span class="mt-auto pt-1.5 text-xs text-ink-faint">
-							<span class="font-semibold">Apéro</span>{lieu ? ` · ${lieu}` : ''}
-						</span>
-						{#if rdv.rythme}
-							<span class="text-xs text-ink-faint">{rdv.rythme}</span>
-						{:else if rdv.autresDates}
-							<span class="text-xs text-ink-faint">Et {rdv.autresDates} autre{rdv.autresDates > 1 ? 's' : ''} date{rdv.autresDates > 1 ? 's' : ''}</span>
-						{/if}
-					</a>
-				</li>
-			{/each}
-		</ol>
-	{:else}
-		<p class="mt-3 text-white">
-			Pas d’apéro annoncé pour le moment. <a class="font-semibold text-white underline" href="/aperos">Les apéros passés et leurs résumés</a>
-		</p>
-	{/if}
+
+		<div>
+			{#if data.prochainApero}
+				{@const apero = data.prochainApero}
+				{@const lieu = apero.eventLocation || data.apero.lieu}
+				{@const heure = apero.eventStartTime ? formatHeure(apero.eventStartTime) : data.apero.heure}
+				{@const lien = lienPublication(apero.kind, apero.slug)}
+				<!-- Le titre est étendu à toute la fiche (`::after`) ; le lien du
+				     dossier passe devant (`relative`) pour rester cliquable. -->
+				<article class="group relative flex gap-4 rounded-xl border-t-4 border-ocre bg-carte p-4">
+					<!-- La date comme sur un calendrier de bureau : on la lit avant
+					     le reste. -->
+					<p class="flex w-14 shrink-0 flex-col items-center rounded-lg bg-surface-alt py-1.5 text-ocre" aria-hidden="true">
+						<span class="text-xs font-bold uppercase">{jourSemaine(apero.eventAt)}</span>
+						<span class="titre-affiche text-3xl leading-none">{jourDuMois(apero.eventAt)}</span>
+						<span class="text-xs font-bold">{mois(apero.eventAt)}</span>
+					</p>
+					<div class="min-w-0 flex-1">
+						<p class="text-xs font-bold tracking-wide text-ocre uppercase">
+							{apero.jour ? `Apéro · ${apero.jour}` : 'Prochain apéro'}
+						</p>
+						<h2 class="mt-0.5 leading-snug font-bold text-ink">
+							<a href={lien} class="line-clamp-2 after:absolute after:inset-0 group-hover:text-brand group-hover:underline">
+								<span class="sr-only">{formatDateLongue(apero.eventAt)} : </span>{apero.title}
+							</a>
+						</h2>
+						<p class="mt-1 text-sm text-ink-soft">{[heure, lieu].filter(Boolean).join(' · ')}</p>
+						<a class="relative mt-2 inline-block text-sm font-semibold text-brand hover:underline" href="{lien}#sources">
+							{apero.sources
+								? `Préparer la soirée : ${apero.sources} lecture${apero.sources > 1 ? 's' : ''} proposée${apero.sources > 1 ? 's' : ''} →`
+								: 'Proposer une lecture pour préparer la soirée →'}
+						</a>
+					</div>
+				</article>
+
+				{#if data.aperosSuivants.length}
+					<!-- Une ligne par apéro, coupée si le thème est long : en une
+					     seule phrase, trois thèmes faisaient quatre lignes
+					     emmêlées sur téléphone. -->
+					<p class="mt-4 text-xs font-bold tracking-[0.14em] text-white uppercase">Ensuite</p>
+					<ul class="mt-1 space-y-0.5 text-sm text-white">
+						{#each data.aperosSuivants as suivant (suivant.id)}
+							<li class="truncate">
+								<a class="underline-offset-2 hover:underline" href={lienPublication(suivant.kind, suivant.slug)}
+									><span class="font-semibold">{formatDateCourte(suivant.eventAt)}</span> · {suivant.title}</a
+								>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+				<p class="mt-2 text-sm">
+					<a class="font-semibold text-white underline-offset-2 hover:underline" href="/aperos">Tous les apéros →</a>
+				</p>
+			{:else}
+				<div class="rounded-xl border-t-4 border-ocre bg-carte p-4">
+					<p class="text-xs font-bold tracking-wide text-ocre uppercase">Les apéros</p>
+					<p class="mt-0.5 font-bold text-ink">Le prochain thème sera annoncé ici.</p>
+					{#if data.dernierApero}
+						<p class="mt-1 text-sm text-ink-soft">
+							En attendant, le dernier :
+							<a class="font-semibold text-brand hover:underline" href={lienPublication(data.dernierApero.kind, data.dernierApero.slug)}
+								>{data.dernierApero.title}</a
+							>.
+						</p>
+					{/if}
+					<a class="mt-2 inline-block text-sm font-semibold text-brand hover:underline" href="/aperos">Tous les apéros et leurs résumés →</a>
+				</div>
+			{/if}
+		</div>
+	</div>
 </section>
 
 {#if data.aLaUne.length}

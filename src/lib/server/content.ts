@@ -203,8 +203,8 @@ export function countPublished(kind?: Kind, eventCategory?: CategorieEvenement, 
 }
 
 /**
- * Apéros publiés entre deux dates, classés par jour puis par titre : le fil
- * « Les prochains apéros » de l'accueil.
+ * Apéros publiés entre deux dates, classés par jour puis par titre : le
+ * bloc d'ouverture de l'accueil (le prochain apéro, puis les suivants).
  *
  * Seulement les apéros : l'agenda des événements et formations a été retiré
  * en novembre 2026 (voir CLAUDE.md, « L'agenda (retiré) »). Les anciennes
