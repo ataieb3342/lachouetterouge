@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { COULEUR_KIND, formatDate, libellePublication, lienPublication } from '$lib/format';
+	import { COULEUR_KIND, formatDate, libelleFiche, lienPublication } from '$lib/format';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -21,11 +21,12 @@
 		<label class="etiquette" for="type">Type</label>
 		<select id="type" name="type" class="champ">
 			<option value="">Tous</option>
-			<option value="article" selected={data.filtres.kind === 'article'}>Articles</option>
-			<option value="actu" selected={data.filtres.kind === 'actu'}>Tous les rendez-vous hors apéros</option>
-			<option value="reunion" selected={data.filtres.kind === 'reunion'}>Événements</option>
-			<option value="formation" selected={data.filtres.kind === 'formation'}>Formations</option>
+			<option value="article" selected={data.filtres.kind === 'article'}>Tous les articles</option>
+			<option value="format-actu" selected={data.filtres.kind === 'format-actu'}>Articles · Actus</option>
+			<option value="format-article" selected={data.filtres.kind === 'format-article'}>Articles · Articles</option>
+			<option value="format-serie" selected={data.filtres.kind === 'format-serie'}>Articles · Séries</option>
 			<option value="apero" selected={data.filtres.kind === 'apero'}>Apéros</option>
+			<option value="actu" selected={data.filtres.kind === 'actu'}>Anciens événements et formations</option>
 		</select>
 	</div>
 	<div>
@@ -47,7 +48,7 @@
 				<div class="min-w-0 grow">
 					<a class="font-semibold text-ink hover:text-brand" href="/admin/publications/{p.id}">{p.title}</a>
 					<p class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink-faint">
-						<span class="font-semibold {COULEUR_KIND[p.kind]}">{libellePublication(p.kind, p.eventCategory)}</span>
+						<span class="font-semibold {COULEUR_KIND[p.kind]}">{libelleFiche(p)}</span>
 						<span>·</span>
 						{#if p.status === 'published'}
 							<span>Publié le {formatDate(p.publishedAt)}</span>

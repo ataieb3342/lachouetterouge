@@ -82,56 +82,6 @@
 	</section>
 
 	<section class="carte space-y-4">
-		<h2 class="font-bold text-ink">Application Action populaire</h2>
-		<p class="text-sm text-ink-soft">
-			Un bandeau proposant d'installer l'application s'affiche au bas des pages d'actualités.
-		</p>
-
-		<label class="flex items-start gap-2 text-sm text-ink">
-			<input
-				type="checkbox"
-				name="app_bandeau_actif"
-				value="1"
-				checked={r.app_bandeau_actif === '1'}
-				class="mt-0.5"
-			/>
-			<span>Afficher le bandeau</span>
-		</label>
-
-		<div>
-			<label class="etiquette" for="app_url_android">Lien Google Play</label>
-			<input
-				id="app_url_android"
-				name="app_url_android"
-				type="url"
-				class="champ"
-				placeholder="https://play.google.com/store/apps/details?id=..."
-				value={r.app_url_android}
-			/>
-			<p class="aide">
-				Ouvrez la fiche de l'application dans le Play Store et copiez l'adresse. Seules les
-				adresses commençant par <code>https://</code> sont acceptées.
-			</p>
-		</div>
-
-		<div>
-			<label class="etiquette" for="app_url_ios">Lien App Store</label>
-			<input
-				id="app_url_ios"
-				name="app_url_ios"
-				type="url"
-				class="champ"
-				placeholder="https://apps.apple.com/fr/app/..."
-				value={r.app_url_ios}
-			/>
-			<p class="aide">
-				Facultatif. Tant que les deux champs sont vides, le bandeau renvoie vers le site
-				actionpopulaire.fr.
-			</p>
-		</div>
-	</section>
-
-	<section class="carte space-y-4">
 		<h2 class="font-bold text-ink">Apéros thématiques</h2>
 		<p class="text-sm text-ink-soft">
 			Le cadre habituel des apéros, affiché en tête de la page « Les apéros » et sur chaque

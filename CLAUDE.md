@@ -1,10 +1,32 @@
-# Site du groupe d'action LFI Dijon
+# La chouette rouge
 
-Site d'information d'un groupe militant local : publication d'articles et de
-actualités par des administrateurs, commentaires anonymes modérés.
+Site d'information d'un collectif militant local du centre de Dijon :
+publication d'articles et de rendez-vous par des administrateurs, commentaires
+anonymes modérés.
 
-**Le site en ligne : https://lfi-dijon.fr/** (production, mise à jour par
-`main`, voir « Déploiement »). Pour savoir ce qui est réellement publié - les
+**La chouette rouge n'est le site d'aucun parti.** Le site s'appelait « LFI Dijon
+Centre » jusqu'en novembre 2026. Le pôle groupes d'action de La France
+insoumise en a demandé la fermeture le 17 novembre 2026, pour trois raisons,
+d'après le message transmis au groupe : des éléments de campagne à intégrer aux
+comptes de campagne, un code écrit avec l'aide de l'intelligence artificielle,
+et le risque de sites laissés à l'abandon. Le site a été fermé, puis, sur
+décision du groupe, renommé et redessiné sans rien de LFI : d'abord « Strix »
+(abandonné quelques jours plus tard), puis « La chouette rouge », avec
+« Collectif militant du centre de Dijon » en sous-titre.
+**Ne rien réintroduire qui le rattache à un parti, à un candidat ou à une
+campagne** : ni nom, ni logo, ni lien vers un site de candidat, ni appel à
+voter. Les articles peuvent parler de politique ; le site ne doit pas
+ressembler à la communication d'une organisation.
+
+**Le site en ligne : https://lachouetterouge.fr/** (production, mise à jour par
+`main`, voir « Déploiement ») - **fermé depuis le 17 novembre 2026** : Caddy y
+sert une page « temporairement fermé » et les mises à jour automatiques sont en
+pause. La marche à suivre pour rouvrir est sur le serveur, dans
+`/root/fermeture-site/LISEZMOI.txt`. Le domaine était `lfi-dijon.fr` jusqu'en
+novembre 2026 ; le nouveau est `lachouetterouge.fr`, réglé sur le serveur par
+`SITE_DOMAIN` et `ORIGIN` dans `.env`. L'ancien domaine renvoie vers le
+nouveau (bloc `lfi-dijon.fr` de `docker/Caddyfile`) ; la bascule a un ordre à
+respecter, sans quoi Caddy refuse de démarrer : voir `DEPLOIEMENT.md`, partie 9. Pour savoir ce qui est réellement publié - les
 médias recommandés, les rendez-vous, les articles -, regarder ce site plutôt
 que la base de démonstration : le dépôt ne contient que les données de départ.
 
@@ -62,8 +84,7 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/server/captcha.ts` | Anti-spam par preuve de travail |
 | `src/lib/server/limiteur.ts` | Écarte les adresses qui envoient trop de requêtes (voir « Les vagues de requêtes ») |
 | `src/lib/server/frequentation.ts` | Compte les visites et le trafic, sans cookie ni adresse IP (voir « La fréquentation ») |
-| `src/lib/components/Logo.svelte` | Le phi officiel, en dégradé ou en monochrome |
-| `src/lib/components/BandeauApplication.svelte` | Invitation à installer Action populaire |
+| `src/lib/components/Logo.svelte` | La chouette rouge, en couleur ou en monochrome |
 | `src/lib/components/Encart.svelte` | Le gabarit unique des encarts d'appel |
 | `src/lib/components/Metadonnees.svelte` | Titre, description, adresse canonique et aperçus - sur **toutes** les pages publiques |
 | `src/lib/components/Partage.svelte` | Les boutons de partage en bas de chaque publication (voir « Le partage ») |
@@ -71,7 +92,8 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/donnees-structurees.ts` | Les fiches schema.org lues par Google (article, événement, organisation, fil d'Ariane) |
 | `src/hooks.server.ts` | En-têtes de sécurité, session, garde `/admin`, limite par adresse, comptage des visites |
 | `src/routes/[rubrique=rubrique]/` | La liste des articles (`/articles`), les fiches de toutes les publications, et les redirections des anciennes adresses |
-| `src/routes/agenda/` | Page publique `/agenda` : les prochains rendez-vous puis le calendrier du mois |
+| `src/routes/agenda/` | Redirige `/agenda` vers `/aperos` : l'agenda a été retiré (voir « L'agenda (retiré) ») |
+| `src/lib/server/series.ts` + `src/routes/series/` | Les séries d'articles et leurs pages publiques (voir « Les séries ») |
 | `src/routes/aperos/` | Page publique `/aperos` : prochain apéro et archive des thèmes |
 | `src/routes/bibliotheque/` | Page publique `/bibliotheque` : sources approuvées et jeux |
 | `src/lib/boite-a-outils/` + `src/routes/boite-a-outils/` | Page publique `/boite-a-outils` : les outils interactifs de vulgarisation (voir plus bas) |
@@ -204,11 +226,13 @@ Moderne et sobre, pas « affiche de campagne ». **`CHARTE.md` en est la version
 courte, à relire avant d'ajouter une page** ; ce qui suit en donne les raisons.
 Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
 
-- Les surfaces fortes (`.fond-degrade`) sont un violet profond éclairé par deux
-  lueurs radiales, l'une rouge, l'autre violette - pas le dégradé diagonal du
-  logo en aplat. Le dégradé pur ne sert qu'en filet fin (`.filet-degrade`).
+- Les surfaces fortes (`.fond-degrade`) sont un rouge vif qui se fond dans le
+  noir (une lueur radiale en haut à droite sur un fond noir) : la chouette
+  dans la nuit, pas un aplat rouge d'affiche. Pas de bleu dans les dégradés de
+  la marque : le bleu nuit n'est que la couleur des événements. Le dégradé pur ne sert qu'en filet
+  fin (`.filet-degrade`).
 - **Chaque type de publication a sa couleur**, prise aux trois couleurs du
-  logo : violet pour les articles, rouge pour les événements, pourpre pour les
+  logo : rouge pour les articles, bleu nuit pour les événements, ocre pour les
   apéros (`COULEUR_KIND` et `FOND_KIND` dans `format.ts`). Elle sert aux
   étiquettes des listes et aux surfaces colorées : `.fond-degrade`,
   `.fond-actu`, `.fond-apero`, construites pareil (fond profond, deux lueurs).
@@ -237,8 +261,7 @@ Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
   Le principe qui revient partout : **deux marges ne s'additionnent jamais pour
   un même écart.** Quand un bloc porte déjà sa marge, celui d'à côté n'en met
   pas - c'est la raison du `main > :first-child` d'`app.css`, du `pt-6` (et non
-  `py-6`) de la grille d'accueil au-dessus du bandeau Action populaire, et du
-  pied de page sans marge.
+  `py-6`) de la grille d'accueil, et du pied de page sans marge.
 - **Quand un bandeau suit l'en-tête, le filet passe dessous.** La surface
   colorée pose déjà la limite en haut : un trait par-dessus ferait une rayure.
   C'est en bas qu'il faut détacher le bandeau de la liste qui suit. Les listes
@@ -248,10 +271,7 @@ Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
 
   Deux pièges. Le filet va sur un **conteneur**, jamais sur la surface colorée
   elle-même : elle est arrondie, la bordure s'y dessinerait par-dessus au lieu
-  de faire un trait en dessous. Et sur l'agenda, le bandeau Action
-  populaire disparaît quand l'application est désactivée dans les réglages - le
-  filet est donc conditionné par `data.app.actif`, sans quoi la page afficherait
-  un trait tout seul. L'accueil, lui, n'a pas de filet : son bandeau ouvre la page
+  de faire un trait en dessous. L'accueil, lui, n'a pas de filet : son bandeau ouvre la page
   et le contenu qui suit a son propre en-tête.
 - **Le premier bloc d'une page n'ajoute pas sa marge haute** à celle de
   `<main>`. C'est une règle d'`app.css` (`main > :first-child`) et non quelque
@@ -269,7 +289,7 @@ Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
   les retoucher ensemble, sinon l'écart se voit d'une page à l'autre.
 - Boutons en pilule (`rounded-full`), aucun filigrane décoratif, le logo en
   couleur sur fond blanc dans l'en-tête.
-- **Le fond clair n'est pas un blanc pur** (`--color-surface`, un lavande très
+- **Le fond clair n'est pas un blanc pur** (`--color-surface`, un crème très
   clair) et le texte n'est pas un noir pur : le contraste reste très large mais
   la page n'éblouit pas et ne paraît pas vide. Trois niveaux, du plus foncé au
   plus clair : `--color-surface` est la page, `--color-carte` est ce qui se pose
@@ -285,8 +305,8 @@ Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
   dans la couleur de la rubrique, le titre en `.titre-affiche`, un chapô, et un
   filet `border-b border-line pb-6` qui la sépare du contenu. Une page sans ce
   filet se voit tout de suite.
-- **Le texte posé sur un fond violet passe par `text-sur-brand`**, jamais
-  `text-white` : en thème sombre le violet devient un lavande clair et le
+- **Le texte posé sur un fond rouge passe par `text-sur-brand`**, jamais
+  `text-white` : en thème sombre le rouge devient un corail clair et le
   texte doit devenir sombre. La classe `.bouton` le fait déjà.
 - **Le visiteur choisit son affichage** (clair, sombre, automatique) dans le
   pied de page. C'est un formulaire ordinaire vers `/theme`, qui pose un
@@ -294,58 +314,65 @@ Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
   script en ligne, donc rien à assouplir dans la CSP, et pas de page qui
   s'affiche en clair avant de basculer. Les jetons sombres d'`app.css` sont
   écrits deux fois, pour le cas « automatique » et pour le cas « choisi ».
-- Les couleurs du logo officiel restent la référence de la palette (`app.css`),
-  mais la couleur principale des textes et liens est le violet, le rouge n'est
-  qu'un accent.
+- Les couleurs du logo restent la référence de la palette (`app.css`) : le
+  rouge vif (`#cc1420`, le plus vif qui reste lisible en texte sur le fond
+  clair) est la couleur principale des textes et liens, le bleu nuit et l'ocre
+  ne servent qu'aux types de publication et à leurs surfaces.
 
-## Deux familles, quatre types de publication
+## Deux familles : les articles et les apéros
 
 Le visiteur se pose deux questions, et le site range tout d'après elles :
-**« où est-ce que je peux venir ? »** (l'agenda) et **« qu'est-ce que vous
-faites, qu'est-ce que vous pensez ? »** (les articles). Celui qui publie se pose
-la même : « est-ce que les gens peuvent venir ? » - oui, c'est un rendez-vous ;
+**« qu'est-ce que vous faites, qu'est-ce que vous pensez ? »** (les articles)
+et **« où est-ce que je peux venir ? »** (les apéros). Celui qui publie se pose
+la même : « est-ce que les gens peuvent venir ? » - oui, c'est un apéro ;
 non, c'est un article.
 
-Une seule table `publications`, distinguée par la colonne `kind` :
+Une seule table `publications`, distinguée par la colonne `kind`, et, pour
+les articles, par `format_article` (migration 031) :
 
-| Famille | Type affiché | `kind` | `event_category` | Où il apparaît |
+| Famille | Type affiché | `kind` | `format_article` | Où il apparaît |
 | --- | --- | --- | --- | --- |
-| Articles | Article | `article` | `autre` | `/articles` |
-| Agenda | Événement | `actu` | `reunion` | `/agenda`, fiche sous `/actualites/…` |
-| Agenda | Formation | `actu` | `formation` | `/agenda`, fiche sous `/actualites/…` |
-| Agenda | Apéro thématique | `apero` | `apero` | `/agenda` et `/aperos` |
+| Articles | Actu | `article` | `actu` | `/articles` (filtre « Actus ») |
+| Articles | Article | `article` | `article` | `/articles` (filtre « Articles ») |
+| Articles | Série | `article` | `serie` | `/articles` (filtre « Séries ») et `/series/<slug>` |
+| Apéros | Apéro thématique | `apero` | - | `/aperos`, le fil de l'accueil |
+| (retiré) | Événement, formation | `actu` | - | leur fiche sous `/actualites/…`, listée nulle part |
 
 - Un **article** n'a pas de date de rendez-vous, qu'il fasse trois lignes ou
-  trois pages : analyse, compte rendu, prise de position, guide, annonce
-  courte. Le formulaire efface la date et les informations pratiques d'un
-  article.
-- Un **rendez-vous** a toujours une date (`event_at`, `AAAA-MM-JJ`). C'est elle
-  qui le place dans l'agenda, puis dans le passé.
+  trois pages. Le formulaire efface la date et les informations pratiques d'un
+  article. Il a l'un des **trois formats** décidés en réunion le 25 novembre
+  2026 :
+  - **Actu** : des faits, des témoignages - une manifestation, une décision
+    municipale, un compte rendu des medics ;
+  - **Article** : un avis subjectif, mais sourcé ;
+  - **Série** : un épisode d'une série (voir « Les séries »).
+- Un **apéro** a toujours une date (`event_at`, `AAAA-MM-JJ`). C'est elle
+  qui le place dans les prochains apéros, puis dans l'archive.
 
-**Il y en a eu sept, et c'était trop** (octobre 2026). Actualité (brève),
+Le format n'est pas un type : il ne change ni l'adresse (`/articles/…`), ni
+la couleur, ni le parcours de relecture. C'est une étiquette (« Actu »,
+« Série · La santé (2) ») et un filtre de la page Articles. Le format n'est
+gardé que pour un article : `champsFormat` (`content.ts`) enregistre
+« article » sans série pour toute autre fiche, et efface la série d'un
+article qui change de format.
+
+**Il y a eu sept types, et c'était trop** (octobre 2026). Actualité (brève),
 retour d'action et revue de presse existaient en plus : le menu « Actualités »
 mêlait sept entrées des deux familles, la page Actualités était en fait un
 second agenda rempli de « rendez-vous passés », et l'équipe elle-même se
-trompait de case (un apéro publié comme événement, des comptes rendus publiés
-comme articles, une revue de presse qui contenait des guides). La migration 021
-a tout rangé : revues, brèves et retours d'action sont devenus des articles,
-les rendez-vous sans catégorie des événements, et les apéros publiés comme
-événements des apéros. **Avant de rajouter un type, se demander s'il ne s'agit
-pas d'un article** : un type de plus, c'est une case de plus où se tromper.
+trompait de case. La migration 021 a tout rangé : revues, brèves et retours
+d'action sont devenus des articles. **Avant de rajouter un type, se demander
+s'il ne s'agit pas d'un format d'article** : un type de plus, c'est une case
+de plus où se tromper.
 
 Les adresses partagées avant ce rangement continuent de fonctionner. Le slug
 étant unique dans toute la table, la fiche redirige vers sa rubrique actuelle
 (`/revue-de-presse/x` et `/actualites/x` vers `/articles/x` quand c'est devenu
-un article), et les anciennes listes redirigent (`/actualites` vers `/agenda`,
-`/revue-de-presse` vers `/articles`). C'est pour cela que le `match` de
-`src/params/rubrique.ts` accepte encore `revue-de-presse`. La contrainte
-`check` accepte encore `'revue'` : reconstruire la table pour l'en retirer ne
-rapportait rien.
-
-Les événements et formations gardent leurs fiches sous `/actualites/…`, même
-si le mot n'apparaît plus nulle part sur le site : des liens ont été partagés,
-et le visiteur ne lit pas l'adresse. `LISTE_RUBRIQUE` (`rubriques.ts`) dit
-quelle page liste chaque rubrique - l'agenda pour `actualites`.
+un article), et les anciennes listes redirigent (`/actualites` et `/agenda`
+vers `/aperos`, `/revue-de-presse` vers `/articles`). C'est pour cela que le
+`match` de `src/params/rubrique.ts` accepte encore `revue-de-presse`. La
+contrainte `check` accepte encore `'revue'` : reconstruire la table pour l'en
+retirer ne rapportait rien.
 
 Ajouter un type demande de toucher, dans cet ordre : la contrainte `check` de
 `publications` (une migration qui reconstruit la table, voir la 007), `Kind`
@@ -356,33 +383,61 @@ formulaire de publication (et sa phrase d'aide), le filtre de
 l'administration et `PAGES_FIXES` du plan du site. Le flux RSS et les cartes
 suivent tout seuls.
 
-## L'agenda
+## L'agenda (retiré)
 
-`/agenda` a **deux vues**, choisies par l'adresse et non par un script :
+**Le site n'a plus d'agenda depuis le 26 novembre 2026**, sur décision du
+groupe : il ne garde que ses apéros. L'agenda rassemblait événements,
+formations et apéros, en liste ou en calendrier du mois (`/agenda`), et
+l'en-tête en faisait sa première porte.
 
-- **la liste** (par défaut) : tous les rendez-vous à venir (quarante au plus),
-  regroupés par mois. Chaque ligne porte la date en grand à gauche, comme un
-  agenda papier, puis le type, l'heure, le lieu (ceux des réglages pour un
-  apéro), le titre et le chapô, avec un liseré de la couleur du type.
-  « Aujourd'hui » et « Demain » sont signalés. C'est la seule vue lisible sur
-  téléphone, et la seule indexée ;
-- **le calendrier** (`?vue=calendrier&mois=AAAA-MM`) : un mois en grille, les
-  jours passés estompés. Il sert à se projeter, ou à retrouver un rendez-vous
-  passé - la liste ne montre que l'avenir et y renvoie par un lien.
+- `/agenda` (filtres et mois compris) et `/actualites` redirigent vers
+  `/aperos` (301) : des liens ont été partagés.
+- On ne crée plus d'événement ni de formation : le formulaire ne les propose
+  plus, et `lirePublication` les refuse, sauf pour corriger une ancienne fiche
+  (`kindActuel`). Le type `actu` reste en base : les cinquante anciennes
+  fiches de la production gardent leur adresse sous `/actualites/…`, leur
+  fichier `.ics` et leur fiche Google, mais ne sont plus listées nulle part.
+  Leur lien de retour mène aux apéros, et leur fil d'Ariane s'arrête à
+  l'accueil (`LISTE_RUBRIQUE.actualites` vaut `/`).
+- « Apéros » a pris la place d'« Agenda » dans l'en-tête : deux portes,
+  toujours (`structure.ts`, et le garde-fou qui va avec).
+- Le fil de l'accueil s'appelle « Les prochains apéros » (`listAperosEntre`).
 
-Le **filtre par type** (`?type=reunion|formation|apero`) vaut pour les deux
-vues. Les pastilles et le choix de la vue sont des **liens** : tout fonctionne
-sans JavaScript et une vue filtrée se partage. Les vues filtrées et les mois du
-calendrier portent `noindex, follow`.
+Si un agenda revient un jour, la version retirée est dans l'historique git
+(`src/routes/agenda/`) : deux vues par l'adresse (liste et calendrier), des
+pastilles qui sont des liens, `noindex, follow` sur les vues filtrées.
+Première erreur à ne pas refaire : empiler la liste et le calendrier du mois
+sur la même page, qui faisait quatre mille pixels sur téléphone.
 
-La première version empilait la liste des dix prochains et le calendrier du
-mois en cours - deux agendas sur la même page, dont un mois à moitié passé -,
-et ses lignes reprenaient le gabarit des articles : ni heure, ni lieu, la date
-en petit. La page faisait quatre mille pixels sur téléphone.
+## Les séries
 
-Le bandeau Action populaire est **en bas**, comme sur l'accueil : on propose
-l'application à quelqu'un qui a vu les rendez-vous. Avec le filtre « Apéros »,
-un lien mène à `/aperos`, qui garde l'archive des thèmes et leurs résumés.
+Une série, ce sont plusieurs articles qui suivent le même fil, thème par
+thème, avec une structure commune (le premier fil décidé : un programme,
+thème par thème - santé, économie, éducation…). Table `series`, gérée dans
+Administration → Séries (`admin/(interne)/series`, logique dans
+`src/lib/server/series.ts`) : titre, présentation, ordre (flèches).
+
+- Un article de série a le format `serie`, une série (`serie_id`) et, s'il le
+  faut, un rang (`rang_serie`). L'ordre de lecture est le rang, puis la date
+  pour les articles sans rang (`ORDRE_SERIE`).
+- `/series` liste les séries qui ont au moins un article en ligne ;
+  `/series/<slug>` montre la présentation et les articles numérotés, en liste
+  (l'ordre compte, une grille le brouille). La page Articles y renvoie d'une
+  ligne sous le chapô (« Nos séries : … »), sans encart. Le lien « Articles »
+  de l'en-tête s'allume sur ces pages.
+- La fiche d'un article de série dit « Série · <titre> · 2 sur 5 », renvoie à
+  sa série en haut et propose l'article précédent et le suivant sous le texte.
+- **L'adresse d'une série ne change pas** quand on la renomme : elle a pu être
+  partagée.
+- **Une série qui contient des articles ne se supprime pas** : il faudrait
+  d'abord rattacher ses articles ailleurs ou changer leur format. Sans cela,
+  des articles se diraient « épisode » d'une série disparue.
+- Création, modification et suppression passent par `audit()`.
+- **Une série « le programme de tel parti, thème par thème » se rapproche de
+  ce qui a fait fermer le site** (voir l'en-tête de ce fichier) : la titrer
+  par thème, sans nom de parti ni de candidat dans le titre de la série.
+
+Tests : `tests/formats-et-series.test.ts`.
 
 ## La page Articles
 
@@ -394,13 +449,13 @@ grille de trois colonnes : 1 + 12, quatre rangées pleines ; les pages
 suivantes en ont douze (`PREMIERE_PAGE` et `PAR_PAGE`). Les cartes
 (`CarteArticle.svelte`, partagée avec l'accueil) n'ont pas d'étiquette
 « Article » - tout ce qui est listé en est un - et ont **toujours une
-image** : sans couverture, le phi officiel en couleur sur une carte
+image** : sans couverture, la chouette en couleur sur une carte
 (`.vignette-article`). Sans cela les articles sans image n'avaient pas la forme
 de leurs voisins et la liste paraissait cassée. Deux essais l'ont précédé : un
-aplat lavande presque de la couleur de la page avec un phi pâle, qu'on prenait
+aplat presque de la couleur de la page avec un logo pâle, qu'on prenait
 pour une image qui n'avait pas chargé, puis une version claire de
 `.fond-degrade`, d'un rose-mauve délavé que le site n'a nulle part ailleurs. Le
-violet profond de `.fond-degrade` lui-même est exclu : quatre articles sans
+fond sombre de `.fond-degrade` lui-même est exclu : quatre articles sans
 image à la suite feraient autant de pavés sombres. Sur téléphone, la grille
 redevient une liste à vignettes.
 
@@ -408,7 +463,7 @@ L'ordre est celui des dates, sans faire remonter les fiches à la une : la une
 est un choix pour l'accueil, et le plus récent doit rester en tête.
 
 La bibliothèque est annoncée d'une ligne sous le chapô, et non par un encart
-coloré : posé avant le premier article, le pavé violet se lisait comme une
+coloré : posé avant le premier article, le pavé coloré se lisait comme une
 publicité et repoussait la liste.
 
 ## Les apéros thématiques
@@ -438,8 +493,8 @@ l'avance, puis publie un résumé des échanges. Sur le site :
   horaires, lieu et adresse ; dès qu'un lieu ou une adresse spécifique est
   renseigné, le couple propre à la fiche remplace entièrement le couple
   habituel afin de ne jamais associer un nouveau lieu à l'ancienne adresse.
-- Le prochain apéro a sa fiche dans le fil « Les prochains rendez-vous » de
-  l'accueil, comme les autres rendez-vous (voir « L'accueil »). Il est aussi
+- Le prochain apéro a sa fiche dans le fil « Les prochains apéros » de
+  l'accueil (voir « L'accueil »). Il est aussi
   dans le flux RSS et dans le plan du site. `BandeauApero.svelte` n'est plus
   utilisé sur l'accueil.
 - **Pas de calcul automatique des dates** tous les quinze jours : un apéro
@@ -549,22 +604,23 @@ boutons, prochain rendez-vous), une rangée de trois cartes de navigation et le
 bandeau du prochain apéro : ensemble, ils repoussaient l'article à la une à
 878 pixels sur téléphone. Ils ont été retirés à leur tour (septembre 2026).
 
-La page tient maintenant en quatre blocs, de haut en bas :
+La page tient maintenant en trois blocs, de haut en bas (le quatrième, le
+bandeau de l'application Action populaire, a été retiré en novembre 2026 avec
+tout ce qui renvoyait à La France insoumise) :
 
 1. **L'ouverture**, sur la surface `.fond-degrade` - le seul pavé coloré de la
    page : une ligne d'identité, la devise en `h1`, puis le **fil « Les
-   prochains rendez-vous »** : les six prochains (`DANS_LE_FIL` dans
-   `+page.server.ts`), événements, formations et apéros confondus
-   (`listAgenda`). **Un nombre et non une durée** : le fil couvrait d'abord
-   quinze jours, et n'affichait que deux fiches quand le rendez-vous suivant
-   tombait le seizième jour. Chaque fiche porte
-   « Aujourd'hui » ou « Demain » quand c'est le cas, l'heure, le titre, le
-   type et le lieu, et un liseré dans la couleur de sa catégorie (les classes
-   `agenda-*` de la page agenda). Sur téléphone, le fil défile au doigt
+   prochains apéros »** : les six prochains (`DANS_LE_FIL` dans
+   `+page.server.ts`, `listAperosEntre`). Il mêlait événements, formations
+   et apéros jusqu'au retrait de l'agenda (novembre 2026). **Un nombre et non
+   une durée** : le fil couvrait d'abord quinze jours, et n'affichait que deux
+   fiches quand le rendez-vous suivant tombait le seizième jour. Chaque fiche
+   porte « Aujourd'hui » ou « Demain » quand c'est le cas, l'heure, le titre
+   et le lieu, et un liseré ocre (la classe `agenda-apero` d'`app.css`). Sur téléphone, le fil défile au doigt
    (`scroll-snap`, aucun script) ; la fiche suivante qui dépasse à droite dit
    qu'on peut faire glisser. L'article à la une commence vers 340 pixels.
 2. **Les publications à la une**, puis les articles récents. Toute publication
-   en ligne peut y être mise : article, événement, formation ou apéro. Cinq
+   en ligne peut y être mise : article ou apéro. Cinq
    au plus (`MAX_A_LA_UNE` dans
    `content.ts`) ; elles forment une grille et ne sont pas répétées dans les
    listes situées juste en dessous.
@@ -599,9 +655,9 @@ La page tient maintenant en quatre blocs, de haut en bas :
    Articles (`CarteArticle`, six fiches, deux rangées pleines :
    `DERNIERS_ARTICLES`). La moitié droite a longtemps porté « Plus tard dans
    l'agenda », les rendez-vous suivant ceux du fil : elle coupait le milieu de
-   la page entre deux sujets, pour une liste que « Tout l'agenda → » donne
-   déjà. Elle a été retirée (octobre 2026) ; **l'agenda de l'accueil, c'est le
-   fil du haut, et rien d'autre**.
+   la page entre deux sujets, pour une liste que le lien du fil donnait
+   déjà. Elle a été retirée (octobre 2026) ; **les rendez-vous de l'accueil,
+   c'est le fil du haut, et rien d'autre**.
    Dessous, **« S'informer ailleurs »** (surlignage « On recommande ») : les
    médias cochés « Sur l'accueil » dans l'administration. Une phrase dit
    pourquoi, puis ils sont **rangés par format**, une rangée « À regarder »,
@@ -612,9 +668,6 @@ La page tient maintenant en quatre blocs, de haut en bas :
    carrousel à diapositives : presque personne ne dépasse la première, les
    autres médias seraient cachés. Pas en tête de page : un lien sortant dès
    l'arrivée fait partir le visiteur avant qu'il ait vu ce que fait le groupe.
-4. **Le bandeau Action populaire**, tout en bas - jamais en tête : on propose
-   d'installer quelque chose à quelqu'un qui a lu la page, pas à quelqu'un qui
-   arrive.
 
 **Un rendez-vous qui revient n'est affiché qu'une fois** (`regrouperRepetitions`
 dans `+page.server.ts`). Le site n'a pas de récurrence : le rassemblement de
@@ -643,45 +696,30 @@ navigateur ouvre la page sur la mauvaise diapositive), et `w-full` plutôt que
 `min-w-full` (qui, avec `shrink-0`, laisse la diapositive s'élargir jusqu'à son
 contenu et déborder sur mobile).
 
-## Le bandeau Action populaire
+## Le bandeau Action populaire (retiré)
 
-Affiché au bas de l'agenda, au bas de chaque événement et au bas
-de l'accueil - pas ailleurs : c'est là que le visiteur cherche les prochains
-rendez-vous, donc le moment où proposer l'application a du sens. Sur l'accueil il
-est **tout en bas**, jamais en tête. Pour l'étendre à tout le site, déplacer le
-composant dans `src/routes/+layout.svelte`, juste avant le `<footer>`.
-
-C'est un `Encart` ordinaire - mais il porte les couleurs de l'application
-(jaune `#f0e80d`, bleu nuit `#0b0b33`) et non celles du site, écrites en dur
-plutôt que prises dans les jetons : elles ne doivent bouger ni avec le thème
-sombre, ni si l'on retouche la palette du site. Ce contraste avec le reste de la page est voulu - c'est ce qui
-fait remarquer le bandeau.
-
-Les adresses des magasins d'applications sont dans les réglages
-(`app_url_android`, `app_url_ios`) et non dans le code : un lien de magasin
-change, et le modifier ne doit pas demander de redéploiement. Elles sont filtrées
-à l'enregistrement pour n'accepter que `https://` - sans ce filtre, un
-`javascript:…` saisi dans le formulaire s'exécuterait au clic du visiteur.
-
-Quand les deux champs sont vides, le bandeau renvoie vers actionpopulaire.fr
-plutôt que d'afficher des boutons morts.
+Un bandeau invitait à installer Action populaire, l'application de La France
+insoumise, au bas de l'accueil, de l'agenda et des événements. Il a été retiré
+en novembre 2026 avec le composant `BandeauApplication.svelte` et ses réglages
+(`app_bandeau_actif`, `app_url_android`, `app_url_ios`, qui peuvent rester en
+base : `getSettings` ignore les clés qu'il ne connaît plus). Voir l'en-tête de
+ce fichier.
 
 ## Les encarts d'appel
 
 `src/lib/components/Encart.svelte` est le gabarit **unique** des invitations
-posées sur une page : aujourd'hui, Action populaire en bas de l'agenda et de
-l'accueil. Ils avaient chacun leur mise en page ; d'une page à l'autre, le
+posées sur une page : aujourd'hui, celui de la page des jeux. Ils avaient chacun leur mise en page ; d'une page à l'autre, le
 visiteur ne reconnaissait pas qu'il s'agissait de la même chose.
 
 **Un encart annonce toujours une autre page.** Posé en tête d'une page pour
-vanter une section de cette même page, il a le gabarit du bandeau Action
-populaire : le visiteur le lit comme une publicité et le saute, et le contenu
+vanter une section de cette même page, il a le gabarit d'une publicité : le
+visiteur le lit comme une publicité et le saute, et le contenu
 réel de la page part sous la ligne de flottaison. C'est ce qui arrivait à la
 boîte à outils annoncée depuis la bibliothèque, avant qu'elle n'y devienne une
 section ordinaire.
 
 Un encart est une surface colorée (`.fond-degrade`, `.fond-actu`, `.fond-apero`,
-ou un `style` en dur pour Action populaire), un surlignage en petites capitales,
+ou un `style` en dur), un surlignage en petites capitales,
 un titre d'affiche, un paragraphe, et **au choix** un lien étendu à toute la
 surface (`href`) ou des boutons (`actions`) - jamais les deux : le lien étendu
 passerait derrière les boutons.
@@ -697,9 +735,7 @@ sinon il faut le modifier à chaque publication.
 chapô.** Les encarts de tête - la revue de presse sur les articles, la
 bibliothèque sur la revue de presse, Action populaire sur les actualités -
 passaient avant le contenu, se lisaient comme des publicités et repoussaient la
-liste sous la ligne de flottaison : ils ont été retirés en octobre 2026. Le
-bandeau Action populaire, lui, va **en bas** de l'agenda et de l'accueil : on
-propose l'application à quelqu'un qui a vu les rendez-vous.
+liste sous la ligne de flottaison : ils ont été retirés en octobre 2026.
 
 **Une page n'a qu'un seul pavé coloré.** La page des apéros en a déjà un en tête
 (le prochain apéro) : son renvoi vers la bibliothèque est donc un simple lien en
@@ -707,19 +743,26 @@ fin de page. Deux surfaces colorées sur la même page se font concurrence.
 
 ## Le logo
 
-`src/lib/components/Logo.svelte` contient le phi officiel 2024, en SVG écrit
-directement dans le composant. Deux variantes :
+`src/lib/components/Logo.svelte` contient la chouette rouge, dessinée
+pour le site en novembre 2026, en SVG écrit directement dans le composant.
+Une chouette et non un hibou : tête ronde, sans aigrettes. Deux variantes :
 
-- `variante="couleur"` (par défaut) : le dégradé officiel, pour les fonds clairs
+- `variante="couleur"` (par défaut) : rouge, yeux ocre. Les yeux sont dessinés
+  et non découpés, ce qui la rend lisible sur fond clair comme sombre
 - `variante="mono"` : une seule couleur héritée du parent - mettre `text-white`
-  sur un fond coloré
+  sur un fond coloré. Les yeux, le bec et les ailes y sont découpés
 
-Il est en format portrait : le dimensionner par la hauteur (`h-10 w-auto`), pas
-par un carré, sinon il est inutilement rétréci.
+Elle est en format portrait (100 × 120) : la dimensionner par la hauteur
+(`h-10 w-auto`), pas par un carré, sinon elle est inutilement rétrécie.
 
-Le fichier d'origine récupéré sur Wikimedia pesait 61 Ko dont 52 Ko d'aperçu PNG
-masqué et un tracé en `display:none`, restes du recadrage. Ils ont été retirés.
-Les couleurs du dégradé de `app.css` sont celles, exactes, de ce fichier.
+Les mêmes tracés sont repris dans `static/favicon.svg` (la variante mono, en
+blanc sur une tuile rouge : à seize pixels, la version en couleur se fondrait
+en une tache). `favicon.ico`, `icone-192.png`, `apple-touch-icon.png` et
+`static/apercu-partage.jpg` en sont tirés, avec `sharp`. **Retoucher le logo
+demande de les refaire.**
+
+Le phi de La France insoumise, utilisé jusqu'en novembre 2026, ne doit pas
+revenir (voir l'en-tête de ce fichier).
 
 ## Les vidéos
 
@@ -780,8 +823,9 @@ deux heures, sans heure du tout, pour la journée.
 
 **L'image d'aperçu.** Un lien partagé affiche l'image de couverture de la
 publication. Sans couverture, `Metadonnees.svelte` annonce
-`static/apercu-partage.jpg` : le phi blanc sur le fond de `.fond-degrade`, en
-1200 × 630, le format des grandes cartes de partage. Avant, une page sans
+`static/apercu-partage.jpg` : la chouette blanche et le nom du site sur le fond de `.fond-degrade`, en
+1200 × 630, le format des grandes cartes de partage. Le nom y est dessiné en
+dur : renommer le site demande de refaire l'image. Avant, une page sans
 couverture n'avait aucune image, et son lien passait inaperçu dans un fil.
 Les réseaux gardent l'aperçu d'une adresse en mémoire un certain temps : une
 page déjà partagée avant ce changement ne le montre pas tout de suite.
@@ -828,15 +872,17 @@ une rubrique de plus est arrivée dans l'en-tête (la revue de presse, le menu
 « Actualités », les dessins), et trois fois il a fallu tout re-ranger. Une
 nouvelle page va dans le menu Ressources ou dans le pied de page.
 
-L'en-tête porte les deux portes du site, **Agenda** et **Articles**, en liens
+L'en-tête porte les deux portes du site, **Articles** et **Apéros**, en liens
 simples (`LIENS_PRINCIPAUX`), puis le menu
 **Ressources** (bibliothèque, outils, jeux, dessins, médias), « Qui sommes-nous ? »
 et le bouton « Nous rejoindre ». Le logo ramène à l'accueil. Le menu mobile
-reprend la même chose. « Agenda » s'allume aussi sur les fiches d'événements
-(`/actualites/…`) et sur les apéros (`sections`) ; « Ressources » s'allume sur
-chacune de ses pages (`groupeActif`).
+reprend la même chose. « Articles » s'allume aussi sur les séries (`/series`),
+« Apéros » sur la fiche d'un apéro (`sections`) ; « Ressources » s'allume sur
+chacune de ses pages (`groupeActif`). Jusqu'au 26 novembre 2026, la première
+porte était **Agenda** (voir « L'agenda (retiré) ») : « Apéros » l'a remplacée
+sans ajouter de lien.
 
-**Les dessins sont dans Ressources, pas à côté d'Agenda et d'Articles.** Ils y
+**Les dessins sont dans Ressources, pas à côté d'Articles et d'Apéros.** Ils y
 ont été un troisième lien principal quelques jours (novembre 2026) : ce n'est
 pas une troisième question que se pose le visiteur, et l'en-tête débordait. On
 y arrive par le menu Ressources, par la carte en bas de la bibliothèque et par
@@ -900,7 +946,7 @@ média coché, la section de l'accueil disparaît. Chaque action passe par
 faite. Chaque média porte une phrase qui dit **pourquoi** on le
 recommande : c'est ce qui fait de la liste un conseil et non un annuaire.
 Même place que les jeux : carte en bas de la bibliothèque, pied de page, menu
-« Ressources ». Sur l'accueil, ils sont sous les articles et l'agenda
+« Ressources ». Sur l'accueil, ils sont sous les articles
 (voir « L'accueil »).
 
 Le lien n'accepte que `https://` (il finit dans un `href` public). L'adresse
@@ -924,8 +970,8 @@ outil vit à `/boite-a-outils/<dossier>/` et son script s'appelle `outil.js` (et
 non `game.js`).
 
 C'est **une page à part entière**, pas une section de la bibliothèque : ils sont
-appelés à devenir nombreux, et ce sont des outils d'argumentation pour la
-campagne, pas des distractions. C'est aussi pourquoi ils ne sont pas servis sous
+appelés à devenir nombreux, et ce sont des outils pour comprendre et
+argumenter, pas des distractions. C'est aussi pourquoi ils ne sont pas servis sous
 `/jeux/` : l'adresse d'une page se partage, et `/jeux/qui-paie-vraiment`
 décrédibiliserait l'outil avant même qu'on l'ouvre.
 
@@ -985,7 +1031,7 @@ La description reprise dans la tête est l'`accroche` de l'outil quand elle
 existe, sa `description` sinon. C'est une raison de plus d'écrire une accroche
 pour chaque outil et pas seulement pour les deux mis en avant : ces pages sont
 celles que quelqu'un qui ne connaît pas le groupe a le plus de chances de
-trouver - on ne cherche pas « LFI Dijon », on cherche « combien d'impôts je
+trouver - on ne cherche pas « La chouette rouge Dijon », on cherche « combien d'impôts je
 paie ». Le nom du site y est écrit en dur, repris de `DEFAULTS` : le renommer
 dans l'administration demande de relancer le script.
 
@@ -1014,7 +1060,7 @@ Quatre règles, dont la première n'est pas négociable :
 Chaque outil a **sa** couleur (`--accent` et `--accent-fort` de son `style.css`),
 qui habille ses cartes de résultat et ses graphiques. Le surlignage de l'en-tête,
 lui, est l'étiquette de la rubrique : il dit « Comprendre et argumenter » et
-porte le violet (`--rubrique`) sur tous les outils, comme la page qui y mène. Un
+porte le rouge (`--rubrique`) sur tous les outils, comme la page qui y mène. Un
 outil dont le surlignage change de couleur ou de texte n'a plus l'air de venir
 de la même rubrique que la page qu'on vient de quitter.
 
@@ -1117,8 +1163,8 @@ une fois :
    `/sitemap.xml`. Sans cela, l'indexation d'un site neuf prend des semaines.
 2. Créer une **fiche d'établissement Google** pour le groupe. C'est le premier
    levier des recherches locales, loin devant tout le reste.
-3. Obtenir des **liens entrants** : annuaire des groupes d'action sur
-   `actionpopulaire.fr`, sites des groupes voisins, presse locale. C'est le
+3. Obtenir des **liens entrants** : associations et collectifs dijonnais,
+   lieux partenaires, presse locale. C'est le
    facteur que Google pondère le plus, et le seul qui ne se code pas.
 4. **Publier régulièrement.** Un site qui ne bouge pas est recrawlé de moins en
    moins souvent.
@@ -1246,7 +1292,7 @@ faisait défiler un écran entier ; l'adresse est passée dans l'infobulle.
 Les graphiques (`Histogramme.svelte`) sont faits de boîtes HTML et non d'un
 dessin SVG, pour que le texte ne rapetisse pas sur téléphone. Leurs deux
 couleurs (`--color-graphe` et `--color-graphe-alerte` dans `app.css`) sont
-dérivées du violet et du rouge du logo, et ont été vérifiées pour rester
+dérivées du bleu nuit et du rouge du logo, et ont été vérifiées pour rester
 distinctes aux yeux des daltoniens, dans les deux thèmes : les changer demande
 de refaire cette vérification. Chaque graphique se parcourt au clavier et a son
 tableau de chiffres dépliable.

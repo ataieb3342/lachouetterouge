@@ -12,12 +12,14 @@
 	 *   sur ordinateur ; sur téléphone elle redevient une ligne, sinon quinze
 	 *   images pleine largeur feraient défiler cinq écrans.
 	 *
-	 * **Toujours une image**, même sans couverture : le phi officiel en
+	 * **Toujours une image**, même sans couverture : la chouette en
 	 * couleur sur une carte la remplace (`.vignette-article`, voir `app.css`).
 	 * Sans image du tout, ces articles n'avaient pas la même forme que leurs
 	 * voisins, et la liste avait l'air cassée.
 	 *
-	 * Pas d'étiquette « Article » : tout ce qui est listé ici en est un.
+	 * Pas d'étiquette « Article » : tout ce qui est listé ici en est un. Les
+	 * deux autres formats se signalent devant la date : « Actu », ou le nom de
+	 * la série et le rang de l'article dans la série.
 	 * Toute la carte est cliquable (le lien du titre est étendu par `::after`).
 	 */
 	let { publication, forme = 'carte' }: { publication: PublicationVue; forme?: 'grande' | 'carte' } =
@@ -56,6 +58,13 @@
 
 	<div class="min-w-0 flex-1">
 		<p class="text-xs text-ink-faint">
+			{#if publication.formatArticle === 'actu'}
+				<span class="font-bold text-brand">Actu</span> ·
+			{:else if publication.serie}
+				<span class="font-bold text-brand"
+					>Série · {publication.serie.titre}{publication.serie.rang ? ` (${publication.serie.rang})` : ''}</span
+				> ·
+			{/if}
 			<time datetime={publication.publishedAt ?? undefined}>{formatDate(publication.publishedAt)}</time>
 			{#if publication.authorName}· {publication.authorName}{/if}
 			{#if publication.commentCount > 0}

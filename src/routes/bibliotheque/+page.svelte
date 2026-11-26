@@ -38,7 +38,7 @@
 />
 
 <header class="border-b border-line pb-4">
-	<p class="text-xs font-bold tracking-[0.2em] text-pourpre uppercase">Ressources partagées</p>
+	<p class="text-xs font-bold tracking-[0.2em] text-ocre uppercase">Ressources partagées</p>
 	<h1 class="titre-affiche mt-2 text-3xl text-ink sm:text-4xl">Bibliothèque</h1>
 	<p class="mt-3 max-w-2xl text-lg text-ink-soft">
 		Ce que nous lisons, regardons et écoutons - proposé autour de nos apéros et relu par le groupe.

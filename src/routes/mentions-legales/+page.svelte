@@ -7,7 +7,7 @@
 <!-- Hors index : ces pages sont obligatoires, pas destinées aux moteurs. -->
 <Metadonnees
 	titre="Mentions légales - {data.settings.siteName}"
-	description="Éditeur, hébergeur et contact du site du groupe d'action de La France insoumise du centre de Dijon."
+	description="Éditeur, hébergeur et contact du site de La chouette rouge, collectif militant du centre de Dijon."
 	indexable={false}
 />
 

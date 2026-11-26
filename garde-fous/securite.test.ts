@@ -14,7 +14,7 @@ import { fichiersDuSite, lire, lister } from './fichiers.ts';
  */
 
 // `media.ts` crée son dossier à l'import : on l'envoie dans un dossier temporaire.
-process.env.UPLOADS_PATH = mkdtempSync(join(tmpdir(), 'lfi-garde-fous-'));
+process.env.UPLOADS_PATH = mkdtempSync(join(tmpdir(), 'chouette-garde-fous-'));
 const { renderMarkdown } = await import('../src/lib/markdown.ts');
 const { rendreCompteRendu } = await import('../src/lib/markdown-compte-rendu.ts');
 const { sniffImage } = await import('../src/lib/server/media.ts');

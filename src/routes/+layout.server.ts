@@ -11,11 +11,6 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 			description: settings.site_description,
 			contactEmail: settings.contact_email
 		},
-		app: {
-			actif: settings.app_bandeau_actif === '1',
-			android: settings.app_url_android,
-			ios: settings.app_url_ios
-		},
 		// Cadre des apéros thématiques : rythme, heure et lieu habituels.
 		apero: {
 			rythme: settings.apero_rythme,

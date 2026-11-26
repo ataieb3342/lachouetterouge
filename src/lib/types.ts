@@ -41,6 +41,10 @@ export type PublicationVue = {
 	/** Vrai tant que la date du rendez-vous n'est pas passée. */
 	aVenir: boolean;
 	cover: { url: string; alt: string } | null;
+	/** Format d'un article : actu, article, ou épisode d'une série. */
+	formatArticle: 'actu' | 'article' | 'serie';
+	/** La série d'un article de série, avec son rang (null : « à la suite »). */
+	serie: { id: number; titre: string; slug: string; rang: number | null } | null;
 };
 
 export type CommentaireVue = {

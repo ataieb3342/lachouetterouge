@@ -6,10 +6,11 @@ export const load: PageServerLoad = async ({ url }) => {
 	const kind = url.searchParams.get('type');
 	const status = url.searchParams.get('etat');
 	const recherche = url.searchParams.get('q') ?? '';
-	// Événements et formations partagent le type 'actu' : leur catégorie
-	// d'agenda les distingue.
-	const categorie = kind === 'reunion' || kind === 'formation' ? kind : null;
-	const kindInterne = categorie ? 'actu' : kind;
+	// Le filtre « Type » mêle les types et les formats d'article : « format-actu »,
+	// « format-article » et « format-serie » sont des articles d'un format
+	// donné ; « actu » regroupe les anciens événements et formations.
+	const format = kind?.startsWith('format-') ? kind.slice('format-'.length) : null;
+	const kindInterne = format ? 'article' : kind;
 
 	return {
 		filtres: { kind: kind ?? '', status: status ?? '', recherche },
@@ -22,6 +23,6 @@ export const load: PageServerLoad = async ({ url }) => {
 			search: recherche
 		})
 			.map(presentPublication)
-			.filter((publication) => !categorie || publication.eventCategory === categorie)
+			.filter((publication) => !format || publication.formatArticle === format)
 	};
 };

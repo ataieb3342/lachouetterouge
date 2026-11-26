@@ -11,8 +11,8 @@
 export const JEUX = [
 	{
 		dossier: 'snake',
-		titre: 'Tortue Mélenchon',
-		description: 'Un snake : aide la tortue à récupérer le plus de votes possible.'
+		titre: 'La tortue gourmande',
+		description: 'Un snake : aide la tortue à ramasser le plus de feuilles possible.'
 	},
 	{
 		dossier: 'pinball',

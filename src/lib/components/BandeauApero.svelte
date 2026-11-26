@@ -12,7 +12,7 @@
 	 * l'en-tête.
 	 *
 	 * Le bandeau dit la même chose en trois lignes : la date, le thème, le lieu,
-	 * et de quoi cliquer. Il garde la surface pourpre `.fond-apero`, la seule du
+	 * et de quoi cliquer. Il garde la surface ocre `.fond-apero`, la seule du
 	 * site, pour qu'on le reconnaisse d'un coup d'œil, et l'image de couverture
 	 * en fond si la fiche en a une.
 	 *
@@ -77,7 +77,7 @@
 		<div class="relative hidden sm:block">
 			<a
 				href="/aperos/{apero.slug}"
-				class="inline-block rounded-full bg-white px-4 py-2 text-sm font-bold text-pourpre transition-colors hover:bg-white/90"
+				class="inline-block rounded-full bg-white px-4 py-2 text-sm font-bold text-ocre transition-colors hover:bg-white/90"
 				tabindex="-1"
 				aria-hidden="true">En savoir plus</a
 			>

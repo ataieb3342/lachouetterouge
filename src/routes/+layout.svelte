@@ -93,7 +93,7 @@
 	</div>
 {/if}
 
-<!-- Filet aux couleurs du mouvement, présent sur toutes les pages. -->
+<!-- Filet aux couleurs de la chouette, présent sur toutes les pages. -->
 <div class="filet-degrade h-1" aria-hidden="true"></div>
 
 <header class="border-b border-line bg-carte">
@@ -222,8 +222,8 @@
 				<p class="text-lg font-extrabold tracking-tight text-white">{data.settings.siteName}</p>
 			</div>
 			<p class="mt-4 max-w-md text-sm text-pretty text-white/75">
-				Site d'un groupe d'action local de La France insoumise. Les contenus publiés ici
-				n'engagent que ce groupe et ne constituent pas une communication officielle du mouvement.
+				La chouette rouge est un collectif militant indépendant du centre de Dijon. Ce site
+				n'est celui d'aucun parti, d'aucun candidat ni d'aucune campagne électorale.
 			</p>
 			{#if data.settings.contactEmail}
 				<p class="mt-3 text-sm">
@@ -263,7 +263,7 @@
 							aria-pressed={data.theme === a.valeur}
 							class="rounded-full border px-3 py-1 text-sm font-semibold transition-colors
 								{data.theme === a.valeur
-								? 'border-white bg-white text-[#1a0f2e]'
+								? 'border-white bg-white text-[#0f0c0d]'
 								: 'border-white/40 text-white/85 hover:border-white hover:text-white'}">{a.label}</button
 						>
 					{/each}

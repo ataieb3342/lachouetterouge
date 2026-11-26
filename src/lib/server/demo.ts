@@ -1,6 +1,7 @@
 import { db, now } from './db.ts';
 import { confirmTotp, countAdmins, createAdmin, storeTotpSecret } from './auth.ts';
 import { createComment, createPublication, createSource } from './content.ts';
+import { creerSerie } from './series.ts';
 import { decryptAtRest, hmac } from './crypto.ts';
 import { supprimerJetonInstallation } from './installation.ts';
 import { currentTotp, generateTotpSecret } from './totp.ts';
@@ -159,17 +160,20 @@ function ilYaNJours(n: number, heure = 18): string {
 }
 
 type Fiche = {
-	kind: 'article' | 'actu' | 'apero';
+	kind: 'article' | 'apero';
+	/** Format d'un article ; « article » s'il n'est pas précisé. */
+	format?: 'actu' | 'article' | 'serie';
+	/** Pour un article de série : le titre de sa série (`SERIES`) et son rang. */
+	serie?: string;
+	rang?: number;
 	title: string;
 	summary: string;
 	body: string;
 	auteur?: string;
 	/** Nombre de jours écoulés depuis la publication, ou une fonction qui le calcule. */
 	publieIlYa: number | (() => number);
-	/** Décalage en jours de la date du rendez-vous (événements et apéros), ou une fonction qui le calcule. */
+	/** Décalage en jours de la date de l'apéro, ou une fonction qui le calcule. */
 	actionDans?: number | (() => number);
-	/** Pastille affichée dans l'agenda et sur les rendez-vous. */
-	categorieEvenement?: 'reunion' | 'formation';
 	/** Vrai pour la fiche qui reçoit l'image de couverture de la démonstration. */
 	illustree?: true;
 	/** Mise en page éditoriale facultative. */
@@ -182,71 +186,7 @@ type Fiche = {
 const FICHES: Fiche[] = [
 	{
 		kind: 'article',
-		title: 'Premiers Amfis : beaucoup d’idées, peu de sommeil',
-		summary:
-			'Pour ses premiers Amfis, Zaza raconte une journée de militantisme entre navettes, foule, transports et sieste involontaire.',
-		publieIlYa: 0,
-		layoutStyle: 'carnet-aquarelle',
-		auteur: 'Zaza',
-		body: `![R | faisant un signe de la main, dessinée à l’aquarelle](/images/articles/sticker-r-web.png)
-
-Et si, et si ! Je racontais les Amfis 2026. Mon premier.
-
-Quatre jours, dont trois sur place pour moi.
-
-Mon Dieu, quelle immensité ! Peu de temps avant, Rita m’avait proposé de devenir coordinatrice du groupe d’action de La France insoumise de Dijon Centre-Ville.
-
-En étais-je capable ? Légitime ? Mais surtout, au vu de l’enjeu de l’année 2026-2027, étais-je prête à assumer du militantisme et des responsabilités en pleine campagne présidentielle ?
-
-## Première épreuve : atteindre les Amfis
-
-J’arrive le premier jour pour accéder aux navettes (après avoir fait du stop le matin, au départ de mon camping à plus de 20 bornes de Valence). Près de deux heures d’attente pour accéder au lieu. Un soleil ardent me cueille et, heureusement, Vincent devient instantanément mon pair-aidant pour la journée. Il est bavard, mais moi aussi, alors ça va.
-
-Rita, qui est bénévole aux Amfis, nous attend à la sortie de la réglementaire fouille au corps.
-
-## Mais quel monde !
-
-![Raïssa | le bras levé, dessinée à l’aquarelle](/images/articles/sticker-raissa-web.png)
-
-On se balade, mais quel monde ! Et le pire reste à venir : nous ne sommes que vendredi.
-
-Partout où porte mon regard, des personnes marchent d’un air affairé, un petit groupe discute, tandis que les autres s’arrêtent et regardent autour d’elles pour prendre leurs repères.
-
-Vincent veut manger. Évidemment, il est bientôt midi. Tandis qu’il fait la queue, je m’aperçois d’une bousculade et réalise que c’est l’heure de l’allocution d’Antoine Léaument, le youtubeur en chef et député populaire. Je m’approche pour l’écouter, avec des boules Quiès, parce que la prévention de l’ouïe, aux Amfis, il y a encore du travail à faire sur cette thématique.
-
-Il parle bien et fort, se rit de la médiocrité des membres élus du RN (et ma foi, il a raison) et me donne envie d’aller rapidement écouter les prochaines interventions. Tout le monde est joyeux et les « on va gagner » sont puissants, enjoués, sans l’ombre de la peur. Ils sont suivis systématiquement d’un « Siamo tutti antifascisti », tout aussi exaltant.
-
-## Peut-on vraiment sortir de la voiture ?
-
-Il est 13 h 30 et je décide d’aller écouter la conférence « Des transports sans pétrole ? ». Les tours de parole entre intervenants sont bien respectés. Sont présents : Aurélien Bigo, chercheur sur la bifurcation énergétique des transports, Sylvie Landriève, directrice du Forum Vies Mobiles, Karima Delli, conseillère régionale des Hauts-de-France et ancienne présidente de la commission des transports du Parlement européen, ainsi que Sylvain Carrière, député LFI.
-
-J’ignorais qu’une personne en insertion sur deux avait déjà refusé un emploi ou une formation à cause de difficultés de mobilité. Parmi ces personnes, 28 % avaient même abandonné un emploi ou une formation en cours.
-
-Selon Wimoov, 17 millions de personnes sont en situation de précarité liée à la mobilité en 2026. Cela concerne notamment celles qui vivent loin des transports publics, qui n’ont pas d’alternative à la voiture ou pour qui le coût des déplacements est devenu trop élevé.
-
-Certains territoires européens ont imaginé des abonnements uniques permettant d’emprunter plusieurs réseaux de transports publics. Lorsque l’offre est large, simple et abordable, sortir de la voiture devient beaucoup plus envisageable.
-
-Une donnée historique m’a particulièrement amusée : malgré l’augmentation considérable de notre vitesse de déplacement, le temps moyen passé chaque jour dans les transports serait resté relativement stable, autour d’une heure. Nous ne gagnons donc pas vraiment du temps : nous parcourons surtout de plus grandes distances. C’est absurde et drôle à la fois.
-
-Au final, on ne parvient pas à régler les problèmes de trajet avec de la technologie et des solutions individuelles, mais avec une organisation collective qui s’appuie sur des faits scientifiques et des personnes compétentes dont l’intérêt collectif est la priorité.
-
-## Morphée entre en scène
-
-Je pensais m’ennuyer et, au final, j’avais déjà appris énormément de choses. Bon, à la conférence suivante, Morphée a quand même fini par réclamer son dû. Après l’orage, la tente qui prenait l’eau et les quelques heures de sommeil, je pouvais difficilement lui en vouloir.
-
-Et ce n’était que le premier jour…
-
----
-
-### Sources
-
-- [Programme officiel des Amfis 2026](https://amfis.fr/programme/)
-- [Baromètre des mobilités 2026 - Wimoov](https://wimoov.org/barometre-des-mobilites/etude-barometre-precarite-mobilites-2026/)
-- [Mobilité et accès à l’emploi - rapport public](https://www.vie-publique.fr/files/rapport/pdf/174000685.pdf)
-- [Temps de transport et vitesse - Forum Vies Mobiles](https://forumviesmobiles.org/regards-croises/464/temps-de-transport-et-vitesse)`
-	},
-	{
-		kind: 'article',
+		format: 'actu',
 		title: 'Retour sur notre tractage',
 		summary:
 			'Retour sur notre tractage et les échanges avec les passantes et les passants.',
@@ -270,48 +210,8 @@ Et ce n’était que le premier jour…
 		]
 	},
 	{
-		kind: 'actu',
-		title: 'Réunion publique : transports et mobilité à Dijon',
-		summary:
-			'Soirée ouverte à toutes et tous pour discuter de la gratuité des transports, du vélo et du dernier tram.',
-		actionDans: 9,
-		categorieEvenement: 'reunion',
-		publieIlYa: 5,
-		body: `Le groupe organise une **réunion publique** sur les transports dans la métropole. Entrée libre, sans inscription.
-
-## Programme
-
-1. Présentation de la proposition de gratuité pour les moins de 26 ans.
-2. Témoignages d’usagers et d’usagères : étudiants, salariés en horaires décalés, retraités.
-3. Temps de questions et de propositions.
-
-## Informations pratiques
-
-- **Quand :** à 19 h, accueil dès 18 h 30.
-- **Où :** salle municipale du quartier, adresse précisée sur le tract.
-- **Accessibilité :** salle de plain-pied, accessible en fauteuil.
-
-La réunion se termine au plus tard à 21 h. Un pot est prévu ensuite pour continuer la discussion.`
-	},
-	{
-		kind: 'actu',
-		title: 'Formation : prendre la parole en réunion',
-		summary: 'Un atelier de deux heures pour celles et ceux qui n’osent pas encore parler en public.',
-		actionDans: 16,
-		categorieEvenement: 'formation',
-		publieIlYa: 8,
-		body: `Beaucoup d’entre nous hésitent à prendre la parole en réunion ou en porte-à-porte. Cet atelier est fait pour ça.
-
-## Au programme
-
-- Structurer une intervention en trois minutes.
-- Répondre à une objection sans s’énerver.
-- Exercices en petits groupes, bienveillants et sans jugement.
-
-**Places limitées à douze personnes** pour que chacun puisse s’exercer. Inscription par courriel.`
-	},
-	{
 		kind: 'article',
+		format: 'actu',
 		title: 'Nouvelle permanence chaque mercredi soir',
 		summary: 'À partir de ce mois-ci, le groupe tient une permanence hebdomadaire ouverte à toutes et tous.',
 		publieIlYa: 12,
@@ -328,6 +228,7 @@ Le lieu est indiqué dans la lettre d’information du groupe.`
 	},
 	{
 		kind: 'article',
+		format: 'actu',
 		title: 'Retour sur la marche pour le climat',
 		summary: 'Plusieurs centaines de personnes ont défilé de la place de la République à la place Darcy.',
 		publieIlYa: 11,
@@ -478,6 +379,7 @@ Une participante a proposé de dresser la liste des campagnes de boycott en cour
 	},
 	{
 		kind: 'article',
+		format: 'actu',
 		title: 'Revue de presse : logement, budget municipal et ligne ferroviaire',
 		summary:
 			'Trois lectures de la semaine, avec ce que nous en retenons pour Dijon. Les liens renvoient vers les articles d’origine.',
@@ -536,7 +438,7 @@ Nous proposons la **gratuité des transports en commun de la métropole pour tou
 
 Nous présenterons cette proposition lors de notre réunion publique sur les transports, et nous distribuerons un tract au marché des Halles. Venez en discuter avec nous.
 
-*Cet article est une prise de position du groupe d’action local. Il n’engage pas le mouvement national.*`,
+*Cet article est une prise de position du collectif.*`,
 		commentaires: [
 			{
 				auteur: 'Nadia',
@@ -558,6 +460,7 @@ Nous présenterons cette proposition lors de notre réunion publique sur les tra
 	},
 	{
 		kind: 'article',
+		format: 'actu',
 		title: 'Logement étudiant : ce que nous avons entendu en porte-à-porte',
 		summary:
 			'Trois soirées de porte-à-porte dans les résidences du campus. Loyers, chauffage, isolement : le compte rendu.',
@@ -591,6 +494,7 @@ C’est le sujet dont on parle le moins et qui est pourtant revenu à chaque por
 	},
 	{
 		kind: 'article',
+		format: 'actu',
 		title: 'Compte rendu de notre assemblée de rentrée',
 		summary: 'Une trentaine de personnes présentes, un calendrier d’actions jusqu’à la fin de l’année et deux nouveaux référents.',
 		publieIlYa: 20,
@@ -612,36 +516,91 @@ Les actions terminées font l’objet d’un compte rendu dans les articles, san
 
 ## Finances
 
-Le groupe fonctionne sans budget propre. Le matériel est financé par les dons des membres et les commandes groupées auprès du mouvement.`
+Le groupe fonctionne sans budget propre. Le matériel est financé par les dons des membres.`
 	},
 	{
 		kind: 'article',
-		title: 'Comment fonctionne un groupe d’action ?',
-		summary: 'Ni bureau, ni carte d’adhérent : un groupe d’action est ouvert à toute personne qui veut agir localement.',
+		title: 'Comment fonctionne La chouette rouge ?',
+		summary: 'Ni bureau, ni carte d’adhérent : le collectif est ouvert à toute personne qui veut agir localement.',
 		publieIlYa: 30,
 		body: `On nous pose souvent la question : faut-il adhérer, payer une cotisation, être élu ? Non.
 
 ## Un groupe ouvert
 
-Un groupe d’action rassemble des personnes d’un même quartier ou d’une même ville qui veulent agir ensemble. Il n’y a pas de carte, pas de cotisation obligatoire, pas de hiérarchie.
+La chouette rouge rassemble des personnes du centre de Dijon qui veulent agir ensemble. Il n’y a pas de carte, pas de cotisation obligatoire, pas de hiérarchie.
 
 ## Ce que l’on y fait
 
 - Des actions de terrain : tractages, porte-à-porte, réunions publiques.
 - Des temps d’échange et de formation.
-- Le relais des campagnes nationales à l’échelle locale.
+- Des apéros thématiques, un lundi sur deux.
 
 ## Comment nous rejoindre
 
-Le plus simple est de venir à une action ou à une permanence. La page [Nous rejoindre](/nous-rejoindre) explique la marche à suivre.
+Le plus simple est de venir à une action ou à une permanence. La page [Nous rejoindre](/nous-rejoindre) explique la marche à suivre.`
+	},
+	{
+		kind: 'article',
+		format: 'serie',
+		serie: 'Le budget de la métropole, poste par poste',
+		rang: 1,
+		title: 'Les transports : le premier poste de dépense',
+		summary: 'Premier épisode : ce que coûtent les bus et le tram, et qui les paie vraiment.',
+		publieIlYa: 20,
+		body: `Chaque épisode de cette série suit le même plan : **ce que dit le budget**, **ce que ça change pour les habitants**, **ce que nous proposons**.
 
-*Ce site est celui d’un groupe local. Il ne remplace pas la plateforme Action populaire, qui reste l’outil de référence du mouvement.*`
+## Ce que dit le budget
+
+Les transports sont le premier poste de dépense de la métropole. Le prix du ticket n'en couvre qu'une petite partie : l'essentiel vient du versement mobilité payé par les employeurs.
+
+## Ce que ça change pour les habitants
+
+Le prix du ticket pèse surtout sur ceux qui n'ont pas d'autre choix que le bus.
+
+## Ce que nous proposons
+
+La gratuité pour les moins de 26 ans, financée sans hausse d'impôt local.`
+	},
+	{
+		kind: 'article',
+		format: 'serie',
+		serie: 'Le budget de la métropole, poste par poste',
+		rang: 2,
+		title: 'Le logement : où va l’argent de l’habitat',
+		summary: 'Deuxième épisode : les aides au logement social, et ce qu’elles ne couvrent pas.',
+		publieIlYa: 6,
+		body: `Même plan que le premier épisode : **ce que dit le budget**, **ce que ça change pour les habitants**, **ce que nous proposons**.
+
+## Ce que dit le budget
+
+La métropole finance une partie de la construction de logements sociaux, aux côtés de l'État et des bailleurs.
+
+## Ce que ça change pour les habitants
+
+Les délais d'attente restent longs, en particulier pour les petits logements.
+
+## Ce que nous proposons
+
+Donner la priorité aux petits logements, là où la demande est la plus forte.`
+	}
+];
+
+/** Une série pour montrer le format : deux épisodes, un même plan. */
+const SERIES = [
+	{
+		titre: 'Le budget de la métropole, poste par poste',
+		presentation:
+			'Chaque épisode prend un poste du budget et suit le même plan : ce que dit le budget, ce que ça change pour les habitants, ce que nous proposons.'
 	}
 ];
 
 function remplirContenus(adminId: number, imageId: number | null) {
 	const base = db();
-	const auteur = 'Le groupe d’action';
+	const auteur = 'La chouette rouge';
+
+	// Les séries de démonstration, créées avant leurs articles.
+	const series = new Map<string, number>();
+	for (const serie of SERIES) series.set(serie.titre, creerSerie(serie));
 
 	for (const fiche of FICHES) {
 		const id = createPublication(
@@ -660,8 +619,10 @@ function remplirContenus(adminId: number, imageId: number | null) {
 					fiche.actionDans === undefined
 						? null
 						: dansNJours(typeof fiche.actionDans === 'function' ? fiche.actionDans() : fiche.actionDans),
-				eventCategory:
-					fiche.kind === 'apero' ? 'apero' : (fiche.categorieEvenement ?? 'autre')
+				eventCategory: fiche.kind === 'apero' ? 'apero' : 'autre',
+				formatArticle: fiche.format ?? 'article',
+				serieId: fiche.serie ? (series.get(fiche.serie) ?? null) : null,
+				rangSerie: fiche.rang ?? null
 			},
 			adminId
 		);

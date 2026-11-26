@@ -12,6 +12,7 @@ const PAGES_FIXES: Record<string, string> = {
 	'/dessins': 'Dessins et caricatures',
 	'/agenda': 'Agenda',
 	'/aperos': 'Apéros',
+	'/series': 'Séries',
 	'/bibliotheque': 'Bibliothèque',
 	'/boite-a-outils': 'Boîte à outils',
 	'/jeux': 'Jeux',

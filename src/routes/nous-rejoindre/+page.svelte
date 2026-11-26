@@ -7,21 +7,21 @@
 
 	const etapes = [
 		{
-			titre: 'Inscrivez-vous au mouvement',
+			titre: 'Venez à un apéro',
 			texte:
-				"C'est gratuit et sans engagement financier : on s'inscrit sur le site de La France insoumise ou sur Action populaire, en acceptant les principes du mouvement.",
-			lien: { href: 'https://lafranceinsoumise.fr/rejoindre/', label: 'lafranceinsoumise.fr/rejoindre' }
+				"Un lundi sur deux, on se retrouve dans un bar autour d'un thème choisi à l'avance. C'est le plus simple pour faire connaissance, sans rien avoir préparé.",
+			lien: { href: '/aperos', label: 'Le prochain apéro' }
 		},
 		{
-			titre: 'Rejoignez le groupe',
+			titre: 'Passez à une réunion',
 			texte:
-				"Sur Action populaire, cherchez le groupe du centre de Dijon et demandez à le rejoindre. Ou écrivez-nous : on vous indique la date de la prochaine réunion.",
-			lien: { href: 'https://actionpopulaire.fr', label: 'actionpopulaire.fr' }
+				"On s'y retrouve pour écrire les articles et préparer les apéros. Elles ne sont pas annoncées sur le site : demandez l'heure et le lieu lors d'un apéro. Une première fois, on peut simplement écouter et poser ses questions.",
+			lien: { href: '/le-groupe', label: 'Qui sommes-nous ?' }
 		},
 		{
-			titre: 'Venez, puis participez',
+			titre: 'Participez à votre rythme',
 			texte:
-				"Une première réunion pour écouter et poser vos questions. Ensuite, tractage, porte-à-porte, réunions publiques ou logistique : chacun contribue selon ses envies et son temps.",
+				"Tractage, porte-à-porte, écriture d'un article, organisation d'un apéro ou logistique : chacun contribue selon ses envies et son temps.",
 			lien: null
 		}
 	];
@@ -29,7 +29,7 @@
 
 <Metadonnees
 	titre="Nous rejoindre - {data.settings.siteName}"
-	description="Rejoindre le groupe d'action de La France insoumise du centre de Dijon : inscription gratuite, aucune expérience nécessaire."
+	description="Rejoindre La chouette rouge, collectif militant du centre de Dijon : gratuit, sans inscription, aucune expérience nécessaire."
 	donnees={filAriane(page.url.origin, [
 		{ nom: 'Accueil', chemin: '/' },
 		{ nom: 'Nous rejoindre', chemin: '/nous-rejoindre' }
@@ -55,11 +55,8 @@
 			<h2 class="mt-4 text-lg font-extrabold tracking-tight text-ink">{etape.titre}</h2>
 			<p class="mt-2 grow text-sm leading-relaxed text-ink-soft">{etape.texte}</p>
 			{#if etape.lien}
-				<a
-					href={etape.lien.href}
-					rel="noopener noreferrer"
-					target="_blank"
-					class="mt-4 text-sm font-semibold text-brand hover:underline">{etape.lien.label} →</a
+				<a href={etape.lien.href} class="mt-4 text-sm font-semibold text-brand hover:underline"
+					>{etape.lien.label} →</a
 				>
 			{/if}
 		</li>
@@ -69,25 +66,12 @@
 <div class="contenu mt-8 max-w-2xl">
 	<h2>Ce que ça implique - et ce que ça n'implique pas</h2>
 	<p>
-		Militer dans un groupe d'action, c'est venir quand on peut. Certains membres sont là chaque
-		semaine, d'autres une fois par mois, d'autres seulement pour les grandes mobilisations. Il n'y a
-		ni présence obligatoire, ni tâche imposée, ni compte à rendre.
+		Militer avec La chouette rouge, c'est venir quand on peut. Certains membres sont là chaque semaine,
+		d'autres une fois par mois, d'autres seulement pour les grandes mobilisations. Il n'y a ni
+		présence obligatoire, ni tâche imposée, ni compte à rendre.
 	</p>
 	<p>
-		L'inscription au mouvement et la participation au groupe sont deux choses distinctes : on
-		peut militer avec nous sans être inscrit, et inversement. L'inscription donne accès à Action
-		populaire, aux formations et aux informations du mouvement.
-	</p>
-
-	<h2>Un autre quartier, une autre ville ?</h2>
-	<p>
-		Il existe d'autres groupes d'action à Dijon et dans toute la Côte-d'Or. La
-		<a href="https://lafranceinsoumise.fr/groupes-action/carte-groupes/" rel="noopener noreferrer" target="_blank"
-			>carte des groupes</a
-		>
-		permet de trouver le plus proche de chez vous, et
-		<a href="https://lafranceinsoumise21.fr" rel="noopener noreferrer" target="_blank"
-			>La France insoumise 21</a
-		> coordonne l'ensemble du département.
+		La chouette rouge est un collectif indépendant : le rejoindre n'engage à s'inscrire nulle part, ni à
+		adhérer à un parti.
 	</p>
 </div>

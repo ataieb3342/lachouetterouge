@@ -121,6 +121,7 @@
 		publication={data.publication}
 		{actionPrincipale}
 		admins={data.admins}
+		series={data.series}
 		positionUne={data.positionUne}
 		{valeurs}
 		erreur={form?.erreur ?? ''}

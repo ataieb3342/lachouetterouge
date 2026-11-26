@@ -1,8 +1,10 @@
-# Site du groupe d'action LFI Dijon Centre
+# La chouette rouge
 
-Site d'information : articles, actualités classées par catégorie, agenda
-interactif, galerie collaborative de dessins, commentaires anonymes modérés
-et administration protégée par double authentification.
+Le site d'un collectif militant indépendant du centre de Dijon.
+
+Site d'information : articles en trois formats (actus, articles, séries),
+apéros thématiques, galerie collaborative de dessins, commentaires anonymes
+modérés et administration protégée par double authentification.
 
 - **Hébergement** : VPS français (OVH ou Scaleway), Docker + Caddy.
 - **Données** : un fichier SQLite, les images et les PDF de la bibliothèque.
@@ -43,10 +45,10 @@ scripts/           sauvegarde et restauration
 
 | Je veux… | Où |
 | --- | --- |
-| Écrire un article ou un compte rendu | Administration → Publications → Nouvelle publication → Article |
-| Ajouter un rendez-vous | Choisir directement « Événement », « Formation » ou « Apéro thématique » |
+| Écrire un article ou un compte rendu | Administration → Publications → Nouvelle publication → Article, puis choisir le format : Actu, Article ou Série |
+| Commencer une série d’articles | Administration → Séries, puis le format « Série » dans chaque article |
+| Annoncer un apéro | Nouvelle publication → Apéro thématique |
 | Mettre une publication à la une | Sur une publication en ligne, choisir « Enregistrer et mettre à la une » ; gérer l’ordre et le retrait dans Administration → À la une |
-| Consulter les rendez-vous | Agenda : navigation par mois et filtres par catégorie |
 | Retrouver mes articles en cours | Administration → Relecture → Mes articles en cours |
 | Relire l’article de quelqu’un d’autre | Administration → Relecture → À relire |
 | Relire les commentaires reçus | Administration → Commentaires |
@@ -60,7 +62,6 @@ scripts/           sauvegarde et restauration
 | Ajouter un média recommandé, choisir ceux de l'accueil | Administration → Médias recommandés |
 | Changer le nom du site, l'adresse de contact | Administration → Réglages |
 | Ouvrir ou fermer les commentaires du site | Administration → Réglages |
-| Mettre les liens de l'application Action populaire | Administration → Réglages |
 | Ajouter un compte à quelqu'un | Administration → Comptes (rôle « responsable ») |
 | Changer mon mot de passe, mon téléphone | Administration → Mon compte |
 
@@ -89,12 +90,9 @@ la taille du texte et les marges intérieures pour cet élément seulement.
 en respectant leur ordre dans le Markdown.
 Les anciens articles restent compatibles. Le HTML brut n'est pas interprété.
 
-Les événements, formations et apéros peuvent partager une même date : chaque
-fiche reste distincte dans les rubriques et dans l’agenda. Ils disposent de
-leurs propres horaires, lieu, adresse, point de rendez-vous, responsables et
-lien d’inscription. Pour un apéro, les informations propres à la fiche priment
-sur le lieu et l’horaire habituels définis dans les réglages ; ces derniers ne
-servent que de valeurs de repli.
+Un apéro a ses propres horaires, lieu, adresse, point de rendez-vous et
+responsables ; ces informations priment sur le lieu et l’horaire habituels
+définis dans les réglages, qui ne servent que de valeurs de repli.
 
 ## Relecture des articles
 
@@ -209,12 +207,13 @@ Le dossier `data/` doit être sauvegardé avec les fichiers cachés des envois e
 attente. Le script `scripts/sauvegarde.sh` les inclut. Les dessins d'exemple de
 l'aperçu local sont dans des données ignorées par Git et ne sont pas déployés.
 
-## Navigation et agenda
+## Navigation
 
-La navigation publique donne directement accès à l’agenda, aux articles et aux dessins.
-Le menu « Ressources » ouvre la bibliothèque ; sa flèche donne aussi accès à
-la boîte à outils, aux jeux et aux médias. L’agenda rassemble les événements,
-formations et apéros, avec une navigation par mois et des filtres par catégorie.
+L’en-tête donne accès aux articles et aux apéros. Le menu « Ressources » ouvre
+la bibliothèque ; sa flèche donne aussi accès à la boîte à outils, aux jeux,
+aux dessins et aux médias. La page Articles se filtre par format (actus,
+articles, séries) et mène aux pages des séries. L’agenda (événements et
+formations) a été retiré en novembre 2026 : `/agenda` mène aux apéros.
 
 ## Site de démonstration
 

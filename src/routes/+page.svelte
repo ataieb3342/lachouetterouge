@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import BandeauApplication from '$lib/components/BandeauApplication.svelte';
 	import CarteArticle from '$lib/components/CarteArticle.svelte';
 	import Metadonnees from '$lib/components/Metadonnees.svelte';
 	import { organisation } from '$lib/donnees-structurees';
 	import { mediasParFormat } from '$lib/medias';
-	import { COULEUR_KIND, formatDate, formatDateCourte, formatHeure, libellePublication, lienPublication, LIBELLE_EVENEMENT } from '$lib/format';
+	import { COULEUR_KIND, formatDate, formatDateCourte, formatHeure, libelleFiche, lienPublication } from '$lib/format';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -14,7 +13,7 @@
 </script>
 
 <!-- Le titre de l'accueil porte la devise en plus du nom : c'est la ligne que
-     Google affiche, et « LFI Dijon Centre » seul ne dit pas ce qu'on y trouve. -->
+     Google affiche, et le nom seul ne dit pas ce qu'on y trouve. -->
 <Metadonnees
 	titre="{data.settings.siteName} - {data.settings.tagline}"
 	description={data.settings.description}
@@ -24,10 +23,10 @@
 
 <!--
 	L'accueil s'ouvre sur ce qui se passe, pas sur un slogan : un titre d'une
-	ligne, puis le fil des prochains rendez-vous (un nombre fixe, pour qu'il
-	ne soit jamais presque vide). Une fiche par rendez-vous,
-	événements, formations et apéros confondus, dans la couleur de sa
-	catégorie (celle de l'agenda). Le fil défile au doigt sur téléphone
+	ligne, puis le fil des prochains apéros (un nombre fixe, pour qu'il ne soit
+	jamais presque vide), dans la couleur des apéros. Il montrait tous les
+	rendez-vous - événements et formations compris - jusqu'au retrait de
+	l'agenda en novembre 2026. Le fil défile au doigt sur téléphone
 	(`scroll-snap`, aucun script, aucun défilement automatique) et tient sur
 	une seule bande : les articles restent dans le premier écran.
 
@@ -41,15 +40,15 @@
 	une à près de neuf cents pixels sur téléphone.
 -->
 <section aria-labelledby="titre-accueil" class="fond-degrade overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
-	<p class="text-xs font-bold tracking-[0.14em] text-white/75 uppercase">Groupe d’action · Dijon Centre</p>
+	<p class="text-xs font-bold tracking-[0.14em] text-white uppercase">Collectif militant · Dijon Centre</p>
 	<h1 id="titre-accueil" class="titre-affiche mt-1 text-2xl text-white sm:text-3xl">
 		Agir ici, discuter ensemble, changer les choses.
 	</h1>
 
 	{#if data.prochainsRendezVous.length}
 		<div class="mt-5 flex items-baseline justify-between gap-4">
-			<h2 class="text-xs font-bold tracking-[0.14em] text-white/75 uppercase">Les prochains rendez-vous</h2>
-			<a class="text-sm font-semibold text-white underline-offset-2 hover:underline" href="/agenda">Tout l’agenda →</a>
+			<h2 class="text-xs font-bold tracking-[0.14em] text-white uppercase">Les prochains apéros</h2>
+			<a class="text-sm font-semibold text-white underline-offset-2 hover:underline" href="/aperos">Tous les apéros →</a>
 		</div>
 		<ol class="fil-jours mt-2 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
 			{#each data.prochainsRendezVous as rdv (rdv.id)}
@@ -65,7 +64,7 @@
 						</span>
 						<span class="mt-1 line-clamp-2 leading-snug font-bold text-ink group-hover:underline">{rdv.title}</span>
 						<span class="mt-auto pt-1.5 text-xs text-ink-faint">
-							<span class="font-semibold">{LIBELLE_EVENEMENT[rdv.eventCategory]}</span>{lieu ? ` · ${lieu}` : ''}
+							<span class="font-semibold">Apéro</span>{lieu ? ` · ${lieu}` : ''}
 						</span>
 						{#if rdv.rythme}
 							<span class="text-xs text-ink-faint">{rdv.rythme}</span>
@@ -77,8 +76,8 @@
 			{/each}
 		</ol>
 	{:else}
-		<p class="mt-3 text-white/85">
-			Pas de rendez-vous annoncé pour le moment. <a class="font-semibold text-white underline" href="/agenda">Voir l’agenda</a>
+		<p class="mt-3 text-white">
+			Pas d’apéro annoncé pour le moment. <a class="font-semibold text-white underline" href="/aperos">Les apéros passés et leurs résumés</a>
 		</p>
 	{/if}
 </section>
@@ -114,7 +113,7 @@
 					{/if}
 					<div class="min-w-0 flex-1 {large ? 'p-4 sm:p-6 md:self-center' : ''}">
 						<p class="text-xs font-bold tracking-wide uppercase {COULEUR_KIND[publication.kind]}">
-							{libellePublication(publication.kind, publication.eventCategory)}
+							{libelleFiche(publication)}
 							{#if publication.eventAt}
 								<span class="text-ink-faint"> · {formatDateCourte(publication.eventAt)}</span>
 							{/if}
@@ -196,7 +195,7 @@
 	{@const formats = mediasParFormat(data.medias)}
 	<section class="mt-8 border-t border-line pt-6" aria-labelledby="titre-medias">
 		<div class="flex flex-wrap items-baseline justify-between gap-x-4">
-			<p class="text-xs font-bold tracking-[0.14em] text-pourpre uppercase">On recommande</p>
+			<p class="text-xs font-bold tracking-[0.14em] text-ocre uppercase">On recommande</p>
 			<a class="text-sm font-semibold text-brand hover:underline" href="/medias">Tous les médias →</a>
 		</div>
 		<h2 id="titre-medias" class="titre-affiche mt-1 text-2xl text-ink">S’informer ailleurs</h2>
@@ -236,5 +235,3 @@
 		{/each}
 	</section>
 {/if}
-
-<BandeauApplication actif={data.app.actif} android={data.app.android} ios={data.app.ios} />

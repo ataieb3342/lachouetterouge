@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import BandeauApplication from '$lib/components/BandeauApplication.svelte';
 	import Metadonnees from '$lib/components/Metadonnees.svelte';
 	import Partage from '$lib/components/Partage.svelte';
 	import PreuveDeTravail from '$lib/components/PreuveDeTravail.svelte';
 	import { articleStructure, editeur, evenementAction, evenementApero, filAriane } from '$lib/donnees-structurees';
-	import { COULEUR_KIND, formatDate, formatDateLongue, formatDateTime, formatPlageHoraire, formatTailleFichier, libellePublication } from '$lib/format';
+	import { COULEUR_KIND, formatDate, formatDateLongue, formatDateTime, formatPlageHoraire, formatTailleFichier, libelleFiche } from '$lib/format';
 	import { LISTE_RUBRIQUE, RUBRIQUE_PAR_KIND, TITRE_RUBRIQUE } from '$lib/rubriques';
 	import { lienGoogleAgenda, rendezVous } from '$lib/agenda';
 	import type { ActionData, PageData } from './$types';
@@ -57,9 +56,12 @@
 	donnees={[
 		fiche,
 		editeur(page.url.origin, data.settings),
+		// Les anciens événements ne sont plus listés nulle part depuis le
+		// retrait de l'agenda : leur fil d'Ariane va de l'accueil à la fiche.
 		filAriane(page.url.origin, [
 			{ nom: 'Accueil', chemin: '/' },
-			{ nom: TITRE_RUBRIQUE[rubrique], chemin: LISTE_RUBRIQUE[rubrique] },
+			...(LISTE_RUBRIQUE[rubrique] === '/' ? [] : [{ nom: TITRE_RUBRIQUE[rubrique], chemin: LISTE_RUBRIQUE[rubrique] }]),
+			...(data.serie ? [{ nom: data.serie.titre, chemin: `/series/${data.serie.slug}` }] : []),
 			{ nom: p.title, chemin: `/${rubrique}/${p.slug}` }
 		])
 	]}
@@ -75,15 +77,21 @@
 	</p>
 {/if}
 
-<!-- Lien de retour vers la liste d'un rendez-vous : un apéro vers les apéros,
-     un événement ou une formation vers l'agenda. -->
+<!-- Lien de retour vers la liste : un apéro vers les apéros, un article de
+     série vers sa série. Un ancien événement n'a plus de liste (l'agenda a
+     été retiré en novembre 2026) : il renvoie aux apéros, les seuls
+     rendez-vous qui restent. -->
 {#if p.kind === 'apero'}
 	<p class="mb-6 text-sm">
 		<a class="font-semibold text-brand hover:underline" href="/aperos">← Tous les apéros</a>
 	</p>
 {:else if p.kind === 'actu'}
 	<p class="mb-6 text-sm">
-		<a class="font-semibold text-brand hover:underline" href="/agenda">← Tout l’agenda</a>
+		<a class="font-semibold text-brand hover:underline" href="/aperos">← Les prochains apéros</a>
+	</p>
+{:else if data.serie}
+	<p class="mb-6 text-sm">
+		<a class="font-semibold text-brand hover:underline" href="/series/{data.serie.slug}">← Toute la série</a>
 	</p>
 {/if}
 
@@ -92,7 +100,15 @@
 		{#if p.layoutStyle === 'carnet-aquarelle'}
 			<p class="sur-titre-aquarelle">Carnet illustré</p>
 		{/if}
-		<p class="text-xs font-semibold tracking-wide uppercase {COULEUR_KIND[p.kind]}">{libellePublication(p.kind, p.eventCategory)}</p>
+		<p class="text-xs font-semibold tracking-wide uppercase {COULEUR_KIND[p.kind]}">
+			{#if data.serie}
+				Série · <a class="hover:underline" href="/series/{data.serie.slug}">{data.serie.titre}</a>{data.serie.position
+					? ` · ${data.serie.position} sur ${data.serie.total}`
+					: ''}
+			{:else}
+				{libelleFiche(p)}
+			{/if}
+		</p>
 		<h1 class="titre-publication mt-2 text-3xl leading-tight font-extrabold text-ink sm:text-4xl">{p.title}</h1>
 		{#if !p.eventAt && (p.publishedAt || p.authorName)}
 			<p class="mt-3 text-sm text-ink-faint">
@@ -203,6 +219,27 @@
 		{@html data.corpsHtml}
 	</div>
 
+	{#if data.serie && (data.serie.precedent || data.serie.suivant)}
+		<!-- La suite de la série, juste après le texte : on vient de finir un
+		     épisode, le suivant est là. -->
+		<nav class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Dans la même série">
+			{#if data.serie.precedent}
+				<a class="group rounded-xl border border-line bg-carte p-4 transition hover:border-brand" href="/articles/{data.serie.precedent.slug}">
+					<span class="text-xs font-bold tracking-wide text-ink-faint uppercase">← Article précédent</span>
+					<span class="mt-1 block font-bold text-ink group-hover:text-brand">{data.serie.precedent.titre}</span>
+				</a>
+			{:else}
+				<span class="max-sm:hidden"></span>
+			{/if}
+			{#if data.serie.suivant}
+				<a class="group rounded-xl border border-line bg-carte p-4 text-right transition hover:border-brand" href="/articles/{data.serie.suivant.slug}">
+					<span class="text-xs font-bold tracking-wide text-ink-faint uppercase">Article suivant →</span>
+					<span class="mt-1 block font-bold text-ink group-hover:text-brand">{data.serie.suivant.titre}</span>
+				</a>
+			{/if}
+		</nav>
+	{/if}
+
 	<!-- Un brouillon n'est pas public : rien à partager. -->
 	{#if !data.apercu}
 		<Partage titre={p.title} {adresse} />
@@ -214,7 +251,7 @@
 	     voir ou écouter avant la soirée. Volontairement peu formel : un titre,
 	     un lien si on en a un, un mot pour dire pourquoi. -->
 	<section id="sources" class="mx-auto mt-8 max-w-2xl rounded-2xl border border-line bg-surface-alt px-5 py-5 sm:px-7 sm:py-6">
-		<p class="text-xs font-bold tracking-[0.2em] text-pourpre uppercase">Pour préparer la soirée</p>
+		<p class="text-xs font-bold tracking-[0.2em] text-ocre uppercase">Pour préparer la soirée</p>
 		<h2 class="mt-1 text-xl font-extrabold text-ink">Le dossier partagé</h2>
 		<p class="mt-2 text-sm text-ink-soft">
 			Un livre, une vidéo, un podcast, un article, un site : ce que chacun a trouvé utile sur le sujet.
@@ -274,7 +311,7 @@
 
 		{#if data.defiSource}
 			<details class="mt-6" bind:open={partageOuvert}>
-				<summary class="inline-block cursor-pointer list-none rounded-full bg-pourpre px-5 py-2.5 text-sm font-bold text-sur-brand transition-opacity hover:opacity-90">
+				<summary class="inline-block cursor-pointer list-none rounded-full bg-ocre px-5 py-2.5 text-sm font-bold text-sur-brand transition-opacity hover:opacity-90">
 					Partager une source
 				</summary>
 
@@ -543,7 +580,3 @@
 </section>
 
 </div>
-
-{#if p.kind === 'actu'}
-	<BandeauApplication actif={data.app.actif} android={data.app.android} ios={data.app.ios} />
-{/if}

@@ -1,11 +1,11 @@
 import type { PageServerLoad } from './$types';
 import type { PublicationVue } from '$lib/types';
-import { listAgenda, listPinnedPublished, listPublished } from '$lib/server/content';
+import { listAperosEntre, listPinnedPublished, listPublished } from '$lib/server/content';
 import { presentMediaRecommande, presentPublication } from '$lib/server/present';
 import { listMediasRecommandes } from '$lib/server/medias-recommandes';
 
 /**
- * Nombre de rendez-vous du fil « Les prochains rendez-vous ». Un nombre et non
+ * Nombre d'apéros du fil « Les prochains apéros ». Un nombre et non
  * une durée : avec une fenêtre de quinze jours, le fil n'en montrait que deux
  * quand le suivant tombait le seizième jour, et se vidait entre deux périodes
  * chargées.
@@ -14,7 +14,7 @@ const DANS_LE_FIL = 6;
 /** Derniers articles : deux rangées pleines de la grille de trois colonnes. */
 const DERNIERS_ARTICLES = 6;
 
-/** AAAA-MM-JJ à l'heure du serveur, comme la page /agenda. */
+/** AAAA-MM-JJ à l'heure du serveur, comme `aVenir` de present.ts. */
 function jourIso(date: Date): string {
 	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
@@ -68,14 +68,14 @@ export const load: PageServerLoad = async () => {
 	const aLaUne = listPinnedPublished().map(presentPublication);
 	const idsALaUne = new Set(aLaUne.map((publication) => publication.id));
 
-	// Le fil des prochains rendez-vous : événements, formations et apéros
-	// confondus, dans l'ordre du calendrier, à partir d'aujourd'hui. Toutes
-	// les dates à venir sont lues : c'est ce qui permet de reconnaître un
-	// rendez-vous hebdomadaire.
+	// Le fil des prochains apéros, dans l'ordre du calendrier, à partir
+	// d'aujourd'hui. Seulement les apéros depuis le retrait de l'agenda
+	// (novembre 2026). Toutes les dates à venir sont lues : c'est ce qui
+	// permettrait de reconnaître une soirée hebdomadaire.
 	const maintenant = new Date();
 	const aujourdhui = jourIso(maintenant);
 	const demain = jourIso(new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() + 1));
-	const aVenir = regrouperRepetitions(listAgenda(aujourdhui, '9999-12-31').map(presentPublication));
+	const aVenir = regrouperRepetitions(listAperosEntre(aujourdhui, '9999-12-31').map(presentPublication));
 	const prochainsRendezVous = aVenir.slice(0, DANS_LE_FIL).map((rdv) => ({
 		...rdv,
 		jour: rdv.eventAt === aujourdhui ? 'Aujourd’hui' : rdv.eventAt === demain ? 'Demain' : null

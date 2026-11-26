@@ -37,7 +37,7 @@ export type Identite = {
 /**
  * L'organisation elle-même, pour l'accueil. `areaServed` et `address` disent
  * au moteur que le groupe est à Dijon : c'est ce qui rattache le site aux
- * recherches locales (« la france insoumise dijon »).
+ * recherches locales (« collectif militant dijon »).
  */
 export function organisation(origine: string, identite: Identite, cadre: CadreApero) {
 	const fiche: Record<string, unknown> = {
@@ -51,12 +51,7 @@ export function organisation(origine: string, identite: Identite, cadre: CadreAp
 		// moteurs lisent, et assez grande (192 pixels, Google en demande 112).
 		logo: `${origine}/icone-192.png`,
 		areaServed: { '@type': 'City', name: 'Dijon' },
-		address: { '@type': 'PostalAddress', addressLocality: 'Dijon', postalCode: '21000', addressCountry: 'FR' },
-		parentOrganization: {
-			'@type': 'Organization',
-			name: 'La France insoumise',
-			url: 'https://lafranceinsoumise.fr'
-		}
+		address: { '@type': 'PostalAddress', addressLocality: 'Dijon', postalCode: '21000', addressCountry: 'FR' }
 	};
 	if (identite.contactEmail) fiche.email = identite.contactEmail;
 	if (cadre.lieu) fiche.location = lieuApero(cadre);

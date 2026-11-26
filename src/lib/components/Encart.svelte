@@ -3,8 +3,7 @@
 
 	/**
 	 * Encart d'appel : le gabarit unique des invitations posées en tête ou en bas
-	 * d'une page - la bibliothèque depuis les articles, Action populaire depuis
-	 * l'agenda et le bas de l'accueil.
+	 * d'une page vers une autre page du site.
 	 *
 	 * Il annonce toujours une **autre** page. Un encart posé en tête d'une page
 	 * pour vanter une section de cette même page se lit comme une publicité, et
@@ -22,8 +21,9 @@
 	 * y ajouter `.carte`, qui est déclarée après et écraserait le fond - on
 	 * obtiendrait du texte blanc sur fond blanc.
 	 *
-	 * `style` sert au seul cas d'Action populaire, dont les couleurs sont celles
-	 * de l'application et non celles du site.
+	 * `style` permet une surface hors charte. Il servait au bandeau de
+	 * l'application Action populaire, retiré en novembre 2026 avec tout ce qui
+	 * renvoyait à La France insoumise.
 	 */
 	let {
 		/** Petites capitales au-dessus du titre : la catégorie de l'encart. */

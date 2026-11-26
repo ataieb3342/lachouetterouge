@@ -4,6 +4,9 @@
 
 	type Champs = {
 		kind?: string;
+		formatArticle?: string;
+		serieId?: string;
+		rangSerie?: string;
 		title?: string;
 		summary?: string;
 		body?: string;
@@ -35,6 +38,7 @@
 		libelleValider = 'Enregistrer',
 		apercu = '',
 		admins = [],
+		series = [],
 		positionUne = null,
 		actionUne
 	}: {
@@ -53,6 +57,8 @@
 		/** Texte rendu en HTML par le serveur après un clic sur « Aperçu ». */
 		apercu?: string;
 		admins?: { id: number; name: string; profilePublic: boolean }[];
+		/** Les séries existantes, pour un article au format « série ». */
+		series?: { id: number; titre: string }[];
 		/** Rang de la publication à la une (1 pour la grande fiche), ou null. */
 		positionUne?: number | null;
 		/** L'action qui enregistre puis met à la une (`?/creerEtUne`, `?/enregistrerEtUne`). */
@@ -74,6 +80,22 @@
 		);
 	}
 	let typeSelectionne = $state(typeDepuisPublication());
+	// Les événements et formations ne se créent plus (l'agenda a été retiré
+	// en novembre 2026). Une ancienne fiche garde son type dans le menu, pour
+	// qu'on puisse encore la corriger.
+	const ancienRendezVous = $derived(publication?.kind === 'actu');
+
+	// Mêmes règles que le type : les valeurs renvoyées après une erreur
+	// d'abord, puis celles de la fiche.
+	function formatInitial() {
+		return valeurs.formatArticle ?? publication?.formatArticle ?? 'article';
+	}
+	function serieInitiale() {
+		return valeurs.serieId ?? (publication?.serie ? String(publication.serie.id) : '');
+	}
+	let formatSelectionne = $state(formatInitial());
+	let serieChoisie = $state(serieInitiale());
+	const rangInitial = $derived(valeurs.rangSerie ?? (publication?.serie?.rang ? String(publication.serie.rang) : ''));
 
 	function resumeInitial() {
 		return valeurs.summary ?? publication?.summary ?? '';
@@ -130,10 +152,17 @@
 
 	/** Ce que chaque type veut dire, affiché sous le menu pour éviter les erreurs de case. */
 	const aideType: Record<string, string> = {
-		article: 'Un texte à lire : analyse, compte rendu, prise de position, guide, annonce courte. Rangé dans les articles.',
-		reunion: 'Un rendez-vous où l’on peut venir : réunion publique, mobilisation, projection… Rangé dans l’agenda.',
-		formation: 'Un atelier pour apprendre ou se former. Rangé dans l’agenda.',
+		article: 'Un texte à lire, rangé dans les articles. Choisissez ensuite son format.',
+		reunion: 'Ancien type : le site n’a plus d’agenda. Cette fiche reste en ligne à son adresse, mais n’est plus listée.',
+		formation: 'Ancien type : le site n’a plus d’agenda. Cette fiche reste en ligne à son adresse, mais n’est plus listée.',
 		apero: 'La soirée thématique du lundi au bar. Après la soirée, rouvrez la fiche pour écrire le résumé.'
+	};
+
+	/** Les trois formats décidés en réunion le 25 novembre 2026. */
+	const aideFormat: Record<string, string> = {
+		actu: 'Des faits : ce qui s’est passé, des témoignages. Une manifestation, une décision municipale, un compte rendu des medics…',
+		article: 'Un avis, subjectif mais sourcé : on dit ce qu’on pense, et on montre d’où viennent les chiffres.',
+		serie: 'Un épisode d’une série : plusieurs articles qui suivent le même fil, thème par thème, avec la même structure.'
 	};
 
 	const v = $derived({
@@ -219,19 +248,60 @@
 					value={typeSelectionne}
 					onchange={(event) => (typeSelectionne = event.currentTarget.value)}
 				>
-					<!-- Deux familles, comme sur le site : la question à se poser est
+					<!-- Un texte ou une soirée : la question à se poser est
 					     « est-ce que les gens peuvent venir ? ». -->
-					<optgroup label="Un texte">
-						<option value="article">Article</option>
-					</optgroup>
-					<optgroup label="Un rendez-vous">
-						<option value="reunion">Événement</option>
-						<option value="formation">Formation</option>
-						<option value="apero">Apéro thématique</option>
-					</optgroup>
+					<option value="article">Article</option>
+					<option value="apero">Apéro thématique</option>
+					{#if ancienRendezVous}
+						<option value="reunion">Événement (ancien type)</option>
+						<option value="formation">Formation (ancien type)</option>
+					{/if}
 				</select>
 				<p class="aide">{aideType[typeSelectionne] ?? ''}</p>
 			</div>
+
+			{#if typeSelectionne === 'article'}
+				<div>
+					<label class="etiquette" for="formatArticle">Format</label>
+					<select id="formatArticle" name="formatArticle" class="champ" bind:value={formatSelectionne}>
+						<option value="actu">Actu</option>
+						<option value="article">Article</option>
+						<option value="serie">Série</option>
+					</select>
+					<p class="aide">{aideFormat[formatSelectionne] ?? ''}</p>
+				</div>
+
+				{#if formatSelectionne === 'serie'}
+					<div class="space-y-3 rounded-lg border border-line bg-surface-alt p-3">
+						{#if series.length}
+							<div>
+								<label class="etiquette" for="serieId">Série</label>
+								<select id="serieId" name="serieId" class="champ" required bind:value={serieChoisie}>
+									<option value="" disabled>Choisir une série…</option>
+									{#each series as serie (serie.id)}
+										<option value={String(serie.id)}>{serie.titre}</option>
+									{/each}
+								</select>
+							</div>
+							<div>
+								<label class="etiquette" for="rangSerie">
+									Place dans la série <span class="font-normal text-ink-faint">(facultatif)</span>
+								</label>
+								<input id="rangSerie" name="rangSerie" type="number" min="1" max="999" class="champ" value={rangInitial} placeholder="À la suite" />
+								<p class="aide">1 pour le premier article. Vide : après les autres, par date.</p>
+							</div>
+						{:else}
+							<!-- Nouvel onglet : un lien de ce formulaire ne doit jamais
+							     quitter la page, sinon le texte en cours est perdu. -->
+							<p class="text-sm text-ink-soft">
+								Aucune série n’existe encore.
+								<a class="font-semibold text-brand hover:underline" href="/admin/series" target="_blank">Créer une série ↗</a>,
+								puis enregistrez ce texte en format « Article » en attendant, ou rechargez la page.
+							</p>
+						{/if}
+					</div>
+				{/if}
+			{/if}
 
 			{#if typeSelectionne === 'article'}
 				<div>

@@ -6,9 +6,11 @@ import { createPublication } from '$lib/server/content';
 import { enregistrerALaUne } from '$lib/server/formulaires';
 import { apercuPublication, ErreurFormulaire, lirePublication, valeursSaisies } from '$lib/server/formulaires';
 import { audit, listAdminChoices } from '$lib/server/auth';
+import { choixSeries } from '$lib/server/series';
 
 export const load: PageServerLoad = async ({ locals }) => ({
 	adminCourantId: locals.admin!.id,
+	series: choixSeries(),
 	admins: listAdminChoices().map(({ id, name, profile_public }) => ({
 		id,
 		name,

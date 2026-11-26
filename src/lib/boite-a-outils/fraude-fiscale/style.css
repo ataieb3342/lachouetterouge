@@ -16,39 +16,39 @@
 }
 
 :root {
-	--rubrique: #58277e;
+	--rubrique: #cc1420;
 	--accent: #b8334a;
 	--accent-fort: #9c1e33;
 
-	--ink: #2a1f36;
-	--ink-soft: #4d4459;
-	--ink-faint: #6f6679;
-	--surface: #f4eefb;
-	--carte: #fdfbff;
-	--surface-alt: #e9dff6;
-	--line: #e1dbe8;
-	--line-forte: #918799;
+	--ink: #241b19;
+	--ink-soft: #4f4541;
+	--ink-faint: #6e635d;
+	--surface: #f7f2ec;
+	--carte: #fffcf8;
+	--surface-alt: #efe6dc;
+	--line: #e6ddd3;
+	--line-forte: #8c8079;
 	--sur-accent: #ffffff;
-	--ombre: 0 1px 2px rgba(42, 31, 54, 0.06), 0 8px 24px rgba(42, 31, 54, 0.06);
+	--ombre: 0 1px 2px rgba(36, 27, 25, 0.06), 0 8px 24px rgba(36, 27, 25, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--rubrique: #c1a0ef;
+		--rubrique: #ff5a5f;
 		--accent: #ff6d80;
 		--accent-fort: #ff9aa7;
 
-		--ink: #f3eff8;
-		--ink-soft: #bbb2c8;
-		--ink-faint: #9a92a6;
-		--surface: #130f1a;
-		--carte: #1d1629;
-		--surface-alt: #271e36;
-		--line: #2f2740;
-		--line-forte: #6d6280;
+		--ink: #f3eee8;
+		--ink-soft: #c2b9b2;
+		--ink-faint: #9d948e;
+		--surface: #121218;
+		--carte: #1b1b24;
+		--surface-alt: #25242f;
+		--line: #2e2d3a;
+		--line-forte: #7a7585;
 		/* En thème sombre l'accent devient clair : le texte posé dessus passe
 		   au sombre, exactement comme --color-sur-brand sur le site. */
-		--sur-accent: #130f1a;
+		--sur-accent: #121218;
 		--ombre: none;
 	}
 }
