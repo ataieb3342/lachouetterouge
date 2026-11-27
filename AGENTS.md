@@ -24,7 +24,6 @@ impératif.
   `src/lib/structure.ts`, qui est verrouillé. Une nouvelle page va dans le
   menu Ressources ou dans le pied de page. Pas de nouveau type de publication :
   un nouveau genre de texte est un format d'article (actu, article, série).
-  L'agenda a été retiré en novembre 2026 : on ne recrée pas d'événements.
 - **Pas de nouvelle dépendance** sans décision (`garde-fous/dependances.test.ts`).
 - **On ne modifie jamais une migration existante** de `db.ts` : on en ajoute
   une à la fin, puis `npm run garde-fous:migrations`.

@@ -15,22 +15,21 @@ Le site répond à deux questions. L'en-tête n'a donc que deux portes.
 
 | Le visiteur se demande | Il va dans | Ce qu'il y trouve |
 | --- | --- | --- |
+| « Où est-ce que je peux venir ? » | **Agenda** | événements, formations, apéros |
 | « Qu'est-ce que vous faites, qu'est-ce que vous pensez ? » | **Articles** | tout texte sans date de rendez-vous : actus, articles, séries |
-| « Où est-ce que je peux venir ? » | **Apéros** | les apéros thématiques (l'agenda a été retiré le 26 novembre 2026) |
 | « De quoi puis-je me servir ? » | **Ressources** (menu) | bibliothèque, boîte à outils, jeux, dessins, médias |
 
 Puis « Qui sommes-nous ? » et le bouton « Nous rejoindre ». C'est tout.
 
-- ✅ **On n'ajoute rien à côté d'Articles et d'Apéros.** La navigation est
+- ✅ **On n'ajoute rien à côté d'Agenda et d'Articles.** La navigation est
   décidée dans `src/lib/structure.ts`, et nulle part ailleurs.
 - Une nouvelle page qu'on consulte ou dont on se sert va dans le menu
   **Ressources**, et en carte en bas de la bibliothèque. C'est une décision à
   faire relire, pas un ajout en passant.
 - Une page secondaire (mentions, confidentialité…) va dans le **pied de page**.
 - ✅ **Trois types de publication** (`article`, `actu`, `apero`), pas un de
-  plus - et `actu` (événements, formations) ne se crée plus depuis le retrait
-  de l'agenda. Avant d'en imaginer un nouveau : c'est presque toujours un
-  article, au format actu, article ou série.
+  plus. Avant d'en imaginer un nouveau : c'est presque toujours un article, au
+  format actu, article ou série.
 
 Pour ajouter une page, suivre « Ajouter une page fixe » dans `CLAUDE.md`.
 

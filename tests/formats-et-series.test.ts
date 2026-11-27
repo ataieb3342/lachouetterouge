@@ -115,12 +115,12 @@ test('le formulaire refuse un article de série sans série', async () => {
 	);
 });
 
-test('on ne crée plus d’événement ni de formation, mais on corrige les anciens', async () => {
-	const evenement = formulaire({ kind: 'reunion', eventAt: '2027-01-12' });
-	await assert.rejects(lirePublication(evenement, AUTEUR, null), /plus d’agenda/);
-	const corrige = await lirePublication(evenement, AUTEUR, null, null, 'actu');
-	assert.equal(corrige.kind, 'actu');
-	assert.equal(corrige.eventCategory, 'reunion');
+test('un événement se crée depuis le formulaire, avec sa catégorie', async () => {
+	const evenement = await lirePublication(formulaire({ kind: 'reunion', eventAt: '2027-01-12' }), AUTEUR, null);
+	assert.equal(evenement.kind, 'actu');
+	assert.equal(evenement.eventCategory, 'reunion');
+	// Un rendez-vous a toujours une date.
+	await assert.rejects(lirePublication(formulaire({ kind: 'formation' }), AUTEUR, null), ErreurFormulaire);
 });
 
 // La relecture à quatre étapes a été retirée le 26 novembre 2026 : un article

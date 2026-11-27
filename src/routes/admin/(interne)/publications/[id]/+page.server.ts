@@ -65,8 +65,7 @@ async function enregistrer({ request, params, locals }: RequestEvent<{ id: strin
 			form,
 			admin.id,
 			publication.cover_media_id,
-			publication.event_map_media_id,
-			publication.kind
+			publication.event_map_media_id
 		);
 		transaction(() => {
 			verifierRevision(publication.id, Number(form.get('revision')));

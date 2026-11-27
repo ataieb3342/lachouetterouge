@@ -91,10 +91,10 @@
 <section class="mt-6 flex flex-col gap-3 rounded-2xl bg-brand-soft p-5 sm:flex-row sm:items-center sm:justify-between">
 	<div>
 		<h2 class="text-xl font-extrabold text-ink">Envie de nous rencontrer ?</h2>
-		<p class="mt-1 text-sm text-ink-soft">Le plus simple : venir à un apéro, un lundi sur deux.</p>
+		<p class="mt-1 text-sm text-ink-soft">Consultez les prochaines dates ou venez discuter avec nous.</p>
 	</div>
 	<div class="flex shrink-0 flex-wrap gap-2">
-		<a class="bouton-secondaire" href="/aperos">Le prochain apéro</a>
+		<a class="bouton-secondaire" href="/agenda">Voir l’agenda</a>
 		<a class="bouton" href="/nous-rejoindre">Nous rejoindre</a>
 	</div>
 </section>

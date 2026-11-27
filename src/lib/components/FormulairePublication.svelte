@@ -70,10 +70,6 @@
 		);
 	}
 	let typeSelectionne = $state(typeDepuisPublication());
-	// Les événements et formations ne se créent plus (l'agenda a été retiré
-	// en novembre 2026). Une ancienne fiche garde son type dans le menu, pour
-	// qu'on puisse encore la corriger.
-	const ancienRendezVous = $derived(publication?.kind === 'actu');
 
 	// Mêmes règles que le type : les valeurs renvoyées après une erreur
 	// d'abord, puis celles de la fiche.
@@ -134,8 +130,8 @@
 	/** Ce que chaque type veut dire, affiché sous le menu pour éviter les erreurs de case. */
 	const aideType: Record<string, string> = {
 		article: 'Un texte à lire, rangé dans les articles. Choisissez ensuite son format.',
-		reunion: 'Ancien type : le site n’a plus d’agenda. Cette fiche reste en ligne à son adresse, mais n’est plus listée.',
-		formation: 'Ancien type : le site n’a plus d’agenda. Cette fiche reste en ligne à son adresse, mais n’est plus listée.',
+		reunion: 'Un rendez-vous où l’on peut venir : réunion publique, mobilisation, projection… Rangé dans l’agenda.',
+		formation: 'Un atelier pour apprendre ou se former. Rangé dans l’agenda.',
 		apero: 'La soirée thématique du lundi au bar. Après la soirée, rouvrez la fiche pour écrire le résumé.'
 	};
 
@@ -229,14 +225,16 @@
 					value={typeSelectionne}
 					onchange={(event) => (typeSelectionne = event.currentTarget.value)}
 				>
-					<!-- Un texte ou une soirée : la question à se poser est
+					<!-- Deux familles, comme sur le site : la question à se poser est
 					     « est-ce que les gens peuvent venir ? ». -->
-					<option value="article">Article</option>
-					<option value="apero">Apéro thématique</option>
-					{#if ancienRendezVous}
-						<option value="reunion">Événement (ancien type)</option>
-						<option value="formation">Formation (ancien type)</option>
-					{/if}
+					<optgroup label="Un texte">
+						<option value="article">Article</option>
+					</optgroup>
+					<optgroup label="Un rendez-vous">
+						<option value="reunion">Événement</option>
+						<option value="formation">Formation</option>
+						<option value="apero">Apéro thématique</option>
+					</optgroup>
 				</select>
 				<p class="aide">{aideType[typeSelectionne] ?? ''}</p>
 			</div>

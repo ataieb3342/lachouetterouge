@@ -15,8 +15,8 @@
 		{
 			titre: 'Passez à une réunion',
 			texte:
-				"On s'y retrouve pour écrire les articles et préparer les apéros. Elles ne sont pas annoncées sur le site : demandez l'heure et le lieu lors d'un apéro. Une première fois, on peut simplement écouter et poser ses questions.",
-			lien: { href: '/le-groupe', label: 'Qui sommes-nous ?' }
+				"Les réunions sont annoncées dans l'agenda. On y prépare les prochaines actions ; une première fois, on peut simplement écouter et poser ses questions.",
+			lien: { href: '/agenda', label: "L'agenda" }
 		},
 		{
 			titre: 'Participez à votre rythme',

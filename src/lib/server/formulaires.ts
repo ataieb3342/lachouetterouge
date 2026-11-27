@@ -16,15 +16,12 @@ export async function lirePublication(
 	form: FormData,
 	adminId: number,
 	couvertureActuelle: number | null,
-	carteActuelle: number | null = null,
-	/** Le type de la fiche modifiée, ou null pour une création. */
-	kindActuel: Kind | null = null
+	carteActuelle: number | null = null
 ): Promise<PublicationInput> {
-	// Deux types se créent : un article (au format actu, article ou série) ou
-	// un apéro. Les événements et formations ('actu', distingués par leur
-	// catégorie d'agenda) ne se créent plus depuis le retrait de l'agenda en
-	// novembre 2026 ; une ancienne fiche peut encore être corrigée, sans
-	// changer de type pour autant.
+	// Quatre types : un texte (article, au format actu, article ou série) ou
+	// un rendez-vous (événement, formation, apéro). Événements et formations
+	// partagent le `kind` 'actu' et se distinguent par leur catégorie
+	// d'agenda.
 	const typeAffiche = String(form.get('kind') ?? 'article');
 	const kind = typeAffiche === 'reunion' || typeAffiche === 'formation' ? 'actu' : typeAffiche;
 	const estRendezVous = kind !== 'article';
@@ -64,11 +61,6 @@ export async function lirePublication(
 
 	if (!['article', 'reunion', 'formation', 'apero'].includes(typeAffiche)) {
 		throw new ErreurFormulaire('Type de publication inconnu.');
-	}
-	if (kind === 'actu' && kindActuel !== 'actu') {
-		throw new ErreurFormulaire(
-			'Les événements et les formations ne se publient plus : le site n’a plus d’agenda. Choisissez « Article » ou « Apéro ».'
-		);
 	}
 
 	// Le format d'un article, et sa série. Ce qu'aurait laissé un changement de

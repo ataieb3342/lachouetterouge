@@ -3,7 +3,7 @@
 Le site d'un collectif militant indépendant du centre de Dijon.
 
 Site d'information : articles en trois formats (actus, articles, séries),
-apéros thématiques, galerie collaborative de dessins, commentaires anonymes
+agenda (événements, formations, apéros thématiques), galerie collaborative de dessins, commentaires anonymes
 modérés et administration protégée par double authentification.
 
 - **Hébergement** : VPS français (OVH ou Scaleway), Docker + Caddy.
@@ -47,7 +47,8 @@ scripts/           sauvegarde et restauration
 | --- | --- |
 | Écrire un article | Administration → Publications → Nouvelle publication → Article, puis choisir le format : Actu, Article ou Série |
 | Commencer une série d’articles | Administration → Séries, puis le format « Série » dans chaque article |
-| Annoncer un apéro | Nouvelle publication → Apéro thématique |
+| Annoncer un rendez-vous | Nouvelle publication → Événement, Formation ou Apéro thématique |
+| Consulter les rendez-vous | Agenda : liste des prochains, ou calendrier du mois, filtres par type |
 | Mettre une publication à la une | Sur une publication en ligne, choisir « Enregistrer et mettre à la une » ; gérer l’ordre et le retrait dans Administration → À la une |
 | Retrouver les brouillons | Tableau de bord → À faire, ou Publications filtrées sur « Brouillons » |
 | Relire les commentaires reçus | Administration → Commentaires |
@@ -149,11 +150,12 @@ l'aperçu local sont dans des données ignorées par Git et ne sont pas déploy�
 
 ## Navigation
 
-L’en-tête donne accès aux articles et aux apéros. Le menu « Ressources » ouvre
+L’en-tête donne accès à l’agenda et aux articles. Le menu « Ressources » ouvre
 la bibliothèque ; sa flèche donne aussi accès à la boîte à outils, aux jeux,
-aux dessins et aux médias. La page Articles se filtre par format (actus,
-articles, séries) et mène aux pages des séries. L’agenda (événements et
-formations) a été retiré en novembre 2026 : `/agenda` mène aux apéros.
+aux dessins et aux médias. L’agenda rassemble les événements, formations et
+apéros, en liste ou en calendrier du mois, avec des filtres par type. La page
+Articles se filtre par format (actus, articles, séries) et mène aux pages des
+séries.
 
 ## Site de démonstration
 

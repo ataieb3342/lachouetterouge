@@ -160,7 +160,7 @@ function ilYaNJours(n: number, heure = 18): string {
 }
 
 type Fiche = {
-	kind: 'article' | 'apero';
+	kind: 'article' | 'actu' | 'apero';
 	/** Format d'un article ; « article » s'il n'est pas précisé. */
 	format?: 'actu' | 'article' | 'serie';
 	/** Pour un article de série : le titre de sa série (`SERIES`) et son rang. */
@@ -172,8 +172,10 @@ type Fiche = {
 	auteur?: string;
 	/** Nombre de jours écoulés depuis la publication, ou une fonction qui le calcule. */
 	publieIlYa: number | (() => number);
-	/** Décalage en jours de la date de l'apéro, ou une fonction qui le calcule. */
+	/** Décalage en jours de la date du rendez-vous, ou une fonction qui le calcule. */
 	actionDans?: number | (() => number);
+	/** Pastille affichée dans l'agenda et sur les rendez-vous. */
+	categorieEvenement?: 'reunion' | 'formation';
 	/** Vrai pour la fiche qui reçoit l'image de couverture de la démonstration. */
 	illustree?: true;
 	/** Mise en page éditoriale facultative. */
@@ -208,6 +210,47 @@ const FICHES: Fiche[] = [
 				statut: 'pending'
 			}
 		]
+	},
+	{
+		kind: 'actu',
+		title: 'Réunion publique : transports et mobilité à Dijon',
+		summary:
+			'Soirée ouverte à toutes et tous pour discuter de la gratuité des transports, du vélo et du dernier tram.',
+		actionDans: 9,
+		categorieEvenement: 'reunion',
+		publieIlYa: 5,
+		body: `Le groupe organise une **réunion publique** sur les transports dans la métropole. Entrée libre, sans inscription.
+
+## Programme
+
+1. Présentation de la proposition de gratuité pour les moins de 26 ans.
+2. Témoignages d’usagers et d’usagères : étudiants, salariés en horaires décalés, retraités.
+3. Temps de questions et de propositions.
+
+## Informations pratiques
+
+- **Quand :** à 19 h, accueil dès 18 h 30.
+- **Où :** salle municipale du quartier, adresse précisée sur le tract.
+- **Accessibilité :** salle de plain-pied, accessible en fauteuil.
+
+La réunion se termine au plus tard à 21 h. Un pot est prévu ensuite pour continuer la discussion.`
+	},
+	{
+		kind: 'actu',
+		title: 'Formation : prendre la parole en réunion',
+		summary: 'Un atelier de deux heures pour celles et ceux qui n’osent pas encore parler en public.',
+		actionDans: 16,
+		categorieEvenement: 'formation',
+		publieIlYa: 8,
+		body: `Beaucoup d’entre nous hésitent à prendre la parole en réunion ou en porte-à-porte. Cet atelier est fait pour ça.
+
+## Au programme
+
+- Structurer une intervention en trois minutes.
+- Répondre à une objection sans s’énerver.
+- Exercices en petits groupes, bienveillants et sans jugement.
+
+**Places limitées à douze personnes** pour que chacun puisse s’exercer. Inscription par courriel.`
 	},
 	{
 		kind: 'article',
@@ -619,7 +662,7 @@ function remplirContenus(adminId: number, imageId: number | null) {
 					fiche.actionDans === undefined
 						? null
 						: dansNJours(typeof fiche.actionDans === 'function' ? fiche.actionDans() : fiche.actionDans),
-				eventCategory: fiche.kind === 'apero' ? 'apero' : 'autre',
+				eventCategory: fiche.kind === 'apero' ? 'apero' : (fiche.categorieEvenement ?? 'autre'),
 				formatArticle: fiche.format ?? 'article',
 				serieId: fiche.serie ? (series.get(fiche.serie) ?? null) : null,
 				rangSerie: fiche.rang ?? null

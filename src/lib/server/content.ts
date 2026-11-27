@@ -203,19 +203,15 @@ export function countPublished(kind?: Kind, eventCategory?: CategorieEvenement, 
 }
 
 /**
- * Apéros publiés entre deux dates, classés par jour puis par titre : le
- * bloc d'ouverture de l'accueil (le prochain apéro, puis les suivants).
- *
- * Seulement les apéros : l'agenda des événements et formations a été retiré
- * en novembre 2026 (voir CLAUDE.md, « L'agenda (retiré) »). Les anciennes
- * fiches d'événements restent en base et à leur adresse, mais ne sont plus
- * listées nulle part.
+ * Rendez-vous publiés (événements, formations, apéros) entre deux dates,
+ * classés par jour puis par titre : la page /agenda et le bloc d'ouverture de
+ * l'accueil.
  */
-export function listAperosEntre(debut: string, fin: string) {
+export function listAgenda(debut: string, fin: string) {
 	return db()
 		.prepare(
 			`${PUBLIC_SELECT}
-			 where p.status = 'published' and p.kind = 'apero'
+			 where p.status = 'published'
 			   and p.event_at is not null
 			   and p.event_at >= ? and p.event_at < ?
 			 order by p.event_at asc, p.title collate nocase asc`
