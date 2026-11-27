@@ -4,7 +4,7 @@
 	import Metadonnees from '$lib/components/Metadonnees.svelte';
 	import { organisation } from '$lib/donnees-structurees';
 	import { mediasParFormat } from '$lib/medias';
-	import { COULEUR_KIND, formatDate, formatDateCourte, formatDateLongue, formatHeure, libelleFiche, lienPublication } from '$lib/format';
+	import { COULEUR_KIND, formatDate, formatDateCourte, formatDateLongue, formatHeure, LIBELLE_EVENEMENT, libelleFiche, lienPublication } from '$lib/format';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -29,16 +29,14 @@
 
 <!--
 	L'accueil s'ouvre sur ce qui se passe, pas sur un slogan : la devise d'une
-	ligne à gauche, le prochain apéro à droite (dessous sur téléphone).
+	ligne à gauche, le prochain rendez-vous à droite (dessous sur téléphone).
 
-	Ce bloc était un fil de six rendez-vous qui défilait au doigt : événements,
-	formations et apéros confondus. L'agenda retiré (novembre 2026), il ne
-	restait qu'un apéro tous les quinze jours : une ou deux fiches perdues dans
-	une bande faite pour six. Le bloc est donc construit pour un seul rendez-vous,
-	montré en grand, avec ce qui donne envie de venir - le thème, le lieu, et
-	le dossier partagé pour préparer la soirée. Les suivants tiennent sur une
-	ligne. Sans apéro annoncé, il propose le résumé du dernier : il n'est
-	jamais vide.
+	Ce bloc a d'abord été un fil de six rendez-vous qui défilait au doigt. Il
+	montre maintenant le prochain en grand, avec ce qui donne envie de venir -
+	la date, le lieu, et pour un apéro le dossier partagé -, puis les trois
+	suivants, un par ligne. Le fil suffisait quand l'agenda était plein ; il
+	paraissait vide avec un ou deux rendez-vous. Sans rendez-vous annoncé, le
+	bloc propose le résumé du dernier apéro : il n'est jamais vide.
 
 	Le tout est posé sur la surface rouge et noire du site : c'est le seul pavé
 	coloré de la page, et la fiche claire y ressort comme une carte posée
@@ -54,7 +52,7 @@
 			<h1 id="titre-accueil" class="titre-affiche mt-1 text-2xl text-white sm:text-3xl">
 				Agir ici, discuter ensemble, changer les choses.
 			</h1>
-			<!-- Masqué sur téléphone : la fiche de l'apéro, juste dessous, dit
+			<!-- Masqué sur téléphone : la fiche du rendez-vous, juste dessous, dit
 			     déjà tout, et chaque ligne repousse les articles. -->
 			<p class="mt-3 max-w-md text-sm text-white/80 max-md:hidden">
 				{data.apero.rythme}, un apéro autour d’un thème choisi à l’avance. Ouvert à toutes et tous, sans rien
@@ -63,46 +61,53 @@
 		</div>
 
 		<div>
-			{#if data.prochainApero}
-				{@const apero = data.prochainApero}
-				{@const lieu = apero.eventLocation || data.apero.lieu}
-				{@const heure = apero.eventStartTime ? formatHeure(apero.eventStartTime) : data.apero.heure}
-				{@const lien = lienPublication(apero.kind, apero.slug)}
+			{#if data.prochain}
+				{@const rdv = data.prochain}
+				{@const estApero = rdv.kind === 'apero'}
+				{@const lieu = rdv.eventLocation || (estApero ? data.apero.lieu : '')}
+				{@const heure = rdv.eventStartTime ? formatHeure(rdv.eventStartTime) : estApero ? data.apero.heure : ''}
+				{@const lien = lienPublication(rdv.kind, rdv.slug)}
 				<!-- Le titre est étendu à toute la fiche (`::after`) ; le lien du
-				     dossier passe devant (`relative`) pour rester cliquable. -->
-				<article class="group relative flex gap-4 rounded-xl border-t-4 border-ocre bg-carte p-4">
+				     dossier passe devant (`relative`) pour rester cliquable. La
+				     couleur est celle du type (`agenda-*` d'app.css), comme dans
+				     l'agenda. -->
+				<article class="agenda-{rdv.eventCategory} group relative flex gap-4 rounded-xl border-t-4 border-current bg-carte p-4">
 					<!-- La date comme sur un calendrier de bureau : on la lit avant
 					     le reste. -->
-					<p class="flex w-14 shrink-0 flex-col items-center rounded-lg bg-surface-alt py-1.5 text-ocre" aria-hidden="true">
-						<span class="text-xs font-bold uppercase">{jourSemaine(apero.eventAt)}</span>
-						<span class="titre-affiche text-3xl leading-none">{jourDuMois(apero.eventAt)}</span>
-						<span class="text-xs font-bold">{mois(apero.eventAt)}</span>
+					<p class="flex w-14 shrink-0 flex-col items-center rounded-lg bg-surface-alt py-1.5" aria-hidden="true">
+						<span class="text-xs font-bold uppercase">{jourSemaine(rdv.eventAt)}</span>
+						<span class="titre-affiche text-3xl leading-none">{jourDuMois(rdv.eventAt)}</span>
+						<span class="text-xs font-bold">{mois(rdv.eventAt)}</span>
 					</p>
 					<div class="min-w-0 flex-1">
-						<p class="text-xs font-bold tracking-wide text-ocre uppercase">
-							{apero.jour ? `Apéro · ${apero.jour}` : 'Prochain apéro'}
+						<p class="text-xs font-bold tracking-wide uppercase">
+							{LIBELLE_EVENEMENT[rdv.eventCategory]}{rdv.jour ? ` · ${rdv.jour}` : ''}
 						</p>
 						<h2 class="mt-0.5 leading-snug font-bold text-ink">
 							<a href={lien} class="line-clamp-2 after:absolute after:inset-0 group-hover:text-brand group-hover:underline">
-								<span class="sr-only">{formatDateLongue(apero.eventAt)} : </span>{apero.title}
+								<span class="sr-only">{formatDateLongue(rdv.eventAt)} : </span>{rdv.title}
 							</a>
 						</h2>
-						<p class="mt-1 text-sm text-ink-soft">{[heure, lieu].filter(Boolean).join(' · ')}</p>
-						<a class="relative mt-2 inline-block text-sm font-semibold text-brand hover:underline" href="{lien}#sources">
-							{apero.sources
-								? `Préparer la soirée : ${apero.sources} lecture${apero.sources > 1 ? 's' : ''} proposée${apero.sources > 1 ? 's' : ''} →`
-								: 'Proposer une lecture pour préparer la soirée →'}
-						</a>
+						{#if heure || lieu}
+							<p class="mt-1 text-sm text-ink-soft">{[heure, lieu].filter(Boolean).join(' · ')}</p>
+						{/if}
+						{#if estApero}
+							<a class="relative mt-2 inline-block text-sm font-semibold text-brand hover:underline" href="{lien}#sources">
+								{rdv.sources
+									? `Préparer la soirée : ${rdv.sources} lecture${rdv.sources > 1 ? 's' : ''} proposée${rdv.sources > 1 ? 's' : ''} →`
+									: 'Proposer une lecture pour préparer la soirée →'}
+							</a>
+						{/if}
 					</div>
 				</article>
 
-				{#if data.aperosSuivants.length}
-					<!-- Une ligne par apéro, coupée si le thème est long : en une
-					     seule phrase, trois thèmes faisaient quatre lignes
+				{#if data.suivants.length}
+					<!-- Une ligne par rendez-vous, coupée si le titre est long : en
+					     une seule phrase, trois titres faisaient quatre lignes
 					     emmêlées sur téléphone. -->
 					<p class="mt-4 text-xs font-bold tracking-[0.14em] text-white uppercase">Ensuite</p>
 					<ul class="mt-1 space-y-0.5 text-sm text-white">
-						{#each data.aperosSuivants as suivant (suivant.id)}
+						{#each data.suivants as suivant (suivant.id)}
 							<li class="truncate">
 								<a class="underline-offset-2 hover:underline" href={lienPublication(suivant.kind, suivant.slug)}
 									><span class="font-semibold">{formatDateCourte(suivant.eventAt)}</span> · {suivant.title}</a
@@ -112,15 +117,15 @@
 					</ul>
 				{/if}
 				<p class="mt-2 text-sm">
-					<a class="font-semibold text-white underline-offset-2 hover:underline" href="/aperos">Tous les apéros →</a>
+					<a class="font-semibold text-white underline-offset-2 hover:underline" href="/agenda">Tout l’agenda →</a>
 				</p>
 			{:else}
 				<div class="rounded-xl border-t-4 border-ocre bg-carte p-4">
-					<p class="text-xs font-bold tracking-wide text-ocre uppercase">Les apéros</p>
-					<p class="mt-0.5 font-bold text-ink">Le prochain thème sera annoncé ici.</p>
+					<p class="text-xs font-bold tracking-wide text-ocre uppercase">L’agenda</p>
+					<p class="mt-0.5 font-bold text-ink">Le prochain rendez-vous sera annoncé ici.</p>
 					{#if data.dernierApero}
 						<p class="mt-1 text-sm text-ink-soft">
-							En attendant, le dernier :
+							En attendant, le dernier apéro :
 							<a class="font-semibold text-brand hover:underline" href={lienPublication(data.dernierApero.kind, data.dernierApero.slug)}
 								>{data.dernierApero.title}</a
 							>.

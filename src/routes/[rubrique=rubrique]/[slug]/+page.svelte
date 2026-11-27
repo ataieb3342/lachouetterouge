@@ -56,11 +56,9 @@
 	donnees={[
 		fiche,
 		editeur(page.url.origin, data.settings),
-		// Les anciens événements ne sont plus listés nulle part depuis le
-		// retrait de l'agenda : leur fil d'Ariane va de l'accueil à la fiche.
 		filAriane(page.url.origin, [
 			{ nom: 'Accueil', chemin: '/' },
-			...(LISTE_RUBRIQUE[rubrique] === '/' ? [] : [{ nom: TITRE_RUBRIQUE[rubrique], chemin: LISTE_RUBRIQUE[rubrique] }]),
+			{ nom: TITRE_RUBRIQUE[rubrique], chemin: LISTE_RUBRIQUE[rubrique] },
 			...(data.serie ? [{ nom: data.serie.titre, chemin: `/series/${data.serie.slug}` }] : []),
 			{ nom: p.title, chemin: `/${rubrique}/${p.slug}` }
 		])
@@ -77,17 +75,15 @@
 	</p>
 {/if}
 
-<!-- Lien de retour vers la liste : un apéro vers les apéros, un article de
-     série vers sa série. Un ancien événement n'a plus de liste (l'agenda a
-     été retiré en novembre 2026) : il renvoie aux apéros, les seuls
-     rendez-vous qui restent. -->
+<!-- Lien de retour vers la liste : un apéro vers les apéros, un événement ou
+     une formation vers l'agenda, un article de série vers sa série. -->
 {#if p.kind === 'apero'}
 	<p class="mb-6 text-sm">
 		<a class="font-semibold text-brand hover:underline" href="/aperos">← Tous les apéros</a>
 	</p>
 {:else if p.kind === 'actu'}
 	<p class="mb-6 text-sm">
-		<a class="font-semibold text-brand hover:underline" href="/aperos">← Les prochains apéros</a>
+		<a class="font-semibold text-brand hover:underline" href="/agenda">← Tout l’agenda</a>
 	</p>
 {:else if data.serie}
 	<p class="mb-6 text-sm">

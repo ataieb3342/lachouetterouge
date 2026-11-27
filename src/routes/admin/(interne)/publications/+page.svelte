@@ -26,7 +26,7 @@
 			<option value="format-article" selected={data.filtres.kind === 'format-article'}>Articles · Articles</option>
 			<option value="format-serie" selected={data.filtres.kind === 'format-serie'}>Articles · Séries</option>
 			<option value="apero" selected={data.filtres.kind === 'apero'}>Apéros</option>
-			<option value="actu" selected={data.filtres.kind === 'actu'}>Anciens événements et formations</option>
+			<option value="actu" selected={data.filtres.kind === 'actu'}>Événements et formations</option>
 		</select>
 	</div>
 	<div>

@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { listAperosEntre } from '$lib/server/content';
+import { listAgenda } from '$lib/server/content';
 import { recentAudit } from '$lib/server/auth';
 import { picRecent, resumeFrequentation } from '$lib/server/frequentation';
 
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async () => {
 	const brouillons = db()
 		.prepare("select count(*) as n from publications where status = 'draft' and kind != 'actu'")
 		.get() as { n: number };
-	const prochain = listAperosEntre(aujourdhui, '9999-12-31')[0] ?? null;
+	const prochain = listAgenda(aujourdhui, '9999-12-31').find((rdv) => rdv.kind === 'apero') ?? null;
 
 	return {
 		brouillons: brouillons.n,

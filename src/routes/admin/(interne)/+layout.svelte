@@ -28,6 +28,7 @@
 				{ href: '/admin/publications', label: 'Toutes les publications' },
 				{ href: '/admin/publications?type=article', label: 'Articles' },
 				{ href: '/admin/publications?type=apero', label: 'Apéros' },
+				{ href: '/admin/publications?type=actu', label: 'Événements et formations' },
 				{ href: '/admin/a-la-une', label: 'À la une' },
 				{ href: '/admin/series', label: 'Séries' }
 			]

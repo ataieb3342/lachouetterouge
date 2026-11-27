@@ -89,7 +89,7 @@ dépendance native, `sharp`, pour les vignettes des dessins.
 | `src/lib/donnees-structurees.ts` | Les fiches schema.org lues par Google (article, événement, organisation, fil d'Ariane) |
 | `src/hooks.server.ts` | En-têtes de sécurité, session, garde `/admin`, limite par adresse, comptage des visites |
 | `src/routes/[rubrique=rubrique]/` | La liste des articles (`/articles`), les fiches de toutes les publications, et les redirections des anciennes adresses |
-| `src/routes/agenda/` | Redirige `/agenda` vers `/aperos` : l'agenda a été retiré (voir « L'agenda (retiré) ») |
+| `src/routes/agenda/` | Page publique `/agenda` : les prochains rendez-vous en liste, ou le calendrier du mois |
 | `src/lib/server/series.ts` + `src/routes/series/` | Les séries d'articles et leurs pages publiques (voir « Les séries ») |
 | `src/routes/aperos/` | Page publique `/aperos` : prochain apéro et archive des thèmes |
 | `src/routes/bibliotheque/` | Page publique `/bibliotheque` : sources approuvées et jeux |
@@ -316,12 +316,12 @@ Une partie est vérifiée par `garde-fous/charte.test.ts`. Concrètement :
   clair) est la couleur principale des textes et liens, le bleu nuit et l'ocre
   ne servent qu'aux types de publication et à leurs surfaces.
 
-## Deux familles : les articles et les apéros
+## Deux familles : l'agenda et les articles
 
 Le visiteur se pose deux questions, et le site range tout d'après elles :
-**« qu'est-ce que vous faites, qu'est-ce que vous pensez ? »** (les articles)
-et **« où est-ce que je peux venir ? »** (les apéros). Celui qui publie se pose
-la même : « est-ce que les gens peuvent venir ? » - oui, c'est un apéro ;
+**« où est-ce que je peux venir ? »** (l'agenda) et **« qu'est-ce que vous
+faites, qu'est-ce que vous pensez ? »** (les articles). Celui qui publie se pose
+la même : « est-ce que les gens peuvent venir ? » - oui, c'est un rendez-vous ;
 non, c'est un article.
 
 Une seule table `publications`, distinguée par la colonne `kind`, et, pour
@@ -332,8 +332,9 @@ les articles, par `format_article` (migration 031) :
 | Articles | Actu | `article` | `actu` | `/articles` (filtre « Actus ») |
 | Articles | Article | `article` | `article` | `/articles` (filtre « Articles ») |
 | Articles | Série | `article` | `serie` | `/articles` (filtre « Séries ») et `/series/<slug>` |
-| Apéros | Apéro thématique | `apero` | - | `/aperos`, le fil de l'accueil |
-| (retiré) | Événement, formation | `actu` | - | leur fiche sous `/actualites/…`, listée nulle part |
+| Agenda | Événement | `actu` (`event_category` `reunion`) | - | `/agenda`, fiche sous `/actualites/…` |
+| Agenda | Formation | `actu` (`event_category` `formation`) | - | `/agenda`, fiche sous `/actualites/…` |
+| Agenda | Apéro thématique | `apero` | - | `/agenda` et `/aperos` |
 
 - Un **article** n'a pas de date de rendez-vous, qu'il fasse trois lignes ou
   trois pages. Le formulaire efface la date et les informations pratiques d'un
@@ -343,8 +344,9 @@ les articles, par `format_article` (migration 031) :
     municipale, un compte rendu des medics ;
   - **Article** : un avis subjectif, mais sourcé ;
   - **Série** : un épisode d'une série (voir « Les séries »).
-- Un **apéro** a toujours une date (`event_at`, `AAAA-MM-JJ`). C'est elle
-  qui le place dans les prochains apéros, puis dans l'archive.
+- Un **rendez-vous** (événement, formation, apéro) a toujours une date
+  (`event_at`, `AAAA-MM-JJ`). C'est elle qui le place dans l'agenda, puis dans
+  le passé.
 
 Le format n'est pas un type : il ne change ni l'adresse (`/articles/…`), ni
 la couleur. C'est une étiquette (« Actu »,
@@ -365,8 +367,8 @@ de plus où se tromper.
 Les adresses partagées avant ce rangement continuent de fonctionner. Le slug
 étant unique dans toute la table, la fiche redirige vers sa rubrique actuelle
 (`/revue-de-presse/x` et `/actualites/x` vers `/articles/x` quand c'est devenu
-un article), et les anciennes listes redirigent (`/actualites` et `/agenda`
-vers `/aperos`, `/revue-de-presse` vers `/articles`). C'est pour cela que le
+un article), et les anciennes listes redirigent (`/actualites` vers `/agenda`,
+`/revue-de-presse` vers `/articles`). C'est pour cela que le
 `match` de `src/params/rubrique.ts` accepte encore `revue-de-presse`. La
 contrainte `check` accepte encore `'revue'` : reconstruire la table pour l'en
 retirer ne rapportait rien.
@@ -380,31 +382,38 @@ formulaire de publication (et sa phrase d'aide), le filtre de
 l'administration et `PAGES_FIXES` du plan du site. Le flux RSS et les cartes
 suivent tout seuls.
 
-## L'agenda (retiré)
+## L'agenda
 
-**Le site n'a plus d'agenda depuis le 26 novembre 2026**, sur décision du
-groupe : il ne garde que ses apéros. L'agenda rassemblait événements,
-formations et apéros, en liste ou en calendrier du mois (`/agenda`), et
-l'en-tête en faisait sa première porte.
+`/agenda` a **deux vues**, choisies par l'adresse et non par un script :
 
-- `/agenda` (filtres et mois compris) et `/actualites` redirigent vers
-  `/aperos` (301) : des liens ont été partagés.
-- On ne crée plus d'événement ni de formation : le formulaire ne les propose
-  plus, et `lirePublication` les refuse, sauf pour corriger une ancienne fiche
-  (`kindActuel`). Le type `actu` reste en base : les cinquante anciennes
-  fiches de la production gardent leur adresse sous `/actualites/…`, leur
-  fichier `.ics` et leur fiche Google, mais ne sont plus listées nulle part.
-  Leur lien de retour mène aux apéros, et leur fil d'Ariane s'arrête à
-  l'accueil (`LISTE_RUBRIQUE.actualites` vaut `/`).
-- « Apéros » a pris la place d'« Agenda » dans l'en-tête : deux portes,
-  toujours (`structure.ts`, et le garde-fou qui va avec).
-- L'accueil s'ouvre sur le prochain apéro en grand (`listAperosEntre`, voir « L'accueil »).
+- **la liste** (par défaut) : tous les rendez-vous à venir (quarante au plus),
+  regroupés par mois. Chaque ligne porte la date en grand à gauche, comme un
+  agenda papier, puis le type, l'heure, le lieu (ceux des réglages pour un
+  apéro), le titre et le chapô, avec un liseré de la couleur du type.
+  « Aujourd'hui » et « Demain » sont signalés. C'est la seule vue lisible sur
+  téléphone, et la seule indexée ;
+- **le calendrier** (`?vue=calendrier&mois=AAAA-MM`) : un mois en grille, les
+  jours passés estompés. Il sert à se projeter, ou à retrouver un rendez-vous
+  passé - la liste ne montre que l'avenir et y renvoie par un lien.
 
-Si un agenda revient un jour, la version retirée est dans l'historique git
-(`src/routes/agenda/`) : deux vues par l'adresse (liste et calendrier), des
-pastilles qui sont des liens, `noindex, follow` sur les vues filtrées.
-Première erreur à ne pas refaire : empiler la liste et le calendrier du mois
-sur la même page, qui faisait quatre mille pixels sur téléphone.
+Le **filtre par type** (`?type=reunion|formation|apero`) vaut pour les deux
+vues. Les pastilles et le choix de la vue sont des **liens** : tout fonctionne
+sans JavaScript et une vue filtrée se partage. Les vues filtrées et les mois du
+calendrier portent `noindex, follow`.
+
+La première version empilait la liste des dix prochains et le calendrier du
+mois en cours - deux agendas sur la même page, dont un mois à moitié passé -,
+et ses lignes reprenaient le gabarit des articles : ni heure, ni lieu, la date
+en petit. La page faisait quatre mille pixels sur téléphone.
+
+Avec le filtre « Apéros », un lien mène à `/aperos`, qui garde l'archive des
+thèmes et leurs résumés.
+
+**L'agenda a été retiré le 26 novembre 2026** (« Apéros » avait pris sa place
+dans l'en-tête, et `/agenda` redirigeait vers `/aperos`), **puis remis le
+lendemain** à la demande du groupe. Ce qui est resté de ce passage : le bloc
+d'ouverture de l'accueil, qui montre le prochain rendez-vous en grand (voir
+« L'accueil »).
 
 ## Les séries
 
@@ -607,28 +616,27 @@ tout ce qui renvoyait à La France insoumise) :
 
 1. **L'ouverture**, sur la surface `.fond-degrade` - le seul pavé coloré de la
    page : à gauche une ligne d'identité et la devise en `h1`, à droite (dessous
-   sur téléphone) **le prochain apéro en grand** : la date comme sur un
-   calendrier de bureau, « Aujourd'hui » ou « Demain » quand c'est le cas, le
-   thème, l'heure et le lieu (ceux des réglages à défaut), et un lien vers le
-   dossier partagé (« Préparer la soirée : 2 lectures proposées », ou
-   « Proposer une lecture » s'il est vide). Dessous, « Ensuite » : les trois
-   apéros suivants au plus (`APEROS_SUIVANTS`), un par ligne, coupés s'ils
-   sont longs. **Sans apéro annoncé, le bloc n'est jamais vide** : il annonce
-   le prochain thème et renvoie au résumé du dernier.
+   sur téléphone) **le prochain rendez-vous en grand** (`listAgenda`) : la
+   date comme sur un calendrier de bureau, « Aujourd'hui » ou « Demain » quand
+   c'est le cas, le type, le titre, l'heure et le lieu (ceux des réglages pour
+   un apéro), et pour un apéro un lien vers le dossier partagé (« Préparer la
+   soirée : 2 lectures proposées », ou « Proposer une lecture »). La fiche
+   porte la couleur de son type (`agenda-*` d'`app.css`). Dessous, « Ensuite » :
+   les trois rendez-vous suivants au plus (`SUIVANTS`), un par ligne, coupés
+   s'ils sont longs, puis « Tout l'agenda → ». **Sans rendez-vous annoncé, le
+   bloc n'est jamais vide** : il le dit et renvoie au résumé du dernier apéro.
 
-   Ce bloc a d'abord été un **fil de six rendez-vous** qui défilait au doigt -
-   événements, formations et apéros confondus. L'agenda retiré (novembre
-   2026), il ne restait qu'un apéro tous les quinze jours : une ou deux fiches
-   perdues dans une bande faite pour six. Il est donc construit pour un seul
-   rendez-vous, avec ce qui donne envie de venir. Le regroupement des
-   rendez-vous répétés (`regrouperRepetitions`, « Chaque samedi ») a disparu
-   avec lui : les apéros ne se répètent pas.
+   Ce bloc a d'abord été un **fil de six rendez-vous** qui défilait au doigt.
+   Il paraissait vide avec un ou deux rendez-vous, et ne disait presque rien de
+   chacun. Le regroupement des rendez-vous répétés (`regrouperRepetitions`,
+   « Chaque samedi ») a disparu avec lui (novembre 2026) : si des fiches
+   hebdomadaires reviennent, « Ensuite » les montrera chacune.
 
    Piège : la grille porte `grid-cols-[minmax(0,1fr)]` même sur téléphone.
    Sans lui, la colonne prend la largeur de son contenu, et les lignes coupées
    de « Ensuite » élargissaient le bloc hors de l'écran.
 2. **Les publications à la une**, puis les articles récents. Toute publication
-   en ligne peut y être mise : article ou apéro. Cinq
+   en ligne peut y être mise : article, événement, formation ou apéro. Cinq
    au plus (`MAX_A_LA_UNE` dans
    `content.ts`) ; elles forment une grille et ne sont pas répétées dans les
    listes situées juste en dessous.
@@ -870,17 +878,15 @@ une rubrique de plus est arrivée dans l'en-tête (la revue de presse, le menu
 « Actualités », les dessins), et trois fois il a fallu tout re-ranger. Une
 nouvelle page va dans le menu Ressources ou dans le pied de page.
 
-L'en-tête porte les deux portes du site, **Articles** et **Apéros**, en liens
+L'en-tête porte les deux portes du site, **Agenda** et **Articles**, en liens
 simples (`LIENS_PRINCIPAUX`), puis le menu
 **Ressources** (bibliothèque, outils, jeux, dessins, médias), « Qui sommes-nous ? »
 et le bouton « Nous rejoindre ». Le logo ramène à l'accueil. Le menu mobile
-reprend la même chose. « Articles » s'allume aussi sur les séries (`/series`),
-« Apéros » sur la fiche d'un apéro (`sections`) ; « Ressources » s'allume sur
-chacune de ses pages (`groupeActif`). Jusqu'au 26 novembre 2026, la première
-porte était **Agenda** (voir « L'agenda (retiré) ») : « Apéros » l'a remplacée
-sans ajouter de lien.
+reprend la même chose. « Agenda » s'allume aussi sur les fiches d'événements
+(`/actualites/…`) et sur les apéros, « Articles » sur les séries (`sections`) ;
+« Ressources » s'allume sur chacune de ses pages (`groupeActif`).
 
-**Les dessins sont dans Ressources, pas à côté d'Articles et d'Apéros.** Ils y
+**Les dessins sont dans Ressources, pas à côté d'Agenda et d'Articles.** Ils y
 ont été un troisième lien principal quelques jours (novembre 2026) : ce n'est
 pas une troisième question que se pose le visiteur, et l'en-tête débordait. On
 y arrive par le menu Ressources, par la carte en bas de la bibliothèque et par
@@ -1331,7 +1337,7 @@ téléphone) :
 
 | Catégorie | Pages |
 | --- | --- |
-| Publier | Toutes les publications, Articles, Apéros (la liste filtrée), À la une, Séries |
+| Publier | Toutes les publications, Articles, Apéros, Événements et formations (la liste filtrée), À la une, Séries |
 | À relire | Commentaires, Sources des apéros, Dessins - la catégorie porte le total en attente |
 | Le site | Réglages, Médias recommandés, Images, Fréquentation |
 | L'équipe | Mon compte, Comptes (propriétaires seulement) |

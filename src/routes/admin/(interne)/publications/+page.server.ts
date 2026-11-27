@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	const recherche = url.searchParams.get('q') ?? '';
 	// Le filtre « Type » mêle les types et les formats d'article : « format-actu »,
 	// « format-article » et « format-serie » sont des articles d'un format
-	// donné ; « actu » regroupe les anciens événements et formations.
+	// donné ; « actu » regroupe les événements et les formations.
 	const format = kind?.startsWith('format-') ? kind.slice('format-'.length) : null;
 	const kindInterne = format ? 'article' : kind;
 

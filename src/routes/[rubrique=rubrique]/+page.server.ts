@@ -14,12 +14,13 @@ const PAR_PAGE = 12;
 
 /**
  * La seule liste servie ici est celle des articles : les apéros ont leur
- * page. Les anciennes listes redirigent, filtres compris : /actualites était
- * la liste des événements, puis renvoyait à l'agenda ; l'agenda retiré
- * (novembre 2026), elle renvoie aux apéros comme /agenda.
+ * page, et les événements sont dans l'agenda. Les anciennes listes
+ * redirigent, filtres compris : /actualites?categorie=… n'a plus
+ * d'équivalent exact, et l'agenda montre tous les rendez-vous avec leurs
+ * propres filtres.
  */
 export const load: PageServerLoad = async ({ params, url }) => {
-	if (params.rubrique === 'actualites') redirect(301, '/aperos');
+	if (params.rubrique === 'actualites') redirect(301, '/agenda');
 	if (params.rubrique === 'revue-de-presse') redirect(301, '/articles');
 
 	// Le filtre par format (`?format=actu|article|serie`) passe par l'adresse,

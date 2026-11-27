@@ -19,6 +19,7 @@ const PAGES_FIXES = [
 	'/',
 	'/articles',
 	'/dessins',
+	'/agenda',
 	'/aperos',
 	'/series',
 	'/bibliotheque',
@@ -34,6 +35,7 @@ const PAGES_FIXES = [
 /** Les pages de liste, datées de leur publication la plus récente. */
 const LISTES: Record<string, Kind> = {
 	'/articles': 'article',
+	'/agenda': 'actu',
 	'/aperos': 'apero'
 };
 
